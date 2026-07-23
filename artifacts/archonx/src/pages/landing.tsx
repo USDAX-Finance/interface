@@ -540,150 +540,179 @@ function TrustedBy() {
 
 /* ─────────────────────── WHAT IS USDAX ─────────────────────── */
 
+function BracketCard({ title, plus, desc, offset = false }: {
+  title: string;
+  plus: string;
+  desc: string;
+  offset?: boolean;
+}) {
+  const BRACKET = LIME;
+  const BW = 12; // bracket arm length px
+
+  return (
+    <div
+      className="relative p-7 transition-all duration-200 group cursor-default"
+      style={{
+        marginLeft: offset ? "2.5rem" : "0",
+        background: CARD_BG_RAISED,
+        border: `1px solid hsl(0 0% 13%)`,
+      }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLElement).style.borderColor = "hsl(0 0% 18%)";
+        (e.currentTarget as HTMLElement).style.background = "hsl(0 0% 9%)";
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLElement).style.borderColor = "hsl(0 0% 13%)";
+        (e.currentTarget as HTMLElement).style.background = CARD_BG_RAISED;
+      }}
+    >
+      {/* Corner brackets */}
+      <span className="absolute top-[-1px] left-[-1px]" style={{
+        display: "block", width: BW, height: BW,
+        borderTop: `2px solid ${BRACKET}`, borderLeft: `2px solid ${BRACKET}`,
+      }} />
+      <span className="absolute top-[-1px] right-[-1px]" style={{
+        display: "block", width: BW, height: BW,
+        borderTop: `2px solid ${BRACKET}`, borderRight: `2px solid ${BRACKET}`,
+      }} />
+      <span className="absolute bottom-[-1px] left-[-1px]" style={{
+        display: "block", width: BW, height: BW,
+        borderBottom: `2px solid ${BRACKET}`, borderLeft: `2px solid ${BRACKET}`,
+      }} />
+      <span className="absolute bottom-[-1px] right-[-1px]" style={{
+        display: "block", width: BW, height: BW,
+        borderBottom: `2px solid ${BRACKET}`, borderRight: `2px solid ${BRACKET}`,
+      }} />
+
+      {/* Content */}
+      <p className="text-[12px] font-bold tracking-[0.18em] uppercase mb-5"
+        style={{ color: "hsl(0 0% 88%)" }}>
+        {title}
+      </p>
+      <p className="text-[28px] font-thin text-center my-4 leading-none select-none"
+        style={{ color: "hsl(0 0% 20%)" }}>
+        {plus}
+      </p>
+      <p className="text-[12px] leading-relaxed mt-5" style={{ color: "hsl(0 0% 38%)" }}>
+        {desc}
+      </p>
+    </div>
+  );
+}
+
 function WhatIsUSDax() {
-  const pillars = [
-    {
-      icon: Droplets,
-      title: "Always liquid, always stable",
-      desc: "Stay fully dollar-pegged with instant access to your funds — no lockups, no delays.",
-      color: LIME,
-    },
-    {
-      icon: HandMetal,
-      title: "100% hands-free",
-      desc: "No need to manage strategies manually. USDAX works in the background for you.",
-      color: "hsl(0 0% 65%)",
-    },
-    {
-      icon: Leaf,
-      title: "Earn passive income",
-      desc: "Your collateral is deployed into high-performing DeFi positions automatically.",
-      color: EMERALD,
-    },
-  ];
-
-  const metrics = [
-    { value: "150%", label: "Collateral Ratio", color: LIME },
-    { value: "15%", label: "Base APY", color: EMERALD },
-    { value: "7d", label: "Staking Cooldown", color: WARNING },
-    { value: "100M", label: "APX Max Supply", color: "hsl(0 0% 65%)" },
-  ];
-
   return (
     <section
       id="product"
-      className="py-24 px-8"
+      className="py-24 px-8 overflow-hidden"
       style={{ borderTop: `1px solid ${BORDER}` }}
     >
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-16">
-          <Tag>Product</Tag>
-          <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight">
-            What is <span className="gradient-text">USDAX</span>?
-          </h2>
-          <p
-            className="max-w-xl mx-auto mt-4 text-[15px] leading-relaxed"
-            style={{ color: "hsl(0 0% 42%)" }}
-          >
-            A yield-bearing stablecoin that helps your capital grow while staying pegged to the U.S. dollar.
-          </p>
-        </div>
+        <div className="grid lg:grid-cols-2 gap-16 items-center">
 
-        <div className="grid md:grid-cols-3 gap-5">
-          {pillars.map((p) => {
-            const Icon = p.icon;
-            return (
-              <div
-                key={p.title}
-                className="relative p-8 rounded-2xl overflow-hidden group"
+          {/* ── LEFT: headline + giant stat ── */}
+          <div>
+            <p
+              className="text-[10px] font-bold tracking-[0.28em] uppercase mb-8"
+              style={{ color: "hsl(0 0% 28%)" }}
+            >
+              ◈ APEX PROTOCOL
+            </p>
+
+            <h2
+              className="text-4xl md:text-[2.85rem] font-extrabold leading-[1.1] tracking-tight uppercase mb-14"
+              style={{ color: "hsl(0 0% 94%)" }}
+            >
+              YOUR STABLECOIN<br />
+              EARNS YIELD<br />
+              <span style={{ color: LIME }}>BY DEFAULT</span>
+            </h2>
+
+            {/* Giant stat with lime glow at base */}
+            <div className="relative inline-block">
+              <span
+                className="font-extrabold font-mono leading-none select-none"
                 style={{
-                  background: "linear-gradient(145deg, rgba(255,255,255,0.055) 0%, rgba(255,255,255,0.018) 60%, rgba(0,0,0,0.1) 100%)",
-                  border: "1px solid rgba(255,255,255,0.09)",
-                  borderTop: "1px solid rgba(255,255,255,0.18)",
-                  borderLeft: "1px solid rgba(255,255,255,0.12)",
-                  backdropFilter: "blur(24px)",
-                  WebkitBackdropFilter: "blur(24px)",
-                  boxShadow: "0 8px 40px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.1), inset 0 -1px 0 rgba(0,0,0,0.3)",
-                  transition: "transform 0.25s, box-shadow 0.25s",
-                }}
-                onMouseEnter={(e) => {
-                  const el = e.currentTarget as HTMLElement;
-                  el.style.transform = "translateY(-4px) scale(1.015)";
-                  el.style.boxShadow = `0 20px 60px rgba(0,0,0,0.65), 0 0 30px ${p.color}18, inset 0 1px 0 rgba(255,255,255,0.14), inset 0 -1px 0 rgba(0,0,0,0.3)`;
-                }}
-                onMouseLeave={(e) => {
-                  const el = e.currentTarget as HTMLElement;
-                  el.style.transform = "";
-                  el.style.boxShadow = "0 8px 40px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.1), inset 0 -1px 0 rgba(0,0,0,0.3)";
+                  fontSize: "clamp(100px, 16vw, 160px)",
+                  color: "hsl(0 0% 93%)",
+                  display: "block",
+                  lineHeight: 1,
+                  textShadow: `0 60px 100px ${LIME}50, 0 80px 160px ${LIME}28`,
                 }}
               >
-                {/* Corner light refraction */}
-                <div
-                  className="pointer-events-none absolute -top-12 -right-12 w-28 h-28 rounded-full"
-                  style={{
-                    background: `radial-gradient(circle, ${p.color}22 0%, transparent 70%)`,
-                    filter: "blur(12px)",
-                  }}
-                />
-                {/* Bottom dark tint for depth */}
-                <div
-                  className="pointer-events-none absolute bottom-0 inset-x-0 h-1/2 rounded-b-2xl"
-                  style={{
-                    background: "linear-gradient(to bottom, transparent, rgba(0,0,0,0.18))",
-                  }}
-                />
+                15
+              </span>
+              <span
+                className="absolute font-extrabold font-mono leading-none"
+                style={{
+                  fontSize: "clamp(52px, 8vw, 80px)",
+                  color: LIME,
+                  bottom: "6px",
+                  right: "-0.6em",
+                  lineHeight: 1,
+                }}
+              >
+                %
+              </span>
+              {/* Glow bloom */}
+              <div
+                className="pointer-events-none absolute -bottom-6 left-0 right-0 h-16"
+                style={{
+                  background: `radial-gradient(ellipse 70% 80% at 30% 100%, ${LIME}28 0%, transparent 70%)`,
+                  filter: "blur(8px)",
+                }}
+              />
+            </div>
 
-                <div className="relative z-10">
-                  {/* Icon with lime-tinted glass badge */}
-                  <div
-                    className="w-12 h-12 rounded-xl flex items-center justify-center mb-7"
-                    style={{
-                      background: `linear-gradient(135deg, ${p.color}22, ${p.color}08)`,
-                      border: `1px solid ${p.color}30`,
-                      boxShadow: `0 2px 12px ${p.color}18`,
-                    }}
-                  >
-                    <Icon className="h-5 w-5" style={{ color: p.color }} />
-                  </div>
-                  <h3
-                    className="font-semibold mb-3"
-                    style={{ color: "hsl(0 0% 92%)" }}
-                  >
-                    {p.title}
-                  </h3>
-                  <p
-                    className="text-[13px] leading-relaxed"
-                    style={{ color: "hsl(0 0% 48%)" }}
-                  >
-                    {p.desc}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
+            <p className="text-[13px] mt-10 max-w-[280px] leading-relaxed"
+              style={{ color: "hsl(0 0% 34%)" }}>
+              base APY earned by USDAX holders on Robinhood Chain — compounding automatically, no action required.
+            </p>
+            <p className="text-[10px] mt-4 font-mono" style={{ color: "hsl(0 0% 20%)" }}>
+              Source: APEX Protocol on-chain data · usdax.finance
+            </p>
+          </div>
+
+          {/* ── RIGHT: staggered bracket cards ── */}
+          <div className="flex flex-col gap-4">
+            <BracketCard
+              title="Stable at $1.00"
+              plus="+"
+              desc="Overcollateralized at 150% minimum — your USDAX is always redeemable at face value, no algorithmic tricks."
+              offset={false}
+            />
+            <BracketCard
+              title="Yield-Bearing"
+              plus="+"
+              desc="USDAX earns 15% base APY automatically. Hold it in your wallet and watch the balance grow."
+              offset={true}
+            />
+            <BracketCard
+              title="Fully On-Chain"
+              plus="+"
+              desc="Every mint is backed by verifiable on-chain collateral. No black boxes, no custodians, no counterparty risk."
+              offset={false}
+            />
+          </div>
+
         </div>
 
-        {/* Metrics row */}
+        {/* Metrics strip */}
         <div
-          className="grid grid-cols-2 md:grid-cols-4 gap-px mt-px"
+          className="grid grid-cols-2 md:grid-cols-4 gap-px mt-20"
           style={{ background: BORDER }}
         >
-          {metrics.map((m) => (
-            <div
-              key={m.label}
-              className="py-8 text-center"
-              style={{ background: CARD_BG }}
-            >
-              <div
-                className="text-3xl font-extrabold font-mono"
-                style={{ color: m.color }}
-              >
+          {[
+            { value: "150%", label: "Collateral Ratio", color: LIME },
+            { value: "15%",  label: "Base APY",         color: EMERALD },
+            { value: "7d",   label: "Unstake Cooldown", color: WARNING },
+            { value: "100M", label: "APX Max Supply",   color: "hsl(0 0% 55%)" },
+          ].map((m) => (
+            <div key={m.label} className="py-8 text-center" style={{ background: CARD_BG }}>
+              <div className="text-3xl font-extrabold font-mono" style={{ color: m.color }}>
                 {m.value}
               </div>
-              <div
-                className="text-[11px] mt-2 uppercase tracking-widest"
-                style={{ color: "hsl(0 0% 32%)" }}
-              >
+              <div className="text-[10px] mt-2 uppercase tracking-widest" style={{ color: "hsl(0 0% 30%)" }}>
                 {m.label}
               </div>
             </div>
