@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { formatCurrency, formatNumber, formatAddress } from "@/lib/utils";
 import { Plus, Zap, Layers } from "lucide-react";
+import { useAuth } from "@/contexts/privy-auth";
 import { useToast } from "@/hooks/use-toast";
 
 /* ─── design tokens ─── */
@@ -28,7 +29,6 @@ const BORDER  = "hsl(0 0% 10%)";
 const CARD_BG = "hsl(0 0% 6%)";
 const CARD_BG2= "hsl(0 0% 8%)";
 
-const WALLET_ADDRESS = "0x71C724E627B0e336338bE5f8a00B32E880B3656F";
 
 function LBracket({ size = 10, color = `${LIME}25` }: { size?: number; color?: string }) {
   const s = { position: "absolute" as const, width: size, height: size };
@@ -85,8 +85,9 @@ function FieldGroup({ label, children }: { label: string; children: React.ReactN
 }
 
 export default function Positions() {
-  const queryClient = useQueryClient();
-  const { toast }   = useToast();
+  const queryClient      = useQueryClient();
+  const { toast }        = useToast();
+  const { address }      = useAuth();
   const { data: positions, isLoading } = useListPositions();
 
   const createMutation = useCreatePosition({
@@ -128,7 +129,7 @@ export default function Positions() {
     e.preventDefault();
     createMutation.mutate({
       data: {
-        owner: WALLET_ADDRESS,
+        owner: address ?? "",
         collateralToken: createData.token as "WETH" | "WBTC",
         collateralAmount: Number(createData.amount),
         usdaxToMint: Number(createData.usdax),
@@ -152,7 +153,13 @@ export default function Positions() {
     if (confirm("Close this vault and redeem all collateral?")) closeMutation.mutate({ id });
   };
 
-  const mockPrice           = createData.token === "WETH" ? 3000 : 60000;
+  // price preview uses current known testnet prices per token
+  const TOKEN_PREVIEW_PRICES: Record<string, number> = {
+    WETH: 3500, WBTC: 97000, stETH: 3480,
+    "RWA-TB": 1, "RWA-RE": 1, "RWA-CB": 1,
+    TSLA: 315, AMZN: 225, PLTR: 45, NFLX: 1050, AMD: 155, NVDA: 135, AAPL: 230,
+  };
+  const mockPrice           = TOKEN_PREVIEW_PRICES[createData.token] ?? 1;
   const previewCollVal      = Number(createData.amount) * mockPrice;
   const previewUsdax        = Number(createData.usdax);
   const previewHealth       = previewUsdax > 0 ? previewCollVal / previewUsdax : 0;

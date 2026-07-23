@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { formatCurrency, formatNumber, formatAddress, formatCompact } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/privy-auth";
 import { Crosshair, AlertOctagon, Zap, TrendingDown, Shield } from "lucide-react";
 
 /* ─── design tokens ─── */
@@ -24,7 +25,6 @@ const BORDER  = "hsl(0 0% 10%)";
 const CARD_BG = "hsl(0 0% 6%)";
 const CARD_BG2= "hsl(0 0% 8%)";
 
-const WALLET_ADDRESS = "0x71C724E627B0e336338bE5f8a00B32E880B3656F";
 
 function LBracket({ size = 10, color = `${LIME}25` }: { size?: number; color?: string }) {
   const s = { position: "absolute" as const, width: size, height: size };
@@ -72,8 +72,9 @@ function LoadingPulse() {
 }
 
 export default function Liquidations() {
-  const queryClient = useQueryClient();
-  const { toast }   = useToast();
+  const queryClient  = useQueryClient();
+  const { toast }    = useToast();
+  const { address }  = useAuth();
   const { data: targets, isLoading } = useListLiquidations();
 
   const liquidateMutation = useExecuteLiquidation({
@@ -96,7 +97,7 @@ export default function Liquidations() {
     e.preventDefault();
     if (!targetPosition) return;
     liquidateMutation.mutate({
-      data: { positionId: targetPosition, liquidator: WALLET_ADDRESS, debtToCover: Number(debtToCover) },
+      data: { positionId: targetPosition, liquidator: address ?? "", debtToCover: Number(debtToCover) },
     });
   };
 

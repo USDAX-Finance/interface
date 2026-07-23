@@ -8,6 +8,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { formatCurrency, formatNumber, formatPercentage, formatShortDateUTC } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/privy-auth";
 import { TrendingUp, Users, Coins, Zap, Clock, ArrowDownRight, ChevronRight, AlertTriangle } from "lucide-react";
 
 /* ─── tokens ─── */
@@ -18,7 +19,6 @@ const BORDER  = "hsl(0 0% 10%)";
 const CARD_BG = "hsl(0 0% 6%)";
 const CARD_BG2= "hsl(0 0% 8%)";
 
-const WALLET_ADDRESS = "0x71C724E627B0e336338bE5f8a00B32E880B3656F";
 
 /* ─── atoms ─── */
 function LBracket({ size = 10, color = `${LIME}25` }: { size?: number; color?: string }) {
@@ -319,8 +319,9 @@ function PositionCard({
 
 /* ─── ROOT ─── */
 export default function Staking() {
-  const queryClient = useQueryClient();
-  const { toast }   = useToast();
+  const queryClient  = useQueryClient();
+  const { toast }    = useToast();
+  const { address }  = useAuth();
 
   const { data: stats,     isLoading: statsLoading } = useGetStakingStats();
   const { data: positions, isLoading: posLoading }   = useListStakingPositions();
@@ -426,7 +427,7 @@ export default function Staking() {
         {/* Action panel */}
         <div className="lg:col-span-1">
           <ActionPanel
-            onStake={(amt) => stakeMutation.mutate({ data: { owner: WALLET_ADDRESS, amount: amt } })}
+            onStake={(amt) => stakeMutation.mutate({ data: { owner: address ?? "", amount: amt } })}
             onUnstake={(amt) => unstakeMutation.mutate({ id: 0, data: { amount: amt } })}
             stakeLoading={stakeMutation.isPending}
             unstakeLoading={unstakeMutation.isPending}

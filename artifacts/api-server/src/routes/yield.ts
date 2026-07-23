@@ -75,74 +75,25 @@ const POOLS = [
   },
 ];
 
-/* ─── Mock positions (deterministic) ─── */
-function calcEarned(depositedUsdax: number, apy: number, depositedAt: string) {
-  const elapsed = (Date.now() - new Date(depositedAt).getTime()) / (1000 * 3600 * 24 * 365);
-  return depositedUsdax * (apy / 100) * elapsed;
-}
-
-function buildPositions(owner: string) {
-  const raw = [
-    { id: 1, poolId: "usdax-usdc-lp",  depositedUsdax: 10_000, depositedAt: "2026-06-15T00:00:00Z" },
-    { id: 2, poolId: "usdax-savings",  depositedUsdax: 25_000, depositedAt: "2026-05-20T00:00:00Z" },
-    { id: 3, poolId: "usdax-weth-lp",  depositedUsdax:  5_000, depositedAt: "2026-07-01T00:00:00Z" },
-  ];
-
-  return raw.map((r) => {
-    const pool          = POOLS.find((p) => p.id === r.poolId)!;
-    const totalEarned   = calcEarned(r.depositedUsdax, pool.apy, r.depositedAt);
-    const feesUsdax     = pool.type === "stable-lp" || pool.type === "volatile-lp"
-      ? calcEarned(r.depositedUsdax, pool.baseApy, r.depositedAt) : 0;
-    const rewardsApx    = pool.rewardApy > 0
-      ? calcEarned(r.depositedUsdax, pool.rewardApy, r.depositedAt) / 0.0082 : 0;
-    const currentValue  = r.depositedUsdax + totalEarned;
-    const pnlUsd        = totalEarned;
-    const pnlPercent    = (pnlUsd / r.depositedUsdax) * 100;
-
-    return YieldPositionSchema.parse({
-      id:                r.id,
-      poolId:            pool.id,
-      poolName:          pool.name,
-      poolType:          pool.type,
-      tokens:            pool.tokens,
-      owner,
-      depositedUsdax:    r.depositedUsdax,
-      currentValueUsd:   currentValue,
-      pendingRewardsApx: rewardsApx,
-      pendingFeesUsdax:  feesUsdax,
-      pnlUsd,
-      pnlPercent,
-      depositedAt:       r.depositedAt,
-      apy:               pool.apy,
-    });
-  });
-}
-
 /* ─── Routes ─── */
 router.get("/yield/pools", (_req, res): void => {
   res.json(POOLS.map((p) => YieldPoolSchema.parse(p)));
 });
 
 router.get("/yield/stats", (_req, res): void => {
-  const positions  = buildPositions("0x71C724E627B0e336338bE5f8a00B32E880B3656F");
-  const totalTvl   = POOLS.reduce((s, p) => s + p.tvlUsd, 0);
-  const bestApy    = Math.max(...POOLS.map((p) => p.apy));
-  const userDep    = positions.reduce((s, p) => s + p.depositedUsdax, 0);
-  const userEarned = positions.reduce((s, p) => s + p.pnlUsd, 0);
-
+  const bestApy = Math.max(...POOLS.map((p) => p.apy));
   res.json(YieldStatsSchema.parse({
-    totalTvlUsd:           totalTvl,
+    totalTvlUsd:           0,
     bestApy,
     activePools:           POOLS.filter((p) => p.isActive).length,
-    userTotalDepositedUsd: userDep,
-    userTotalEarnedUsd:    userEarned,
-    userPositions:         positions.length,
+    userTotalDepositedUsd: 0,
+    userTotalEarnedUsd:    0,
+    userPositions:         0,
   }));
 });
 
-router.get("/yield/positions", (req, res): void => {
-  const owner = (req.query.owner as string) ?? "0x71C724E627B0e336338bE5f8a00B32E880B3656F";
-  res.json(buildPositions(owner));
+router.get("/yield/positions", (_req, res): void => {
+  res.json([]);
 });
 
 router.post("/yield/positions", (req, res): void => {
@@ -165,20 +116,12 @@ router.post("/yield/positions", (req, res): void => {
   }));
 });
 
-router.post("/yield/positions/:id/withdraw", (req, res): void => {
-  const id = parseInt(req.params.id as string, 10);
-  const positions = buildPositions("0x71C724E627B0e336338bE5f8a00B32E880B3656F");
-  const pos = positions.find((p) => p.id === id);
-  if (!pos) { res.status(404).json({ error: "Position not found" }); return; }
-  res.json(YieldPositionSchema.parse({ ...pos, depositedUsdax: 0, currentValueUsd: 0 }));
+router.post("/yield/positions/:id/withdraw", (_req, res): void => {
+  res.status(404).json({ error: "Position not found" });
 });
 
-router.post("/yield/positions/:id/claim", (req, res): void => {
-  const id = parseInt(req.params.id as string, 10);
-  const positions = buildPositions("0x71C724E627B0e336338bE5f8a00B32E880B3656F");
-  const pos = positions.find((p) => p.id === id);
-  if (!pos) { res.status(404).json({ error: "Position not found" }); return; }
-  res.json(YieldPositionSchema.parse({ ...pos, pendingRewardsApx: 0, pendingFeesUsdax: 0 }));
+router.post("/yield/positions/:id/claim", (_req, res): void => {
+  res.status(404).json({ error: "Position not found" });
 });
 
 export default router;

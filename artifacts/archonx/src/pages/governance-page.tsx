@@ -309,50 +309,6 @@ function Governable() {
   );
 }
 
-/* ─── MOCK ACTIVE PROPOSALS ─── */
-const PROPOSALS = [
-  {
-    id: "AIP-015",
-    title: "Increase WBTC collateral LTV from 65% to 67%",
-    status: "active",
-    statusColor: LIME,
-    for: 68, against: 12, abstain: 20,
-    ends: "2 days left",
-    quorum: true,
-    body: "Proposes to increase the Loan-to-Value ratio for WBTC collateral from 65% to 67%, allowing vault owners to borrow slightly more USDAX against the same WBTC deposit.",
-  },
-  {
-    id: "AIP-014",
-    title: "Add stETH as approved collateral at 63% LTV",
-    status: "passed",
-    statusColor: EMERALD,
-    for: 82, against: 8, abstain: 10,
-    ends: "Executed",
-    quorum: true,
-    body: "Successfully approved stETH as a collateral type at 63% LTV with a $5M initial debt ceiling. Yield from stETH accrues to vault owners, reducing effective borrowing cost.",
-  },
-  {
-    id: "AIP-013",
-    title: "Reduce stability fee from 0.75% to 0.50% annually",
-    status: "passed",
-    statusColor: EMERALD,
-    for: 74, against: 18, abstain: 8,
-    ends: "Executed",
-    quorum: true,
-    body: "Reduced the annualised stability fee from 0.75% to 0.50% to incentivise USDAX minting and grow total supply during the early growth phase.",
-  },
-  {
-    id: "AIP-012",
-    title: "Deploy USDAX bridge to Ethereum mainnet",
-    status: "defeated",
-    statusColor: "hsl(0 80% 62%)",
-    for: 38, against: 52, abstain: 10,
-    ends: "Defeated",
-    quorum: true,
-    body: "Proposed deploying an official USDAX bridge to Ethereum mainnet. Defeated due to concerns over cross-chain security risks before full audit completion.",
-  },
-];
-
 function Proposals() {
   return (
     <section className="py-24 px-8" style={{ borderTop: `1px solid ${BORDER}`, background: "hsl(0 0% 5%)" }}>
@@ -364,59 +320,26 @@ function Proposals() {
               Governance in<br /><span style={{ color: LIME }}>Action</span>
             </h2>
           </div>
-          <Link href="/app">
-            <button className="inline-flex items-center gap-2 text-[13px] font-semibold px-5 py-2.5 rounded"
-              style={{ border: `1px solid ${BORDER}`, color: "hsl(0 0% 45%)" }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = "hsl(0 0% 20%)"; (e.currentTarget as HTMLElement).style.color = "hsl(0 0% 75%)"; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = BORDER; (e.currentTarget as HTMLElement).style.color = "hsl(0 0% 45%)"; }}>
-              All Proposals <ArrowRight className="w-4 h-4" />
-            </button>
-          </Link>
         </div>
 
-        <div className="space-y-4">
-          {PROPOSALS.map((p) => (
-            <div key={p.id} className="relative rounded-xl overflow-hidden"
-              style={{ background: CARD_BG, border: `1px solid ${BORDER}` }}>
-              <div className="p-6">
-                <div className="flex items-start justify-between gap-4 mb-3">
-                  <div className="flex items-center gap-3">
-                    <span className="font-mono text-[11px] font-black px-2 py-0.5 rounded"
-                      style={{ background: "hsl(0 0% 5%)", color: "hsl(0 0% 35%)", border: `1px solid ${BORDER}` }}>
-                      {p.id}
-                    </span>
-                    <h3 className="font-bold text-[14px]" style={{ color: "hsl(0 0% 84%)" }}>{p.title}</h3>
-                  </div>
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <span className="text-[9px] font-black tracking-widest uppercase px-2.5 py-1 rounded-full"
-                      style={{ background: `${p.statusColor}12`, color: p.statusColor, border: `1px solid ${p.statusColor}30` }}>
-                      {p.status}
-                    </span>
-                    <span className="text-[11px] font-mono" style={{ color: "hsl(0 0% 30%)" }}>{p.ends}</span>
-                  </div>
-                </div>
-
-                <p className="text-[13px] leading-relaxed mb-5" style={{ color: "hsl(0 0% 40%)" }}>{p.body}</p>
-
-                {/* Vote bars */}
-                <div className="space-y-2">
-                  {[
-                    { label: "FOR", pct: p.for, color: LIME },
-                    { label: "AGAINST", pct: p.against, color: "hsl(0 80% 62%)" },
-                    { label: "ABSTAIN", pct: p.abstain, color: "hsl(0 0% 25%)" },
-                  ].map((v) => (
-                    <div key={v.label} className="flex items-center gap-3">
-                      <span className="text-[10px] font-black tracking-widest w-14" style={{ color: v.color }}>{v.label}</span>
-                      <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: "hsl(0 0% 8%)" }}>
-                        <div className="h-full rounded-full" style={{ width: `${v.pct}%`, background: v.color }} />
-                      </div>
-                      <span className="text-[11px] font-mono w-8 text-right" style={{ color: "hsl(0 0% 35%)" }}>{v.pct}%</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          ))}
+        {/* Empty state — no proposals yet */}
+        <div className="relative rounded-2xl overflow-hidden flex flex-col items-center justify-center py-24 px-8 text-center"
+          style={{ background: "hsl(0 0% 6%)", border: `1px solid ${BORDER}` }}>
+          <LBracket size={18} color={`${LIME}18`} />
+          <div className="w-14 h-14 rounded-2xl flex items-center justify-center mb-6"
+            style={{ background: `${LIME}10`, border: `1px solid ${LIME}20` }}>
+            <Vote className="w-6 h-6" style={{ color: LIME }} />
+          </div>
+          <div className="font-mono text-[10px] tracking-[0.22em] uppercase mb-3" style={{ color: "hsl(0 0% 28%)" }}>
+            No proposals yet
+          </div>
+          <h3 className="font-black text-xl uppercase tracking-tight mb-3" style={{ color: "hsl(0 0% 80%)" }}>
+            Governance is Coming
+          </h3>
+          <p className="text-[13px] leading-relaxed max-w-md" style={{ color: "hsl(0 0% 36%)" }}>
+            On-chain proposals will appear here once governance is live. APX holders will vote on protocol
+            parameters, collateral types, risk settings, and treasury allocations.
+          </p>
         </div>
       </div>
     </section>

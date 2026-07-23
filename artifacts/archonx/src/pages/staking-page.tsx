@@ -79,10 +79,10 @@ function TopBar() {
 /* ─── HERO ─── */
 function Hero() {
   const stats = [
-    { label: "Current APY",       val: "40%+",       sub: "Variable · protocol revenue" },
-    { label: "Total APX Staked",  val: "31.2M",      sub: "of 100M supply" },
-    { label: "Rewards Paid",      val: "$4.1M",       sub: "USDAX distributed" },
-    { label: "Stakers",           val: "12,400+",    sub: "active wallets" },
+    { label: "Current APY",      val: "15%",   sub: "Base · protocol revenue" },
+    { label: "Total APX Staked", val: "—",     sub: "Live once staking launches" },
+    { label: "Rewards Paid",     val: "—",     sub: "USDAX distributed" },
+    { label: "Stakers",          val: "—",     sub: "Active wallets" },
   ];
 
   return (
@@ -100,7 +100,7 @@ function Hero() {
       {/* Big decorative APY */}
       <div className="pointer-events-none absolute right-10 top-20 font-black select-none leading-none"
         style={{ fontSize: "clamp(6rem, 18vw, 18rem)", color: LIME, opacity: 0.04, fontVariantNumeric: "tabular-nums" }}>
-        40%
+        15%
       </div>
 
       <div className="max-w-7xl mx-auto w-full relative z-10">

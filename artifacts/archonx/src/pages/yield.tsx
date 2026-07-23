@@ -12,6 +12,7 @@ import {
   formatCompactNum, formatShortDateUTC,
 } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/privy-auth";
 import {
   Sprout, TrendingUp, Layers, Zap, AlertTriangle,
   Coins, BarChart2, RefreshCw, Droplets,
@@ -28,7 +29,6 @@ const BORDER  = "hsl(0 0% 10%)";
 const CARD    = "hsl(0 0% 6%)";
 const CARD2   = "hsl(0 0% 8%)";
 
-const WALLET = "0x71C724E627B0e336338bE5f8a00B32E880B3656F";
 
 /* ─── Pool meta — icon + color per type ─── */
 const POOL_META: Record<string, { color: string; icon: React.ElementType; label: string }> = {
@@ -541,8 +541,9 @@ function DepositModal({
 
 /* ─── ROOT ─── */
 export default function YieldPage() {
-  const queryClient = useQueryClient();
-  const { toast }   = useToast();
+  const queryClient  = useQueryClient();
+  const { toast }    = useToast();
+  const { address }  = useAuth();
 
   const { data: stats,     isLoading: statsLoading }     = useGetYieldStats();
   const { data: pools,     isLoading: poolsLoading }     = useListYieldPools();
@@ -722,7 +723,7 @@ export default function YieldPage() {
           pool={depositPool}
           onClose={() => setDepositPool(null)}
           onConfirm={(amount) =>
-            depositMutation.mutate({ poolId: depositPool.id, amount, owner: WALLET })
+            depositMutation.mutate({ poolId: depositPool.id, amount, owner: address ?? "" })
           }
           loading={depositMutation.isPending}
         />
