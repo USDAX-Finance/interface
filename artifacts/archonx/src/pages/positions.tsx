@@ -15,7 +15,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,16 +34,42 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { formatCurrency, formatNumber, formatAddress, getHealthColor } from "@/lib/utils";
-import { Layers } from "lucide-react";
+import { Layers, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const WALLET_ADDRESS = "0x71C724E627B0e336338bE5f8a00B32E880B3656F";
+
+function HealthBar({ value }: { value: number }) {
+  const pct = Math.min((value / 3) * 100, 100);
+  const color =
+    value < 1.0
+      ? "hsl(0 84% 60%)"
+      : value < 1.5
+      ? "hsl(35 92% 60%)"
+      : "hsl(142 71% 45%)";
+  return (
+    <div className="flex items-center gap-2">
+      <div
+        className="h-1 flex-1 rounded-full overflow-hidden"
+        style={{ background: "hsl(263 20% 12%)" }}
+      >
+        <div
+          className="h-full rounded-full transition-all"
+          style={{ width: `${pct}%`, background: color }}
+        />
+      </div>
+      <span className="font-mono text-xs font-bold" style={{ color }}>
+        {formatNumber(value)}x
+      </span>
+    </div>
+  );
+}
 
 export default function Positions() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const { data: positions, isLoading } = useListPositions();
-  
+
   const createMutation = useCreatePosition({
     mutation: {
       onSuccess: () => {
@@ -52,7 +77,7 @@ export default function Positions() {
         toast({ title: "Vault created successfully" });
         setIsCreateOpen(false);
       },
-    }
+    },
   });
 
   const updateMutation = useUpdatePosition({
@@ -62,21 +87,20 @@ export default function Positions() {
         toast({ title: "Vault updated successfully" });
         setIsUpdateOpen(false);
       },
-    }
+    },
   });
 
   const closeMutation = useClosePosition({
     mutation: {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: getListPositionsQueryKey() });
-        toast({ title: "Vault closed successfully" });
+        toast({ title: "Vault closed" });
       },
-    }
+    },
   });
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [createData, setCreateData] = useState({ token: "WETH", amount: "", usdax: "" });
-
   const [isUpdateOpen, setIsUpdateOpen] = useState(false);
   const [selectedPosition, setSelectedPosition] = useState<number | null>(null);
   const [updateData, setUpdateData] = useState({ amount: "", usdax: "" });
@@ -89,30 +113,26 @@ export default function Positions() {
         collateralToken: createData.token as "WETH" | "WBTC",
         collateralAmount: Number(createData.amount),
         usdaxToMint: Number(createData.usdax),
-      }
+      },
     });
   };
 
   const handleUpdate = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedPosition) return;
-    
     updateMutation.mutate({
       id: selectedPosition,
       data: {
         collateralAmount: updateData.amount ? Number(updateData.amount) : undefined,
         usdaxMinted: updateData.usdax ? Number(updateData.usdax) : undefined,
-      }
+      },
     });
   };
 
   const handleClose = (id: number) => {
-    if (confirm("Are you sure you want to close this vault and redeem collateral?")) {
-      closeMutation.mutate({ id });
-    }
+    if (confirm("Close this vault and redeem all collateral?")) closeMutation.mutate({ id });
   };
 
-  // Preview health factor for creation
   const mockPrice = createData.token === "WETH" ? 3000 : 60000;
   const previewCollateralValue = Number(createData.amount) * mockPrice;
   const previewUsdax = Number(createData.usdax);
@@ -121,190 +141,277 @@ export default function Positions() {
   if (isLoading) {
     return (
       <div className="flex h-[80vh] items-center justify-center">
-        <div className="font-mono text-xl text-primary animate-pulse">LOADING_VAULTS...</div>
+        <div className="text-center space-y-3">
+          <div
+            className="w-10 h-10 rounded-xl mx-auto animate-pulse"
+            style={{ background: "linear-gradient(135deg,hsl(263 70% 55%),hsl(186 80% 45%))" }}
+          />
+          <div className="font-mono text-sm text-muted-foreground">Loading vaults...</div>
+        </div>
       </div>
     );
   }
 
+  const panelStyle = {
+    background: "hsl(232 18% 7%)",
+    border: "1px solid hsl(263 20% 13%)",
+    borderRadius: "1rem",
+  };
+
+  const dialogStyle = {
+    background: "hsl(232 18% 7%)",
+    border: "1px solid hsl(263 20% 16%)",
+  };
+
   return (
-    <div className="container mx-auto p-4 space-y-6">
+    <div className="container mx-auto p-4 md:p-6 space-y-6">
+      {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-primary">Vault Manager</h1>
-          <p className="text-muted-foreground font-mono text-sm mt-1">
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+            Vault <span className="gradient-text">Manager</span>
+          </h1>
+          <p className="text-muted-foreground text-sm mt-1">
             Manage overcollateralized debt positions
           </p>
         </div>
-        
+
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
           <DialogTrigger asChild>
-            <Button className="font-mono bg-primary text-primary-foreground">
-              <Layers className="mr-2 h-4 w-4" />
-              NEW_VAULT
-            </Button>
+            <button
+              className="btn-gradient flex items-center gap-2 text-white text-sm font-semibold px-5 py-2.5 rounded-xl"
+            >
+              <Plus className="h-4 w-4" />
+              Open Vault
+            </button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px] border-border bg-card">
+          <DialogContent className="sm:max-w-[420px]" style={dialogStyle}>
             <DialogHeader>
-              <DialogTitle className="text-primary font-mono">INITIALIZE_VAULT</DialogTitle>
+              <DialogTitle className="gradient-text-purple font-bold">
+                Initialize Vault
+              </DialogTitle>
             </DialogHeader>
-            <form onSubmit={handleCreate} className="space-y-4 mt-4">
+            <form onSubmit={handleCreate} className="space-y-4 mt-2">
               <div className="space-y-2">
-                <Label className="font-mono text-xs text-muted-foreground">COLLATERAL_TOKEN</Label>
-                <Select value={createData.token} onValueChange={(val) => setCreateData({ ...createData, token: val })}>
-                  <SelectTrigger className="font-mono">
+                <Label className="text-xs text-muted-foreground">Collateral Token</Label>
+                <Select
+                  value={createData.token}
+                  onValueChange={(val) => setCreateData({ ...createData, token: val })}
+                >
+                  <SelectTrigger className="font-mono rounded-xl">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="WETH" className="font-mono">WETH</SelectItem>
-                    <SelectItem value="WBTC" className="font-mono">WBTC</SelectItem>
+                    <SelectItem value="WETH">WETH</SelectItem>
+                    <SelectItem value="WBTC">WBTC</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label className="font-mono text-xs text-muted-foreground">COLLATERAL_AMOUNT</Label>
-                <Input 
-                  type="number" 
-                  step="0.000001" 
-                  required 
+                <Label className="text-xs text-muted-foreground">Collateral Amount</Label>
+                <Input
+                  type="number"
+                  step="0.000001"
+                  required
+                  placeholder="0.00"
+                  className="rounded-xl font-mono"
                   value={createData.amount}
                   onChange={(e) => setCreateData({ ...createData, amount: e.target.value })}
                 />
               </div>
               <div className="space-y-2">
-                <Label className="font-mono text-xs text-muted-foreground">USDAX_TO_MINT</Label>
-                <Input 
-                  type="number" 
-                  step="0.01" 
-                  required 
+                <Label className="text-xs text-muted-foreground">USDAX to Mint</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  required
+                  placeholder="0.00"
+                  className="rounded-xl font-mono"
                   value={createData.usdax}
                   onChange={(e) => setCreateData({ ...createData, usdax: e.target.value })}
                 />
               </div>
-              
-              <div className="p-3 bg-background border border-border rounded flex justify-between items-center">
-                <span className="font-mono text-xs text-muted-foreground">PREVIEW_HEALTH_FACTOR</span>
-                <span className={`font-mono font-bold ${getHealthColor(previewHealth)}`}>
-                  {previewHealth > 0 ? `${formatNumber(previewHealth)}x` : "---"}
-                </span>
-              </div>
-              
-              <Button 
-                type="submit" 
-                className="w-full font-mono bg-primary text-primary-foreground"
-                disabled={createMutation.isPending || (previewUsdax > 0 && previewHealth < 1.5)}
+
+              {previewUsdax > 0 && (
+                <div
+                  className="rounded-xl p-3 flex items-center justify-between"
+                  style={{ background: "hsl(232 20% 9%)", border: "1px solid hsl(263 20% 14%)" }}
+                >
+                  <span className="text-xs text-muted-foreground">Preview Health Factor</span>
+                  <span
+                    className="font-mono font-bold text-sm"
+                    style={{
+                      color:
+                        previewHealth < 1
+                          ? "hsl(0 84% 60%)"
+                          : previewHealth < 1.5
+                          ? "hsl(35 92% 60%)"
+                          : "hsl(142 71% 45%)",
+                    }}
+                  >
+                    {formatNumber(previewHealth)}x
+                  </span>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                className="btn-gradient w-full text-white font-semibold py-2.5 rounded-xl text-sm disabled:opacity-50"
+                disabled={
+                  createMutation.isPending || (previewUsdax > 0 && previewHealth < 1.5)
+                }
               >
-                {createMutation.isPending ? "PROCESSING..." : "EXECUTE_TX"}
-              </Button>
+                {createMutation.isPending ? "Broadcasting..." : "Confirm Deposit"}
+              </button>
             </form>
           </DialogContent>
         </Dialog>
       </div>
 
-      <Card>
+      {/* Table */}
+      <div style={panelStyle} className="overflow-hidden">
         <Table>
           <TableHeader>
-            <TableRow className="border-border/50 hover:bg-transparent">
-              <TableHead className="font-mono text-xs text-muted-foreground">ID</TableHead>
-              <TableHead className="font-mono text-xs text-muted-foreground">COLLATERAL</TableHead>
-              <TableHead className="font-mono text-xs text-muted-foreground">DEBT (USDAX)</TableHead>
-              <TableHead className="font-mono text-xs text-muted-foreground">HEALTH</TableHead>
-              <TableHead className="font-mono text-xs text-muted-foreground">STATUS</TableHead>
-              <TableHead className="text-right font-mono text-xs text-muted-foreground">ACTIONS</TableHead>
+            <TableRow
+              style={{ borderColor: "hsl(263 20% 11%)" }}
+              className="hover:bg-transparent"
+            >
+              {["ID", "Collateral", "Debt (USDAX)", "Health", "Status", ""].map((h) => (
+                <TableHead
+                  key={h}
+                  className={`text-xs text-muted-foreground font-medium ${h === "" ? "text-right" : ""}`}
+                >
+                  {h}
+                </TableHead>
+              ))}
             </TableRow>
           </TableHeader>
           <TableBody>
             {positions?.map((pos) => (
-              <TableRow key={pos.id} className="border-border/50 hover:bg-accent/50">
-                <TableCell className="font-mono text-sm text-primary">#{pos.id}</TableCell>
+              <TableRow
+                key={pos.id}
+                style={{ borderColor: "hsl(263 20% 10%)" }}
+                className="hover:bg-white/[0.02] transition-colors"
+              >
+                <TableCell
+                  className="font-mono text-sm font-semibold"
+                  style={{ color: "hsl(263 70% 70%)" }}
+                >
+                  #{pos.id}
+                </TableCell>
                 <TableCell className="font-mono text-sm">
-                  {formatNumber(pos.collateralAmount, 4)} {pos.collateralToken}
-                  <div className="text-xs text-muted-foreground">{formatCurrency(pos.collateralValueUsd)}</div>
+                  <div>{formatNumber(pos.collateralAmount, 4)} {pos.collateralToken}</div>
+                  <div className="text-xs text-muted-foreground mt-0.5">
+                    {formatCurrency(pos.collateralValueUsd)}
+                  </div>
                 </TableCell>
                 <TableCell className="font-mono text-sm">
                   {formatNumber(pos.usdaxMinted, 2)}
-                </TableCell>
-                <TableCell>
-                  <div className={`font-mono text-sm font-bold ${getHealthColor(pos.healthFactor)}`}>
-                    {formatNumber(pos.healthFactor)}x
-                  </div>
-                  <div className="font-mono text-xs text-muted-foreground">
-                    {formatNumber(pos.collateralRatio, 1)}% Ratio
+                  <div className="text-xs text-muted-foreground mt-0.5">
+                    {formatNumber(pos.collateralRatio, 1)}% ratio
                   </div>
                 </TableCell>
+                <TableCell className="w-36">
+                  <HealthBar value={pos.healthFactor} />
+                </TableCell>
                 <TableCell>
-                  <Badge variant={pos.status === 'active' ? 'outline' : 'secondary'} className="font-mono text-[10px] uppercase">
+                  <span
+                    className="text-[10px] font-mono font-semibold px-2 py-0.5 rounded-full uppercase"
+                    style={
+                      pos.status === "active"
+                        ? {
+                            background: "hsl(142 71% 45% / 0.12)",
+                            color: "hsl(142 71% 55%)",
+                            border: "1px solid hsl(142 71% 45% / 0.25)",
+                          }
+                        : {
+                            background: "hsl(240 8% 15%)",
+                            color: "hsl(240 8% 55%)",
+                          }
+                    }
+                  >
                     {pos.status}
-                  </Badge>
+                  </span>
                 </TableCell>
                 <TableCell className="text-right space-x-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="font-mono text-xs h-7"
-                    disabled={pos.status !== 'active'}
+                  <button
+                    className="text-xs font-mono px-3 py-1.5 rounded-lg transition-all hover:bg-white/5 text-muted-foreground hover:text-foreground disabled:opacity-30"
+                    style={{ border: "1px solid hsl(263 20% 16%)" }}
+                    disabled={pos.status !== "active"}
                     onClick={() => {
                       setSelectedPosition(pos.id);
-                      setUpdateData({ amount: pos.collateralAmount.toString(), usdax: pos.usdaxMinted.toString() });
+                      setUpdateData({
+                        amount: pos.collateralAmount.toString(),
+                        usdax: pos.usdaxMinted.toString(),
+                      });
                       setIsUpdateOpen(true);
                     }}
                   >
-                    MODIFY
-                  </Button>
-                  <Button 
-                    variant="destructive" 
-                    size="sm" 
-                    className="font-mono text-xs h-7"
-                    disabled={pos.status !== 'active' || closeMutation.isPending}
+                    Modify
+                  </button>
+                  <button
+                    className="text-xs font-mono px-3 py-1.5 rounded-lg transition-all text-destructive hover:bg-destructive/10 disabled:opacity-30"
+                    style={{ border: "1px solid hsl(0 84% 60% / 0.3)" }}
+                    disabled={pos.status !== "active" || closeMutation.isPending}
                     onClick={() => handleClose(pos.id)}
                   >
-                    CLOSE
-                  </Button>
+                    Close
+                  </button>
                 </TableCell>
               </TableRow>
             ))}
             {positions?.length === 0 && (
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center font-mono text-muted-foreground">
-                  NO_ACTIVE_POSITIONS_FOUND
+                <TableCell
+                  colSpan={6}
+                  className="h-32 text-center font-mono text-muted-foreground text-sm"
+                >
+                  No active vaults found
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
-      </Card>
+      </div>
 
+      {/* Update dialog */}
       <Dialog open={isUpdateOpen} onOpenChange={setIsUpdateOpen}>
-        <DialogContent className="sm:max-w-[425px] border-border bg-card">
+        <DialogContent className="sm:max-w-[420px]" style={dialogStyle}>
           <DialogHeader>
-            <DialogTitle className="text-primary font-mono">MODIFY_VAULT #{selectedPosition}</DialogTitle>
+            <DialogTitle className="gradient-text-purple font-bold">
+              Modify Vault #{selectedPosition}
+            </DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleUpdate} className="space-y-4 mt-4">
+          <form onSubmit={handleUpdate} className="space-y-4 mt-2">
             <div className="space-y-2">
-              <Label className="font-mono text-xs text-muted-foreground">NEW_COLLATERAL_AMOUNT</Label>
-              <Input 
-                type="number" 
-                step="0.000001" 
+              <Label className="text-xs text-muted-foreground">New Collateral Amount</Label>
+              <Input
+                type="number"
+                step="0.000001"
+                placeholder="0.00"
+                className="rounded-xl font-mono"
                 value={updateData.amount}
                 onChange={(e) => setUpdateData({ ...updateData, amount: e.target.value })}
               />
             </div>
             <div className="space-y-2">
-              <Label className="font-mono text-xs text-muted-foreground">NEW_DEBT_AMOUNT (USDAX)</Label>
-              <Input 
-                type="number" 
-                step="0.01" 
+              <Label className="text-xs text-muted-foreground">New Debt (USDAX)</Label>
+              <Input
+                type="number"
+                step="0.01"
+                placeholder="0.00"
+                className="rounded-xl font-mono"
                 value={updateData.usdax}
                 onChange={(e) => setUpdateData({ ...updateData, usdax: e.target.value })}
               />
             </div>
-            
-            <Button 
-              type="submit" 
-              className="w-full font-mono bg-primary text-primary-foreground"
+            <button
+              type="submit"
+              className="btn-gradient w-full text-white font-semibold py-2.5 rounded-xl text-sm disabled:opacity-50"
               disabled={updateMutation.isPending}
             >
-              {updateMutation.isPending ? "PROCESSING..." : "UPDATE_VAULT"}
-            </Button>
+              {updateMutation.isPending ? "Broadcasting..." : "Update Vault"}
+            </button>
           </form>
         </DialogContent>
       </Dialog>

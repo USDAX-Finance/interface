@@ -4,6 +4,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
 import { Route, Switch, Router as WouterRouter } from 'wouter';
 
+import Landing from '@/pages/landing';
 import { Navbar } from '@/components/layout';
 import Dashboard from '@/pages/dashboard';
 import Positions from '@/pages/positions';
@@ -12,20 +13,29 @@ import Liquidations from '@/pages/liquidations';
 
 const queryClient = new QueryClient();
 
-function Router() {
+function AppLayout() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
       <main className="flex-1 overflow-x-hidden">
         <Switch>
-          <Route path="/" component={Dashboard} />
-          <Route path="/positions" component={Positions} />
-          <Route path="/staking" component={Staking} />
-          <Route path="/liquidations" component={Liquidations} />
+          <Route path="/app" component={Dashboard} />
+          <Route path="/app/positions" component={Positions} />
+          <Route path="/app/staking" component={Staking} />
+          <Route path="/app/liquidations" component={Liquidations} />
           <Route component={NotFound} />
         </Switch>
       </main>
     </div>
+  );
+}
+
+function Router() {
+  return (
+    <Switch>
+      <Route path="/" component={Landing} />
+      <Route component={AppLayout} />
+    </Switch>
   );
 }
 
