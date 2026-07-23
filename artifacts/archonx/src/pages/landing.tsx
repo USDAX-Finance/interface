@@ -1,22 +1,27 @@
 import { Link } from "wouter";
 import {
-  ArrowRight, Check, Droplets, HandMetal, Leaf,
+  ArrowRight, Lock, BarChart2, Zap,
   Building2, Code2, Vault, ChevronRight,
   Twitter, Github, MessageSquare, FileText,
-  Lock, BarChart2, Zap,
+  Droplets, HandMetal, Leaf,
 } from "lucide-react";
 
-/* ─────────────────────────── helpers ─────────────────────────── */
+/* ─────────────────────── Constants ─────────────────────── */
 
-const C = {
-  indigo: "hsl(263 70% 62%)",
-  purple: "hsl(280 65% 60%)",
-  emerald: "hsl(142 71% 45%)",
-  cyan: "hsl(186 80% 50%)",
-  warning: "hsl(35 92% 60%)",
-};
+const LIME = "hsl(79 100% 57%)";      // #BAFF29
+const LIME_DIM = "hsl(79 100% 57% / 0.08)";
+const LIME_BORDER = "hsl(79 100% 57% / 0.2)";
+const EMERALD = "hsl(152 70% 48%)";
+const WARNING = "hsl(38 92% 58%)";
+const DANGER = "hsl(0 80% 58%)";
 
-function GradBtn({
+const BORDER = "hsl(0 0% 10%)";
+const CARD_BG = "hsl(0 0% 6%)";
+const CARD_BG_RAISED = "hsl(0 0% 8%)";
+
+/* ─────────────────────── Shared helpers ─────────────────────── */
+
+function LimeBtn({
   href,
   children,
   className = "",
@@ -28,18 +33,18 @@ function GradBtn({
   return (
     <Link href={href}>
       <button
-        className={`inline-flex items-center gap-2 font-semibold px-7 py-3.5 rounded-xl text-white text-sm transition-all ${className}`}
+        className={`inline-flex items-center gap-2 font-semibold px-6 py-2.5 rounded text-sm transition-all ${className}`}
         style={{
-          background: "linear-gradient(135deg,hsl(263 70% 55%),hsl(280 60% 50%))",
-          boxShadow: "0 4px 20px hsl(263 70% 62% / 0.25)",
+          background: LIME,
+          color: "hsl(0 0% 4%)",
         }}
         onMouseEnter={(e) => {
-          (e.currentTarget as HTMLButtonElement).style.boxShadow =
-            "0 6px 30px hsl(263 70% 62% / 0.45)";
+          (e.currentTarget as HTMLButtonElement).style.boxShadow = `0 0 28px hsl(79 100% 57% / 0.4)`;
+          (e.currentTarget as HTMLButtonElement).style.background = "hsl(79 100% 64%)";
         }}
         onMouseLeave={(e) => {
-          (e.currentTarget as HTMLButtonElement).style.boxShadow =
-            "0 4px 20px hsl(263 70% 62% / 0.25)";
+          (e.currentTarget as HTMLButtonElement).style.boxShadow = "";
+          (e.currentTarget as HTMLButtonElement).style.background = LIME;
         }}
       >
         {children}
@@ -58,87 +63,94 @@ function OutlineBtn({
   return (
     <a
       href={href}
-      className="inline-flex items-center gap-2 font-semibold px-7 py-3.5 rounded-xl text-sm text-muted-foreground hover:text-foreground transition-all"
-      style={{ border: "1px solid hsl(263 20% 18%)" }}
+      className="inline-flex items-center gap-2 font-semibold px-6 py-2.5 rounded text-sm transition-all text-muted-foreground hover:text-foreground"
+      style={{ border: `1px solid ${BORDER}` }}
+      onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.borderColor = "hsl(0 0% 20%)")}
+      onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.borderColor = BORDER)}
     >
       {children}
     </a>
   );
 }
 
-function SectionBadge({ color, children }: { color: string; children: React.ReactNode }) {
+function Tag({ children }: { children: React.ReactNode }) {
   return (
     <span
-      className="inline-block text-xs font-semibold px-4 py-1.5 rounded-full mb-4"
-      style={{ background: `${color}18`, color, border: `1px solid ${color}25` }}
+      className="inline-flex items-center gap-1.5 text-[11px] font-semibold px-3 py-1.5 rounded-full uppercase tracking-widest mb-4"
+      style={{
+        background: LIME_DIM,
+        color: LIME,
+        border: `1px solid ${LIME_BORDER}`,
+      }}
     >
+      <span
+        className="w-1.5 h-1.5 rounded-full"
+        style={{ background: LIME }}
+      />
       {children}
     </span>
   );
 }
 
-/* ─────────────────────────── NAV ─────────────────────────── */
+/* ─────────────────────── NAV ─────────────────────── */
 
 function Nav() {
   return (
     <nav
       className="fixed top-0 inset-x-0 z-50"
       style={{
-        background: "hsl(232 20% 4% / 0.85)",
-        backdropFilter: "blur(20px)",
-        WebkitBackdropFilter: "blur(20px)",
-        borderBottom: "1px solid hsl(263 20% 10%)",
+        background: "hsl(0 0% 3% / 0.9)",
+        backdropFilter: "blur(16px)",
+        borderBottom: `1px solid ${BORDER}`,
       }}
     >
-      <div className="max-w-7xl mx-auto px-6 flex items-center justify-between h-16">
+      <div className="max-w-7xl mx-auto px-8 flex items-center justify-between h-14">
         {/* Logo */}
-        <div className="flex items-center gap-2">
-          <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center"
-            style={{
-              background: "linear-gradient(135deg,hsl(263 70% 55%),hsl(186 80% 45%))",
-            }}
-          >
-            <span className="text-white font-black text-xs">AX</span>
+        <Link href="/">
+          <div className="flex items-center gap-2.5 cursor-pointer">
+            <div
+              className="w-7 h-7 rounded flex items-center justify-center font-black text-[11px]"
+              style={{ background: LIME, color: "hsl(0 0% 4%)" }}
+            >
+              AX
+            </div>
+            <span className="text-foreground font-bold text-base tracking-tight">
+              ArchonX
+            </span>
           </div>
-          <span className="text-foreground font-bold text-lg tracking-tight">
-            Archon<span style={{ color: C.indigo }}>X</span>
-          </span>
-        </div>
+        </Link>
 
-        {/* Links */}
-        <div className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
+        {/* Center links */}
+        <div className="hidden md:flex items-center gap-8 text-[13px] text-muted-foreground">
           {[
             { label: "Product", href: "#product" },
             { label: "Features", href: "#features" },
             { label: "Use Cases", href: "#use-cases" },
             { label: "Staking", href: "#staking" },
           ].map((l) => (
-            <a key={l.label} href={l.href} className="hover:text-foreground transition-colors">
+            <a
+              key={l.label}
+              href={l.href}
+              className="hover:text-foreground transition-colors"
+            >
               {l.label}
             </a>
           ))}
-          <Link href="/app">
-            <button
-              className="text-sm font-semibold px-5 py-2 rounded-full transition-all"
-              style={{
-                background: "hsl(263 70% 62% / 0.12)",
-                color: "hsl(263 70% 75%)",
-                border: "1px solid hsl(263 70% 62% / 0.25)",
-              }}
-            >
-              Launch App →
-            </button>
-          </Link>
         </div>
 
-        {/* Mobile */}
-        <Link href="/app" className="md:hidden">
+        {/* CTA */}
+        <Link href="/app">
           <button
-            className="text-xs font-semibold px-4 py-2 rounded-xl text-white"
-            style={{ background: "linear-gradient(135deg,hsl(263 70% 55%),hsl(280 60% 50%))" }}
+            className="text-[13px] font-semibold px-4 py-2 rounded transition-all"
+            style={{ background: LIME, color: "hsl(0 0% 4%)" }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.boxShadow = `0 0 20px ${LIME_BORDER}`;
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLButtonElement).style.boxShadow = "";
+            }}
           >
-            Launch App
+            Launch App →
           </button>
         </Link>
       </div>
@@ -146,223 +158,284 @@ function Nav() {
   );
 }
 
-/* ─────────────────────────── MOCK DASHBOARD CARD ─────────────────────────── */
+/* ─────────────────────── MOCK DASHBOARD (dark / flat) ─────────────────────── */
 
 function MockDashboard() {
   return (
-    <div className="relative">
-      {/* Main panel */}
+    <div className="relative animate-float">
       <div
-        className="rounded-2xl p-6 shadow-2xl"
+        className="rounded-xl p-5"
         style={{
-          background: "hsl(232 18% 8% / 0.9)",
-          backdropFilter: "blur(20px)",
-          border: "1px solid hsl(263 20% 16%)",
-          boxShadow: "0 30px 80px hsl(232 20% 2% / 0.6), 0 0 0 1px hsl(263 30% 20% / 0.3)",
+          background: CARD_BG,
+          border: `1px solid ${BORDER}`,
+          boxShadow: "0 40px 80px hsl(0 0% 0% / 0.7)",
         }}
       >
-        {/* Window chrome */}
+        {/* Window dots */}
         <div className="flex items-center gap-1.5 mb-5">
-          <div className="w-2.5 h-2.5 rounded-full bg-destructive/70" />
-          <div className="w-2.5 h-2.5 rounded-full bg-warning/70" />
-          <div className="w-2.5 h-2.5 rounded-full bg-safe/70" />
-          <span className="ml-auto text-[10px] font-mono text-muted-foreground">USDAX / USD</span>
+          <div className="w-2 h-2 rounded-full" style={{ background: DANGER }} />
+          <div className="w-2 h-2 rounded-full" style={{ background: WARNING }} />
+          <div className="w-2 h-2 rounded-full" style={{ background: EMERALD }} />
+          <span className="ml-auto text-[10px] font-mono text-muted-foreground tracking-widest">
+            USDAX · USD
+          </span>
         </div>
 
         {/* Price */}
         <div className="flex items-end justify-between mb-5">
           <div>
-            <div className="text-3xl font-black text-foreground font-mono">$1.00</div>
+            <div className="text-4xl font-black font-mono text-foreground tracking-tight">
+              $1.00
+            </div>
             <div className="flex items-center gap-2 mt-1">
               <span
-                className="text-xs font-mono font-semibold px-2 py-0.5 rounded-full"
-                style={{ background: "hsl(142 71% 45% / 0.15)", color: "hsl(142 71% 55%)" }}
+                className="text-[11px] font-mono font-bold px-2 py-0.5 rounded"
+                style={{ background: `${EMERALD}18`, color: EMERALD }}
               >
                 +0.00%
               </span>
-              <span className="text-[10px] text-muted-foreground">Pegged</span>
+              <span className="text-[10px] text-muted-foreground">Pegged stable</span>
             </div>
           </div>
-          <div className="text-right text-xs text-muted-foreground">
-            <div>24h vol: $24.5M</div>
-            <div className="mt-0.5" style={{ color: C.indigo }}>Chain 46630</div>
+          <div className="text-right">
+            <div className="text-xs text-muted-foreground">24h vol</div>
+            <div className="text-sm font-mono font-semibold text-foreground">$24.5M</div>
           </div>
         </div>
 
-        {/* Mini chart bars */}
-        <div className="flex items-end gap-1 h-14 mb-5">
-          {[40, 55, 35, 62, 48, 70, 45, 58, 72, 50, 65, 80].map((h, i) => (
+        {/* Chart bars */}
+        <div className="flex items-end gap-1 h-16 mb-5">
+          {[30, 45, 28, 55, 38, 65, 42, 52, 70, 44, 60, 80].map((h, i) => (
             <div
               key={i}
-              className="flex-1 rounded-sm transition-all"
+              className="flex-1 rounded-sm"
               style={{
                 height: `${h}%`,
                 background:
                   i === 11
-                    ? "hsl(263 70% 62%)"
-                    : i > 7
-                    ? "hsl(263 70% 62% / 0.4)"
-                    : "hsl(263 70% 62% / 0.2)",
+                    ? LIME
+                    : i >= 8
+                    ? `${LIME}50`
+                    : "hsl(0 0% 14%)",
               }}
             />
           ))}
         </div>
 
-        {/* Stats row */}
+        {/* Stats */}
         <div
-          className="grid grid-cols-3 gap-3 pt-4"
-          style={{ borderTop: "1px solid hsl(263 20% 12%)" }}
+          className="grid grid-cols-3 gap-0 pt-4"
+          style={{ borderTop: `1px solid ${BORDER}` }}
         >
           {[
-            { label: "APY", value: "15%", color: C.emerald },
-            { label: "TVL", value: "$56K", color: C.indigo },
-            { label: "Collat.", value: "150%", color: C.cyan },
+            { label: "APY", value: "15%", color: LIME },
+            { label: "TVL", value: "$56K", color: "hsl(0 0% 80%)" },
+            { label: "Collat.", value: "150%", color: EMERALD },
           ].map((s) => (
             <div key={s.label} className="text-center">
-              <div className="text-sm font-bold font-mono" style={{ color: s.color }}>
+              <div
+                className="text-base font-bold font-mono"
+                style={{ color: s.color }}
+              >
                 {s.value}
               </div>
-              <div className="text-[9px] text-muted-foreground mt-0.5">{s.label}</div>
+              <div className="text-[10px] text-muted-foreground mt-0.5">{s.label}</div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Floating yield badge */}
+      {/* Floating badge — yield */}
       <div
-        className="absolute -bottom-4 -right-4 rounded-xl px-4 py-2.5 shadow-xl hidden lg:flex items-center gap-3"
+        className="absolute -bottom-4 -right-4 hidden lg:flex items-center gap-2.5 rounded-lg px-3.5 py-2"
         style={{
-          background: "hsl(263 70% 55%)",
-          border: "1px solid hsl(263 70% 65% / 0.4)",
-          boxShadow: "0 8px 30px hsl(263 70% 55% / 0.4)",
+          background: LIME,
+          boxShadow: `0 8px 30px hsl(79 100% 57% / 0.35)`,
         }}
       >
-        <Zap className="h-4 w-4 text-white" />
+        <Zap className="h-3.5 w-3.5" style={{ color: "hsl(0 0% 4%)" }} />
         <div>
-          <div className="text-[10px] text-purple-200">Yield Active</div>
-          <div className="text-xs font-bold text-white">+15% APY</div>
+          <div className="text-[9px] font-semibold" style={{ color: "hsl(0 0% 20%)" }}>
+            Yield Active
+          </div>
+          <div className="text-xs font-bold" style={{ color: "hsl(0 0% 4%)" }}>
+            +15% APY
+          </div>
         </div>
       </div>
 
-      {/* Floating health badge */}
+      {/* Floating badge — health */}
       <div
-        className="absolute -top-4 -left-4 rounded-xl px-4 py-2.5 shadow-xl hidden lg:flex items-center gap-2"
+        className="absolute -top-3 -left-4 hidden lg:flex items-center gap-2 rounded-lg px-3 py-2"
         style={{
-          background: "hsl(232 18% 9%)",
-          border: "1px solid hsl(142 71% 45% / 0.35)",
-          boxShadow: "0 8px 30px hsl(232 20% 4% / 0.5)",
+          background: "hsl(0 0% 8%)",
+          border: `1px solid ${EMERALD}35`,
         }}
       >
-        <div className="w-2 h-2 rounded-full bg-safe animate-pulse" />
-        <div className="text-xs font-mono">
+        <div
+          className="w-2 h-2 rounded-full animate-pulse"
+          style={{ background: EMERALD }}
+        />
+        <span className="text-[11px] font-mono">
           <span className="text-muted-foreground">HF </span>
-          <span style={{ color: C.emerald }} className="font-bold">2.13x</span>
-        </div>
+          <span className="font-bold" style={{ color: EMERALD }}>
+            2.13x
+          </span>
+        </span>
       </div>
     </div>
   );
 }
 
-/* ─────────────────────────── HERO ─────────────────────────── */
+/* ─────────────────────── TICKER ─────────────────────── */
+
+function Ticker() {
+  const items = [
+    "USDAX pegged at $1.00",
+    "AKX staking APY: 15%",
+    "TVL: $56,333",
+    "Robinhood Chain · ID 46630",
+    "Collateral ratio: 150%",
+    "USDAX minted: 26,700",
+    "Active vaults: 8",
+    "AKX supply: 100M max",
+  ];
+  const doubled = [...items, ...items];
+
+  return (
+    <div
+      className="overflow-hidden py-3"
+      style={{
+        borderTop: `1px solid ${BORDER}`,
+        borderBottom: `1px solid ${BORDER}`,
+        background: "hsl(0 0% 4%)",
+      }}
+    >
+      <div className="flex animate-ticker whitespace-nowrap" style={{ width: "max-content" }}>
+        {doubled.map((item, i) => (
+          <span
+            key={i}
+            className="inline-flex items-center gap-3 text-[11px] font-mono tracking-wide px-8"
+            style={{ color: "hsl(0 0% 35%)" }}
+          >
+            <span style={{ color: LIME }}>◆</span>
+            {item}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────── HERO ─────────────────────── */
 
 function Hero() {
   return (
-    <section className="relative pt-28 pb-24 px-6 overflow-hidden">
-      {/* BG glows */}
-      <div className="absolute inset-0 pointer-events-none">
+    <>
+      <section className="relative pt-28 pb-20 px-8 overflow-hidden grid-bg">
+        {/* Radial lime glow top-right */}
         <div
-          className="absolute top-0 right-0 w-[60%] h-[80%] rounded-full"
-          style={{ background: "hsl(263 70% 62% / 0.07)", filter: "blur(80px)" }}
-        />
-        <div
-          className="absolute bottom-0 left-0 w-[40%] h-[60%] rounded-full"
-          style={{ background: "hsl(280 60% 50% / 0.06)", filter: "blur(60px)" }}
-        />
-        {/* Grid */}
-        <div
-          className="absolute inset-0 opacity-[0.025]"
+          className="pointer-events-none absolute top-0 right-0 w-[55%] h-[65%]"
           style={{
-            backgroundImage:
-              "linear-gradient(hsl(263 50% 60%) 1px,transparent 1px),linear-gradient(90deg,hsl(263 50% 60%) 1px,transparent 1px)",
-            backgroundSize: "60px 60px",
+            background: `radial-gradient(ellipse at 80% 10%, ${LIME}0D 0%, transparent 65%)`,
           }}
         />
-      </div>
 
-      <div className="max-w-7xl mx-auto relative z-10">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
-          {/* Left */}
-          <div>
-            <div
-              className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-medium mb-6"
-              style={{
-                background: "hsl(263 70% 62% / 0.1)",
-                border: "1px solid hsl(263 70% 62% / 0.25)",
-                color: "hsl(263 70% 75%)",
-              }}
-            >
-              <span
-                className="w-1.5 h-1.5 rounded-full animate-pulse"
-                style={{ background: C.indigo }}
-              />
-              Live on Robinhood Chain · Chain ID 46630
-            </div>
+        <div className="max-w-7xl mx-auto relative z-10">
+          <div className="grid lg:grid-cols-[1fr_1fr] gap-20 items-center">
+            {/* Left */}
+            <div>
+              {/* Live badge */}
+              <div
+                className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-mono mb-7"
+                style={{
+                  background: "hsl(0 0% 7%)",
+                  border: `1px solid ${BORDER}`,
+                  color: "hsl(0 0% 45%)",
+                }}
+              >
+                <span
+                  className="w-1.5 h-1.5 rounded-full animate-ping-slow"
+                  style={{ background: EMERALD }}
+                />
+                Live · Robinhood Chain 46630
+              </div>
 
-            <h1 className="text-5xl sm:text-6xl font-extrabold leading-[1.05] tracking-tight text-foreground">
-              Where Money
-              <br />
-              <span className="gradient-text">Grows</span>
-            </h1>
+              <h1
+                className="text-[clamp(3rem,6vw,5.5rem)] font-extrabold leading-[1.0] tracking-tight text-foreground"
+              >
+                Where
+                <br />
+                Money{" "}
+                <span className="gradient-text">Grows</span>
+              </h1>
 
-            <p className="text-base sm:text-lg text-muted-foreground mt-6 max-w-lg leading-relaxed">
-              A programmable, utility-driven stable token designed for native value accrual and
-              seamless integration into DeFi on Robinhood Chain.
-            </p>
+              <p className="text-[15px] text-muted-foreground mt-6 max-w-md leading-relaxed">
+                A programmable, yield-bearing stablecoin for native value accrual and seamless
+                DeFi integration on Robinhood Chain.
+              </p>
 
-            <div className="flex flex-wrap gap-3 mt-8">
-              <GradBtn href="/app">
-                <Zap className="h-4 w-4" /> Try it now
-              </GradBtn>
-              <OutlineBtn href="#product">
-                Explore Protocol <ArrowRight className="h-3.5 w-3.5" />
-              </OutlineBtn>
-            </div>
+              <div className="flex flex-wrap items-center gap-3 mt-8">
+                <LimeBtn href="/app">
+                  <Zap className="h-3.5 w-3.5" /> Try it now
+                </LimeBtn>
+                <OutlineBtn href="#product">
+                  Explore Protocol <ArrowRight className="h-3.5 w-3.5" />
+                </OutlineBtn>
+              </div>
 
-            {/* Social proof */}
-            <div className="flex items-center gap-4 mt-8 text-sm text-muted-foreground">
-              <div className="flex -space-x-2">
-                {["hsl(263 70% 55%)", "hsl(186 80% 45%)", "hsl(142 71% 45%)", "hsl(35 92% 55%)"].map(
-                  (bg, i) => (
+              {/* Social proof */}
+              <div className="flex items-center gap-3 mt-8">
+                <div className="flex -space-x-2">
+                  {[LIME, EMERALD, "hsl(38 92% 58%)", "hsl(0 0% 45%)"].map((bg, i) => (
                     <div
                       key={i}
-                      className="w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold text-white"
+                      className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold"
                       style={{
                         background: bg,
-                        border: "2px solid hsl(232 20% 4%)",
-                        marginLeft: i > 0 ? "-8px" : 0,
+                        color: "hsl(0 0% 4%)",
+                        border: "2px solid hsl(0 0% 3%)",
                       }}
                     >
                       {["A", "B", "C", "+"][i]}
                     </div>
-                  )
-                )}
+                  ))}
+                </div>
+                <span className="text-[13px] text-muted-foreground">
+                  <span className="text-foreground font-semibold">2,000+</span> early adopters
+                </span>
               </div>
-              <span>
-                Trusted by <span className="text-foreground font-semibold">2,000+</span> early
-                adopters
-              </span>
-            </div>
-          </div>
 
-          {/* Right — dashboard mockup */}
-          <MockDashboard />
+              {/* Quick stat pills */}
+              <div className="flex gap-6 mt-10 pt-10" style={{ borderTop: `1px solid ${BORDER}` }}>
+                {[
+                  { value: "1400+", label: "Active users" },
+                  { value: "28+", label: "Vault types" },
+                ].map((s) => (
+                  <div key={s.label}>
+                    <div className="text-2xl font-extrabold font-mono" style={{ color: LIME }}>
+                      {s.value}
+                    </div>
+                    <div className="text-[11px] text-muted-foreground mt-0.5 tracking-wide">
+                      {s.label}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Right */}
+            <MockDashboard />
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      <Ticker />
+    </>
   );
 }
 
-/* ─────────────────────────── TRUSTED BY ─────────────────────────── */
+/* ─────────────────────── TRUSTED BY ─────────────────────── */
 
 function TrustedBy() {
   const logos = [
@@ -370,27 +443,24 @@ function TrustedBy() {
     "KUKUIN", "MGC", "NxGen", "Matter Labs",
     "DEXTools", "NGRAVE", "emergent", "Lovalib",
   ];
+
   return (
-    <section
-      className="py-12"
-      style={{
-        borderTop: "1px solid hsl(263 20% 10%)",
-        borderBottom: "1px solid hsl(263 20% 10%)",
-        background: "hsl(232 20% 5%)",
-      }}
-    >
-      <div className="max-w-7xl mx-auto px-6">
-        <p className="text-center text-[10px] uppercase tracking-widest text-muted-foreground font-semibold mb-8">
-          Backed by the best companies & visionary angels
+    <section className="py-16 px-8">
+      <div className="max-w-7xl mx-auto">
+        <p
+          className="text-center text-[10px] uppercase tracking-[0.2em] font-semibold mb-10"
+          style={{ color: "hsl(0 0% 28%)" }}
+        >
+          Backed by the best companies &amp; visionary angels
         </p>
         <div className="flex flex-wrap justify-center gap-x-10 gap-y-4">
           {logos.map((name) => (
             <span
               key={name}
-              className="text-sm font-bold tracking-wider transition-colors cursor-default"
-              style={{ color: "hsl(240 8% 35%)" }}
-              onMouseEnter={(e) => ((e.target as HTMLElement).style.color = "hsl(240 8% 70%)")}
-              onMouseLeave={(e) => ((e.target as HTMLElement).style.color = "hsl(240 8% 35%)")}
+              className="text-[13px] font-semibold tracking-wider cursor-default transition-colors duration-200"
+              style={{ color: "hsl(0 0% 20%)" }}
+              onMouseEnter={(e) => ((e.target as HTMLElement).style.color = "hsl(0 0% 55%)")}
+              onMouseLeave={(e) => ((e.target as HTMLElement).style.color = "hsl(0 0% 20%)")}
             >
               {name}
             </span>
@@ -401,96 +471,104 @@ function TrustedBy() {
   );
 }
 
-/* ─────────────────────────── WHAT IS USDAX ─────────────────────────── */
+/* ─────────────────────── WHAT IS USDAX ─────────────────────── */
 
 function WhatIsUSDax() {
   const pillars = [
     {
       icon: Droplets,
       title: "Always liquid, always stable",
-      desc: "Stay fully dollar-pegged with instant access to your funds — no lockups or delays.",
-      color: C.indigo,
+      desc: "Stay fully dollar-pegged with instant access to your funds — no lockups, no delays.",
+      color: LIME,
     },
     {
       icon: HandMetal,
       title: "100% hands-free",
       desc: "No need to manage strategies manually. USDAX works in the background for you.",
-      color: C.purple,
+      color: "hsl(0 0% 65%)",
     },
     {
       icon: Leaf,
       title: "Earn passive income",
       desc: "Your collateral is deployed into high-performing DeFi positions automatically.",
-      color: C.emerald,
+      color: EMERALD,
     },
   ];
 
   const metrics = [
-    { value: "150%", label: "Collateral Ratio", color: C.indigo },
-    { value: "15%", label: "Base APY", color: C.emerald },
-    { value: "7d", label: "Staking Cooldown", color: C.warning },
-    { value: "100M", label: "AKX Max Supply", color: C.purple },
+    { value: "150%", label: "Collateral Ratio", color: LIME },
+    { value: "15%", label: "Base APY", color: EMERALD },
+    { value: "7d", label: "Staking Cooldown", color: WARNING },
+    { value: "100M", label: "AKX Max Supply", color: "hsl(0 0% 65%)" },
   ];
 
   return (
-    <section id="product" className="py-24 px-6">
+    <section
+      id="product"
+      className="py-24 px-8"
+      style={{ borderTop: `1px solid ${BORDER}` }}
+    >
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
-          <SectionBadge color={C.indigo}>Product</SectionBadge>
-          <h2 className="text-3xl md:text-5xl font-bold">
+          <Tag>Product</Tag>
+          <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight">
             What is <span className="gradient-text">USDAX</span>?
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto mt-4 text-base md:text-lg">
-            USDAX is a yield-bearing stablecoin that helps your capital grow while staying pegged
-            to the U.S. dollar.
+          <p
+            className="max-w-xl mx-auto mt-4 text-[15px] leading-relaxed"
+            style={{ color: "hsl(0 0% 42%)" }}
+          >
+            A yield-bearing stablecoin that helps your capital grow while staying pegged to the U.S. dollar.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-5">
+        <div className="grid md:grid-cols-3 gap-px" style={{ background: BORDER }}>
           {pillars.map((p) => {
             const Icon = p.icon;
             return (
               <div
                 key={p.title}
-                className="rounded-2xl p-8 text-center card-hover"
-                style={{
-                  background: "hsl(232 18% 7%)",
-                  border: "1px solid hsl(263 20% 12%)",
-                }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.borderColor = `${p.color}40`;
-                  (e.currentTarget as HTMLElement).style.boxShadow = `0 20px 40px ${p.color}10`;
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.borderColor = "hsl(263 20% 12%)";
-                  (e.currentTarget as HTMLElement).style.boxShadow = "";
-                }}
+                className="p-8 card-hover"
+                style={{ background: CARD_BG }}
               >
                 <div
-                  className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6"
-                  style={{ background: `${p.color}18` }}
+                  className="w-12 h-12 rounded flex items-center justify-center mb-6"
+                  style={{ background: `${p.color}12` }}
                 >
-                  <Icon className="h-7 w-7" style={{ color: p.color }} />
+                  <Icon className="h-5 w-5" style={{ color: p.color }} />
                 </div>
-                <h3 className="text-lg font-bold mb-3">{p.title}</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">{p.desc}</p>
+                <h3 className="font-semibold text-foreground mb-2.5">{p.title}</h3>
+                <p className="text-[13px] leading-relaxed" style={{ color: "hsl(0 0% 42%)" }}>
+                  {p.desc}
+                </p>
               </div>
             );
           })}
         </div>
 
-        {/* Metric row */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-10 max-w-3xl mx-auto">
+        {/* Metrics row */}
+        <div
+          className="grid grid-cols-2 md:grid-cols-4 gap-px mt-px"
+          style={{ background: BORDER }}
+        >
           {metrics.map((m) => (
             <div
               key={m.label}
-              className="text-center rounded-xl py-5 px-3"
-              style={{ background: "hsl(232 18% 7%)", border: "1px solid hsl(263 20% 11%)" }}
+              className="py-8 text-center"
+              style={{ background: CARD_BG }}
             >
-              <div className="text-2xl font-extrabold font-mono" style={{ color: m.color }}>
+              <div
+                className="text-3xl font-extrabold font-mono"
+                style={{ color: m.color }}
+              >
                 {m.value}
               </div>
-              <div className="text-xs text-muted-foreground mt-1">{m.label}</div>
+              <div
+                className="text-[11px] mt-2 uppercase tracking-widest"
+                style={{ color: "hsl(0 0% 32%)" }}
+              >
+                {m.label}
+              </div>
             </div>
           ))}
         </div>
@@ -499,137 +577,153 @@ function WhatIsUSDax() {
   );
 }
 
-/* ─────────────────────────── FEATURES ─────────────────────────── */
+/* ─────────────────────── FEATURES ─────────────────────── */
 
 function Features() {
   const bullets = [
     {
       icon: Lock,
       title: "Smart Liquidation Protection",
-      desc: "Real-time health factor monitoring. Positions stay safe above 1.0x.",
-      color: C.indigo,
+      desc: "Real-time health factor monitoring keeps positions safe above 1.0x threshold.",
     },
     {
       icon: BarChart2,
       title: "Yield Optimization Engine",
-      desc: "AKX staking rewards are auto-compounded. Base 15% APY, higher for early stakers.",
-      color: C.emerald,
+      desc: "AKX rewards auto-compound. Base 15% APY, higher for long-term stakers.",
     },
     {
       icon: Zap,
       title: "Cross-Chain Ready",
-      desc: "Built on Robinhood Chain (Arbitrum Orbit) with future bridges to Ethereum.",
-      color: C.purple,
+      desc: "Native on Robinhood Chain (Arbitrum Orbit) with future Ethereum bridges.",
     },
   ];
 
   return (
     <section
       id="features"
-      className="py-24 px-6"
-      style={{ borderTop: "1px solid hsl(263 20% 10%)", background: "hsl(232 20% 4%)" }}
+      className="py-24 px-8"
+      style={{ borderTop: `1px solid ${BORDER}` }}
     >
       <div className="max-w-7xl mx-auto">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
+        <div className="grid lg:grid-cols-2 gap-20 items-start">
           {/* Left */}
           <div>
-            <SectionBadge color={C.indigo}>ArchonX Engine</SectionBadge>
-            <h2 className="text-3xl md:text-4xl font-bold leading-tight">
+            <Tag>ArchonX Engine</Tag>
+            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight">
               Improve Outcomes &amp;{" "}
               <span className="gradient-text">Automate Workflows</span>
             </h2>
-            <p className="text-muted-foreground mt-4 text-base leading-relaxed">
-              ArchonX centralizes financial data, automates repetitive DeFi workflows, and enhances
-              decision-making. Users gain faster insights, cleaner records, and a smoother path to
-              growth.
+            <p
+              className="mt-4 text-[15px] leading-relaxed"
+              style={{ color: "hsl(0 0% 42%)" }}
+            >
+              ArchonX centralizes financial data, automates repetitive DeFi workflows, and
+              enhances decision-making with real-time on-chain intelligence.
             </p>
-            <div className="mt-8 space-y-5">
-              {bullets.map((b) => {
+
+            <div className="mt-10 space-y-6">
+              {bullets.map((b, i) => {
                 const Icon = b.icon;
                 return (
                   <div key={b.title} className="flex items-start gap-4">
                     <div
-                      className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
-                      style={{ background: `${b.color}18`, border: `1px solid ${b.color}25` }}
+                      className="flex-shrink-0 w-8 h-8 rounded flex items-center justify-center mt-0.5"
+                      style={{ background: "hsl(0 0% 8%)", border: `1px solid ${BORDER}` }}
                     >
-                      <Icon className="h-4 w-4" style={{ color: b.color }} />
+                      <Icon
+                        className="h-3.5 w-3.5"
+                        style={{ color: i === 0 ? LIME : i === 1 ? EMERALD : "hsl(0 0% 55%)" }}
+                      />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-foreground">{b.title}</h4>
-                      <p className="text-muted-foreground text-sm mt-0.5">{b.desc}</p>
+                      <h4 className="text-sm font-semibold text-foreground mb-1">{b.title}</h4>
+                      <p className="text-[13px] leading-relaxed" style={{ color: "hsl(0 0% 40%)" }}>
+                        {b.desc}
+                      </p>
                     </div>
                   </div>
                 );
               })}
             </div>
+
+            <div className="mt-10">
+              <LimeBtn href="/app">
+                Open Dashboard <ArrowRight className="h-3.5 w-3.5" />
+              </LimeBtn>
+            </div>
           </div>
 
-          {/* Right — protocol stats panel */}
+          {/* Right — protocol panel */}
           <div
-            className="rounded-2xl p-6"
-            style={{
-              background: "hsl(232 18% 7%)",
-              border: "1px solid hsl(263 20% 14%)",
-            }}
+            className="rounded-xl p-6"
+            style={{ background: CARD_BG, border: `1px solid ${BORDER}` }}
           >
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <BarChart2 className="h-4 w-4" style={{ color: C.indigo }} />
+            {/* Panel header */}
+            <div className="flex items-center justify-between mb-7">
+              <div className="flex items-center gap-2 text-[13px]" style={{ color: "hsl(0 0% 45%)" }}>
+                <BarChart2 className="h-4 w-4" style={{ color: LIME }} />
                 Protocol Dashboard
               </div>
               <span
-                className="text-[10px] font-semibold px-2 py-0.5 rounded-full"
+                className="text-[10px] font-semibold px-2.5 py-1 rounded-full font-mono"
                 style={{
-                  background: "hsl(142 71% 45% / 0.12)",
-                  color: "hsl(142 71% 55%)",
+                  background: `${EMERALD}14`,
+                  color: EMERALD,
+                  border: `1px solid ${EMERALD}25`,
                 }}
               >
-                ● Live
+                ● LIVE
               </span>
             </div>
 
-            <div className="space-y-5">
+            {/* Progress bars */}
+            <div className="space-y-6">
               {[
                 {
                   label: "Total Value Locked",
                   value: "$56,333.75",
                   pct: 68,
-                  gradient: "linear-gradient(90deg,hsl(263 70% 55%),hsl(280 60% 50%))",
+                  bar: LIME,
                 },
                 {
                   label: "USDAX Minted",
                   value: "26,700 USDAX",
                   pct: 47,
-                  gradient: "linear-gradient(90deg,hsl(142 71% 40%),hsl(186 80% 45%))",
+                  bar: EMERALD,
                 },
                 {
                   label: "AKX Staked",
                   value: "700,000 AKX",
                   pct: 42,
-                  gradient: "linear-gradient(90deg,hsl(280 60% 50%),hsl(310 60% 55%))",
+                  bar: "hsl(0 0% 35%)",
                 },
               ].map((row) => (
                 <div key={row.label}>
-                  <div className="flex justify-between text-sm mb-2">
-                    <span className="text-muted-foreground">{row.label}</span>
-                    <span className="font-semibold font-mono text-foreground">{row.value}</span>
+                  <div className="flex justify-between text-[13px] mb-2.5">
+                    <span style={{ color: "hsl(0 0% 42%)" }}>{row.label}</span>
+                    <span className="font-mono font-semibold text-foreground">{row.value}</span>
                   </div>
                   <div
-                    className="h-2 rounded-full overflow-hidden"
-                    style={{ background: "hsl(232 20% 10%)" }}
+                    className="h-1.5 rounded-full overflow-hidden"
+                    style={{ background: "hsl(0 0% 10%)" }}
                   >
                     <div
-                      className="h-full rounded-full"
-                      style={{ width: `${row.pct}%`, background: row.gradient }}
+                      className="h-full rounded-full transition-all"
+                      style={{
+                        width: `${row.pct}%`,
+                        background: row.bar,
+                        boxShadow: row.bar === LIME ? `0 0 8px ${LIME_BORDER}` : undefined,
+                      }}
                     />
                   </div>
                 </div>
               ))}
             </div>
 
+            {/* Bottom stats */}
             <div
-              className="mt-6 pt-5 grid grid-cols-3 gap-3"
-              style={{ borderTop: "1px solid hsl(263 20% 11%)" }}
+              className="mt-7 pt-6 grid grid-cols-3"
+              style={{ borderTop: `1px solid ${BORDER}` }}
             >
               {[
                 { label: "Active Vaults", value: "8" },
@@ -637,8 +731,13 @@ function Features() {
                 { label: "At-Risk", value: "1" },
               ].map((s) => (
                 <div key={s.label} className="text-center">
-                  <div className="font-bold font-mono text-foreground">{s.value}</div>
-                  <div className="text-[10px] text-muted-foreground mt-0.5">{s.label}</div>
+                  <div className="text-xl font-extrabold font-mono text-foreground">{s.value}</div>
+                  <div
+                    className="text-[10px] mt-1 uppercase tracking-widest"
+                    style={{ color: "hsl(0 0% 32%)" }}
+                  >
+                    {s.label}
+                  </div>
                 </div>
               ))}
             </div>
@@ -649,90 +748,85 @@ function Features() {
   );
 }
 
-/* ─────────────────────────── USE CASES ─────────────────────────── */
+/* ─────────────────────── USE CASES ─────────────────────── */
 
 function UseCases() {
   const cases = [
     {
       icon: Building2,
       title: "Business",
-      desc: "Boost user engagement by offering USDAX — a secure yield-backed stablecoin with high yields, allowing your customers to earn effortlessly on your platform.",
-      color: C.indigo,
+      desc: "Offer USDAX as a yield-bearing product on your platform. Boost user engagement with passive income on idle capital.",
+      color: LIME,
     },
     {
       icon: Code2,
       title: "Developers",
-      desc: "Integrate USDAX into your dApps with simple ERC-20 interfaces. Leverage our open-source smart contracts for collateral management and staking.",
-      color: C.purple,
+      desc: "Integrate via simple ERC-20 interfaces. Leverage open-source contracts for collateral management and staking.",
+      color: "hsl(0 0% 60%)",
     },
     {
       icon: Vault,
       title: "Treasuries",
-      desc: "Diversify your treasury with a stable, yield-bearing asset. Earn passive income on idle capital while maintaining dollar parity and full liquidity.",
-      color: C.emerald,
+      desc: "Diversify treasury with a stable, yield-bearing asset. Earn on idle capital while maintaining full dollar parity.",
+      color: EMERALD,
     },
   ];
 
   return (
-    <section id="use-cases" className="py-24 px-6">
+    <section
+      id="use-cases"
+      className="py-24 px-8"
+      style={{ borderTop: `1px solid ${BORDER}` }}
+    >
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
-          <SectionBadge color={C.purple}>Use Cases</SectionBadge>
-          <h2 className="text-3xl md:text-5xl font-bold">
+          <Tag>Use Cases</Tag>
+          <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight">
             Built for{" "}
-            <span className="gradient-text">Developers, Business &amp; Treasuries</span>
+            <span className="gradient-text">Everyone</span>
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto mt-4">
-            ArchonX offers a variety of use cases for developers, businesses and treasuries seeking
-            secure and profitable stablecoin integrations.
+          <p
+            className="max-w-xl mx-auto mt-4 text-[15px] leading-relaxed"
+            style={{ color: "hsl(0 0% 40%)" }}
+          >
+            ArchonX offers use cases for developers, businesses, and treasuries seeking secure,
+            profitable stablecoin integrations.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-5">
+        <div className="grid md:grid-cols-3 gap-4">
           {cases.map((c) => {
             const Icon = c.icon;
             return (
               <div
                 key={c.title}
-                className="relative rounded-2xl p-8 overflow-hidden card-hover"
+                className="rounded-xl p-8 card-hover"
                 style={{
-                  background: "hsl(232 18% 7%)",
-                  border: "1px solid hsl(263 20% 12%)",
-                }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.borderColor = `${c.color}35`;
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.borderColor = "hsl(263 20% 12%)";
+                  background: CARD_BG,
+                  border: `1px solid ${BORDER}`,
                 }}
               >
-                {/* Corner glow */}
                 <div
-                  className="absolute top-0 right-0 w-32 h-32 rounded-full pointer-events-none"
-                  style={{
-                    background: `${c.color}08`,
-                    filter: "blur(30px)",
-                    transform: "translate(30%,-30%)",
-                  }}
-                />
-                <div className="relative z-10">
-                  <div
-                    className="w-14 h-14 rounded-xl flex items-center justify-center mb-6"
-                    style={{ background: `${c.color}18`, border: `1px solid ${c.color}25` }}
-                  >
-                    <Icon className="h-6 w-6" style={{ color: c.color }} />
-                  </div>
-                  <h3 className="text-xl font-bold mb-3">{c.title}</h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">{c.desc}</p>
-                  <Link href="/app">
-                    <span
-                      className="inline-flex items-center gap-2 mt-6 text-sm font-medium transition-all hover:gap-3"
-                      style={{ color: c.color }}
-                    >
-                      Launch App <ChevronRight className="h-3.5 w-3.5" />
-                    </span>
-                  </Link>
+                  className="w-11 h-11 rounded flex items-center justify-center mb-6"
+                  style={{ background: `${c.color}10`, border: `1px solid ${c.color}18` }}
+                >
+                  <Icon className="h-5 w-5" style={{ color: c.color }} />
                 </div>
+                <h3 className="text-lg font-bold mb-3">{c.title}</h3>
+                <p
+                  className="text-[13px] leading-relaxed"
+                  style={{ color: "hsl(0 0% 40%)" }}
+                >
+                  {c.desc}
+                </p>
+                <Link href="/app">
+                  <span
+                    className="inline-flex items-center gap-1.5 mt-6 text-[13px] font-semibold transition-all hover:gap-2.5"
+                    style={{ color: c.color }}
+                  >
+                    Launch App <ChevronRight className="h-3.5 w-3.5" />
+                  </span>
+                </Link>
               </div>
             );
           })}
@@ -742,71 +836,77 @@ function UseCases() {
   );
 }
 
-/* ─────────────────────────── STAKING CTA ─────────────────────────── */
+/* ─────────────────────── STAKING CTA ─────────────────────── */
 
 function StakingCTA() {
   return (
     <section
       id="staking"
-      className="py-24 px-6"
-      style={{ borderTop: "1px solid hsl(263 20% 10%)", background: "hsl(232 20% 4%)" }}
+      className="py-24 px-8"
+      style={{ borderTop: `1px solid ${BORDER}` }}
     >
-      <div className="max-w-3xl mx-auto text-center">
+      <div className="max-w-3xl mx-auto">
         <div
-          className="relative rounded-3xl p-12 md:p-16 overflow-hidden"
+          className="relative rounded-xl overflow-hidden"
           style={{
-            background: "hsl(232 18% 7%)",
-            border: "1px solid hsl(263 20% 16%)",
-            boxShadow: "0 0 80px hsl(263 70% 62% / 0.08)",
+            background: CARD_BG,
+            border: `1px solid ${BORDER}`,
           }}
         >
-          {/* Corner glows */}
+          {/* Lime glow bg */}
           <div
-            className="absolute -top-20 -right-20 w-64 h-64 rounded-full pointer-events-none"
-            style={{ background: "hsl(263 70% 62% / 0.08)", filter: "blur(40px)" }}
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: `radial-gradient(ellipse 60% 50% at 50% 0%, ${LIME}08 0%, transparent 70%)`,
+            }}
           />
-          <div
-            className="absolute -bottom-20 -left-20 w-64 h-64 rounded-full pointer-events-none"
-            style={{ background: "hsl(280 60% 50% / 0.07)", filter: "blur(40px)" }}
-          />
+          {/* Top lime line */}
+          <div className="absolute top-0 inset-x-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${LIME}40, transparent)` }} />
 
-          <div className="relative z-10">
-            <SectionBadge color={C.indigo}>Staking</SectionBadge>
-            <h2 className="text-3xl md:text-4xl font-bold mt-2">
+          <div className="relative z-10 p-12 md:p-16 text-center">
+            <Tag>Staking</Tag>
+            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight mt-2">
               Stake <span className="gradient-text">AKX</span> &amp; Earn Up to{" "}
-              <span style={{ color: C.emerald }}>15% APY</span>
+              <span style={{ color: LIME }}>15% APY</span>
             </h2>
-            <p className="text-muted-foreground max-w-xl mx-auto mt-4 text-base leading-relaxed">
-              Lock your AKX tokens, earn passive rewards, and participate in protocol governance.
-              7-day cooldown ensures long-term alignment and stable voting power.
+            <p
+              className="max-w-lg mx-auto mt-4 text-[15px] leading-relaxed"
+              style={{ color: "hsl(0 0% 42%)" }}
+            >
+              Lock AKX tokens, earn passive rewards, and participate in protocol governance.
+              7-day cooldown ensures long-term alignment.
             </p>
 
             <div className="flex flex-wrap justify-center gap-3 mt-8">
-              <GradBtn href="/app/staking">
-                <Lock className="h-4 w-4" /> Stake Now
-              </GradBtn>
-              <OutlineBtn href="/app">
-                <BarChart2 className="h-4 w-4" /> View Dashboard
-              </OutlineBtn>
+              <LimeBtn href="/app/staking">
+                <Lock className="h-3.5 w-3.5" /> Stake Now
+              </LimeBtn>
+              <OutlineBtn href="/app">View Dashboard</OutlineBtn>
             </div>
 
+            {/* Stats */}
             <div
-              className="grid grid-cols-3 gap-4 mt-10 pt-10 text-sm"
-              style={{ borderTop: "1px solid hsl(263 20% 12%)" }}
+              className="grid grid-cols-3 gap-0 mt-12 pt-10"
+              style={{ borderTop: `1px solid ${BORDER}` }}
             >
               {[
-                { value: "15%", label: "Base APY", color: C.indigo },
-                { value: "7d", label: "Cooldown Period", color: C.warning },
-                { value: "100M", label: "AKX Max Supply", color: C.emerald },
+                { value: "15%", label: "Base APY", color: LIME },
+                { value: "7d", label: "Cooldown Period", color: WARNING },
+                { value: "100M", label: "AKX Max Supply", color: EMERALD },
               ].map((s) => (
                 <div key={s.label}>
                   <div
-                    className="text-2xl font-extrabold font-mono"
+                    className="text-3xl font-extrabold font-mono"
                     style={{ color: s.color }}
                   >
                     {s.value}
                   </div>
-                  <div className="text-xs text-muted-foreground mt-1">{s.label}</div>
+                  <div
+                    className="text-[10px] mt-2 uppercase tracking-widest"
+                    style={{ color: "hsl(0 0% 32%)" }}
+                  >
+                    {s.label}
+                  </div>
                 </div>
               ))}
             </div>
@@ -817,7 +917,7 @@ function StakingCTA() {
   );
 }
 
-/* ─────────────────────────── FOOTER ─────────────────────────── */
+/* ─────────────────────── FOOTER ─────────────────────── */
 
 function Footer() {
   const cols = [
@@ -837,36 +937,37 @@ function Footer() {
 
   return (
     <footer
-      className="py-14 px-6"
-      style={{ borderTop: "1px solid hsl(263 20% 10%)", background: "hsl(232 20% 3%)" }}
+      className="py-14 px-8"
+      style={{ borderTop: `1px solid ${BORDER}` }}
     >
       <div className="max-w-7xl mx-auto">
-        <div className="grid md:grid-cols-4 gap-10 mb-12">
-          {/* Brand col */}
-          <div className="md:col-span-1">
-            <div className="flex items-center gap-2 mb-4">
+        <div className="grid md:grid-cols-4 gap-12 mb-12">
+          {/* Brand */}
+          <div>
+            <div className="flex items-center gap-2 mb-5">
               <div
-                className="w-8 h-8 rounded-lg flex items-center justify-center"
-                style={{
-                  background: "linear-gradient(135deg,hsl(263 70% 55%),hsl(186 80% 45%))",
-                }}
+                className="w-7 h-7 rounded flex items-center justify-center font-black text-[11px]"
+                style={{ background: LIME, color: "hsl(0 0% 4%)" }}
               >
-                <span className="text-white font-black text-xs">AX</span>
+                AX
               </div>
-              <span className="font-bold text-lg">
-                Archon<span style={{ color: C.indigo }}>X</span>
-              </span>
+              <span className="font-bold text-base">ArchonX</span>
             </div>
-            <p className="text-muted-foreground text-sm max-w-xs leading-relaxed">
-              Programmable stablecoin infrastructure for the next generation of DeFi on Robinhood
-              Chain.
+            <p
+              className="text-[13px] leading-relaxed max-w-[180px]"
+              style={{ color: "hsl(0 0% 35%)" }}
+            >
+              Programmable stablecoin infrastructure for the next generation of DeFi.
             </p>
-            <div className="flex gap-4 mt-5">
+            <div className="flex gap-4 mt-6">
               {[Twitter, Github, MessageSquare, FileText].map((Icon, i) => (
                 <a
                   key={i}
                   href="#"
-                  className="text-muted-foreground/50 hover:text-muted-foreground transition-colors"
+                  className="transition-colors"
+                  style={{ color: "hsl(0 0% 22%)" }}
+                  onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "hsl(0 0% 55%)")}
+                  onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "hsl(0 0% 22%)")}
                 >
                   <Icon className="h-4 w-4" />
                 </a>
@@ -874,16 +975,24 @@ function Footer() {
             </div>
           </div>
 
-          {/* Link cols */}
+          {/* Link columns */}
           {cols.map((col) => (
             <div key={col.title}>
-              <h4 className="text-sm font-semibold text-foreground mb-4">{col.title}</h4>
-              <ul className="space-y-2.5">
+              <h4
+                className="text-[11px] font-semibold uppercase tracking-widest mb-5"
+                style={{ color: "hsl(0 0% 30%)" }}
+              >
+                {col.title}
+              </h4>
+              <ul className="space-y-3">
                 {col.links.map((link) => (
                   <li key={link}>
                     <a
                       href="#"
-                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                      className="text-[13px] transition-colors"
+                      style={{ color: "hsl(0 0% 35%)" }}
+                      onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "hsl(0 0% 75%)")}
+                      onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "hsl(0 0% 35%)")}
                     >
                       {link}
                     </a>
@@ -894,15 +1003,22 @@ function Footer() {
           ))}
         </div>
 
-        {/* Bottom bar */}
+        {/* Bottom */}
         <div
-          className="pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-muted-foreground/60"
-          style={{ borderTop: "1px solid hsl(263 20% 10%)" }}
+          className="pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-[11px]"
+          style={{
+            borderTop: `1px solid ${BORDER}`,
+            color: "hsl(0 0% 25%)",
+          }}
         >
           <span>© 2026 ArchonX Protocol. All rights reserved.</span>
           <div className="flex gap-6">
             {["Privacy Policy", "Terms of Service", "Cookie Policy"].map((l) => (
-              <a key={l} href="#" className="hover:text-muted-foreground transition-colors">
+              <a
+                key={l}
+                href="#"
+                className="transition-colors hover:text-muted-foreground"
+              >
                 {l}
               </a>
             ))}
@@ -913,7 +1029,7 @@ function Footer() {
   );
 }
 
-/* ─────────────────────────── ROOT ─────────────────────────── */
+/* ─────────────────────── ROOT ─────────────────────── */
 
 export default function Landing() {
   return (
