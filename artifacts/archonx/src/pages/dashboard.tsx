@@ -21,7 +21,22 @@ const BORDER   = "hsl(0 0% 10%)";
 const CARD_BG  = "hsl(0 0% 6%)";
 const CARD_BG2 = "hsl(0 0% 8%)";
 
-const PIE_COLORS = [LIME, EMERALD, "hsl(200 80% 52%)", AMBER, RED];
+// 13 distinct colors — one per collateral token (crypto → RWA → stocks)
+const PIE_COLORS = [
+  "hsl(231 92% 72%)",  // WETH  — indigo
+  "hsl(35 92% 60%)",   // WBTC  — amber
+  "hsl(152 70% 48%)",  // stETH — emerald
+  "hsl(79 100% 57%)",  // RWA-TB — lime
+  "hsl(280 70% 65%)",  // RWA-RE — violet
+  "hsl(200 80% 55%)",  // RWA-CB — blue
+  "hsl(346 84% 61%)",  // TSLA  — rose
+  "hsl(15 85% 58%)",   // AMZN  — orange
+  "hsl(320 65% 60%)",  // PLTR  — pink
+  "hsl(0 84% 60%)",    // NFLX  — red
+  "hsl(260 65% 65%)",  // AMD   — purple
+  "hsl(120 55% 45%)",  // NVDA  — green
+  "hsl(210 70% 60%)",  // AAPL  — steel-blue
+];
 
 const ACTIVITY_BADGE: Record<string, string> = {
   MINT:      LIME,
@@ -197,18 +212,18 @@ export default function Dashboard() {
         <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
 
           {/* Collateral pie */}
-          <Panel className="p-5">
+          <Panel className="flex flex-col p-5">
             <div className="font-mono text-[10px] tracking-widest uppercase mb-0.5" style={{ color: "hsl(0 0% 28%)" }}>Collateral Breakdown</div>
-            <div className="font-bold text-sm mb-2" style={{ color: "hsl(0 0% 78%)" }}>By asset type</div>
-            {/* Fixed-height chart — no Legend inside so Recharts never mis-sizes the SVG */}
-            <div style={{ height: 186 }}>
+            <div className="font-bold text-sm mb-3" style={{ color: "hsl(0 0% 78%)" }}>By asset type</div>
+            {/* Donut — cy slightly above center so it never clips */}
+            <div style={{ height: 170 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
                     data={collateral}
-                    cx="50%" cy="50%"
-                    innerRadius={54} outerRadius={76}
-                    paddingAngle={4}
+                    cx="50%" cy="48%"
+                    innerRadius={50} outerRadius={72}
+                    paddingAngle={3}
                     dataKey="valueUsd" nameKey="symbol"
                     stroke="none"
                   >
@@ -217,20 +232,20 @@ export default function Dashboard() {
                     ))}
                   </Pie>
                   <Tooltip
-                    formatter={(v: number) => formatCurrency(v)}
+                    formatter={(v: number) => [formatCurrency(v), "Value"]}
                     contentStyle={TOOLTIP_STYLE}
                     itemStyle={{ color: "hsl(0 0% 85%)" }}
                   />
                 </PieChart>
               </ResponsiveContainer>
             </div>
-            {/* Custom legend — wraps to 2 rows when many collateral types */}
-            <div className="flex flex-wrap gap-x-4 gap-y-1.5 mt-2 pt-3" style={{ borderTop: `1px solid ${BORDER}` }}>
+            {/* 2-col grid legend — fits 13 tokens cleanly */}
+            <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 mt-3 pt-3" style={{ borderTop: `1px solid ${BORDER}` }}>
               {collateral.map((c, i) => (
-                <div key={c.symbol} className="flex items-center gap-1.5 flex-shrink-0">
-                  <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: PIE_COLORS[i % PIE_COLORS.length] }} />
-                  <span className="font-mono text-[10px]" style={{ color: "hsl(0 0% 42%)" }}>{c.symbol}</span>
-                  <span className="font-mono text-[10px] font-bold" style={{ color: PIE_COLORS[i % PIE_COLORS.length] }}>
+                <div key={c.symbol} className="flex items-center gap-1.5 min-w-0">
+                  <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: PIE_COLORS[i % PIE_COLORS.length] }} />
+                  <span className="font-mono text-[10px] flex-shrink-0" style={{ color: "hsl(0 0% 50%)" }}>{c.symbol}</span>
+                  <span className="font-mono text-[10px] font-bold ml-auto" style={{ color: PIE_COLORS[i % PIE_COLORS.length] }}>
                     {formatCompact(c.valueUsd)}
                   </span>
                 </div>
@@ -239,15 +254,19 @@ export default function Dashboard() {
           </Panel>
 
           {/* Health factor bar */}
-          <Panel className="p-5">
+          <Panel className="flex flex-col p-5">
             <div className="font-mono text-[10px] tracking-widest uppercase mb-0.5" style={{ color: "hsl(0 0% 28%)" }}>Health Factor</div>
-            <div className="font-bold text-sm mb-2" style={{ color: "hsl(0 0% 78%)" }}>Position distribution</div>
-            <div style={{ height: 186 }}>
+            <div className="font-bold text-sm mb-3" style={{ color: "hsl(0 0% 78%)" }}>Position distribution</div>
+            <div className="flex-1" style={{ height: 170 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={health} barCategoryGap="30%">
+                <BarChart data={health} barCategoryGap="28%" margin={{ top: 4, right: 4, left: -18, bottom: 0 }}>
                   <XAxis dataKey="range" stroke="hsl(0 0% 22%)" fontSize={10} tickLine={false} axisLine={false} />
                   <YAxis stroke="hsl(0 0% 22%)" fontSize={10} tickLine={false} axisLine={false} allowDecimals={false} />
-                  <Tooltip cursor={{ fill: "hsl(0 0% 8%)" }} contentStyle={TOOLTIP_STYLE} />
+                  <Tooltip
+                    cursor={{ fill: "hsl(0 0% 8%)" }}
+                    contentStyle={TOOLTIP_STYLE}
+                    formatter={(v: number) => [v, "Positions"]}
+                  />
                   <Bar dataKey="count" radius={[5, 5, 0, 0]}>
                     {health.map((entry, i) => {
                       let color = LIME;
@@ -260,15 +279,15 @@ export default function Dashboard() {
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            {/* Matching legend row so both cards are the same height */}
-            <div className="flex items-center gap-4 mt-2 pt-3" style={{ borderTop: `1px solid ${BORDER}` }}>
+            {/* Legend row — mirrors pie card footer */}
+            <div className="grid grid-cols-1 gap-y-1.5 mt-3 pt-3" style={{ borderTop: `1px solid ${BORDER}` }}>
               {[
-                { label: "Critical (HF < 1.0)", color: RED     },
-                { label: "Warning  (1.0–1.5)",  color: AMBER   },
-                { label: "Safe     (> 1.5)",     color: EMERALD },
+                { label: "Critical — HF below 1.0", color: RED     },
+                { label: "Warning  — HF 1.0 – 1.5", color: AMBER   },
+                { label: "Safe     — HF above 1.5",  color: EMERALD },
               ].map((leg) => (
-                <div key={leg.label} className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: leg.color }} />
+                <div key={leg.label} className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: leg.color }} />
                   <span className="font-mono text-[10px]" style={{ color: "hsl(0 0% 42%)" }}>{leg.label}</span>
                 </div>
               ))}
