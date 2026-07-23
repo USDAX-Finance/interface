@@ -525,62 +525,74 @@ function TrustedBy() {
 
 /* ─────────────────────── WHAT IS USDAX ─────────────────────── */
 
-function BracketCard({ title, plus, desc, offset = false }: {
+function BracketCard({ title, desc, color, offset = false }: {
   title: string;
-  plus: string;
   desc: string;
+  color: string;
   offset?: boolean;
 }) {
-  const BRACKET = LIME;
-  const BW = 12; // bracket arm length px
+  const BW = 18;
 
   return (
     <div
-      className="relative p-7 transition-all duration-200 group cursor-default"
+      className="relative p-7 overflow-hidden transition-all duration-300 cursor-default"
       style={{
         marginLeft: offset ? "2.5rem" : "0",
-        background: CARD_BG_RAISED,
-        border: `1px solid hsl(0 0% 13%)`,
+        background: "hsl(0 0% 7%)",
+        border: `1px solid hsl(0 0% 12%)`,
+        borderTop: `1px solid ${color}30`,
       }}
       onMouseEnter={(e) => {
-        (e.currentTarget as HTMLElement).style.borderColor = "hsl(0 0% 18%)";
-        (e.currentTarget as HTMLElement).style.background = "hsl(0 0% 9%)";
+        const el = e.currentTarget as HTMLElement;
+        el.style.borderColor = `${color}40`;
+        el.style.borderTopColor = `${color}70`;
+        el.style.background = "hsl(0 0% 8%)";
       }}
       onMouseLeave={(e) => {
-        (e.currentTarget as HTMLElement).style.borderColor = "hsl(0 0% 13%)";
-        (e.currentTarget as HTMLElement).style.background = CARD_BG_RAISED;
+        const el = e.currentTarget as HTMLElement;
+        el.style.borderColor = "hsl(0 0% 12%)";
+        el.style.borderTopColor = `${color}30`;
+        el.style.background = "hsl(0 0% 7%)";
       }}
     >
+      {/* Top-left color bloom */}
+      <div className="pointer-events-none absolute -top-6 -left-6 w-32 h-32 rounded-full" style={{
+        background: `radial-gradient(circle, ${color}18 0%, transparent 70%)`,
+        filter: "blur(16px)",
+      }} />
+
       {/* Corner brackets */}
-      <span className="absolute top-[-1px] left-[-1px]" style={{
+      <span className="absolute top-0 left-0" style={{
         display: "block", width: BW, height: BW,
-        borderTop: `2px solid ${BRACKET}`, borderLeft: `2px solid ${BRACKET}`,
+        borderTop: `2px solid ${color}`, borderLeft: `2px solid ${color}`,
       }} />
-      <span className="absolute top-[-1px] right-[-1px]" style={{
+      <span className="absolute top-0 right-0" style={{
         display: "block", width: BW, height: BW,
-        borderTop: `2px solid ${BRACKET}`, borderRight: `2px solid ${BRACKET}`,
+        borderTop: `2px solid ${color}`, borderRight: `2px solid ${color}`,
       }} />
-      <span className="absolute bottom-[-1px] left-[-1px]" style={{
+      <span className="absolute bottom-0 left-0" style={{
         display: "block", width: BW, height: BW,
-        borderBottom: `2px solid ${BRACKET}`, borderLeft: `2px solid ${BRACKET}`,
+        borderBottom: `2px solid ${color}`, borderLeft: `2px solid ${color}`,
       }} />
-      <span className="absolute bottom-[-1px] right-[-1px]" style={{
+      <span className="absolute bottom-0 right-0" style={{
         display: "block", width: BW, height: BW,
-        borderBottom: `2px solid ${BRACKET}`, borderRight: `2px solid ${BRACKET}`,
+        borderBottom: `2px solid ${color}`, borderRight: `2px solid ${color}`,
       }} />
 
       {/* Content */}
-      <p className="text-[12px] font-bold tracking-[0.18em] uppercase mb-5"
-        style={{ color: "hsl(0 0% 88%)" }}>
-        {title}
-      </p>
-      <p className="text-[28px] font-thin text-center my-4 leading-none select-none"
-        style={{ color: "hsl(0 0% 20%)" }}>
-        {plus}
-      </p>
-      <p className="text-[12px] leading-relaxed mt-5" style={{ color: "hsl(0 0% 38%)" }}>
-        {desc}
-      </p>
+      <div className="relative z-10">
+        <p className="text-[11px] font-black tracking-[0.22em] uppercase mb-5"
+          style={{ color }}>
+          {title}
+        </p>
+        <p className="text-[26px] font-extralight text-center leading-none select-none my-4"
+          style={{ color: `${color}50` }}>
+          +
+        </p>
+        <p className="text-[12px] leading-relaxed mt-5" style={{ color: "hsl(0 0% 40%)" }}>
+          {desc}
+        </p>
+      </div>
     </div>
   );
 }
@@ -613,16 +625,23 @@ function WhatIsUSDax() {
               <span style={{ color: LIME }}>BY DEFAULT</span>
             </h2>
 
-            {/* Giant stat with lime glow at base */}
+            {/* Giant stat with lime glow */}
             <div className="relative inline-block">
+              {/* Background bloom behind the number */}
+              <div className="pointer-events-none absolute inset-0 -z-10" style={{
+                background: `radial-gradient(ellipse 90% 60% at 20% 80%, ${LIME}35 0%, transparent 65%)`,
+                filter: "blur(28px)",
+                transform: "translateY(20px)",
+              }} />
+
               <span
                 className="font-extrabold font-mono leading-none select-none"
                 style={{
                   fontSize: "clamp(100px, 16vw, 160px)",
-                  color: "hsl(0 0% 93%)",
+                  color: "hsl(0 0% 94%)",
                   display: "block",
                   lineHeight: 1,
-                  textShadow: `0 60px 100px ${LIME}50, 0 80px 160px ${LIME}28`,
+                  textShadow: `0 0 80px ${LIME}40, 0 40px 80px ${LIME}30`,
                 }}
               >
                 15
@@ -632,21 +651,20 @@ function WhatIsUSDax() {
                 style={{
                   fontSize: "clamp(52px, 8vw, 80px)",
                   color: LIME,
-                  bottom: "6px",
-                  right: "-0.6em",
+                  bottom: "8px",
+                  right: "-0.55em",
                   lineHeight: 1,
+                  textShadow: `0 0 40px ${LIME}80`,
                 }}
               >
                 %
               </span>
-              {/* Glow bloom */}
-              <div
-                className="pointer-events-none absolute -bottom-6 left-0 right-0 h-16"
-                style={{
-                  background: `radial-gradient(ellipse 70% 80% at 30% 100%, ${LIME}28 0%, transparent 70%)`,
-                  filter: "blur(8px)",
-                }}
-              />
+
+              {/* Floor glow */}
+              <div className="pointer-events-none absolute -bottom-8 left-0 w-48 h-20" style={{
+                background: `radial-gradient(ellipse 100% 100% at 20% 0%, ${LIME}45 0%, transparent 70%)`,
+                filter: "blur(20px)",
+              }} />
             </div>
 
             <p className="text-[13px] mt-10 max-w-[280px] leading-relaxed"
@@ -662,20 +680,20 @@ function WhatIsUSDax() {
           <div className="flex flex-col gap-4">
             <BracketCard
               title="Stable at $1.00"
-              plus="+"
               desc="Overcollateralized at 150% minimum — your USDAX is always redeemable at face value, no algorithmic tricks."
+              color={LIME}
               offset={false}
             />
             <BracketCard
               title="Yield-Bearing"
-              plus="+"
               desc="USDAX earns 15% base APY automatically. Hold it in your wallet and watch the balance grow."
+              color={EMERALD}
               offset={true}
             />
             <BracketCard
               title="Fully On-Chain"
-              plus="+"
               desc="Every mint is backed by verifiable on-chain collateral. No black boxes, no custodians, no counterparty risk."
+              color={WARNING}
               offset={false}
             />
           </div>
