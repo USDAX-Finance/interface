@@ -384,131 +384,138 @@ function Ticker() {
 
 /* ─────────────────────── HERO ─────────────────────── */
 
+const DATA_BITS = [
+  { text: "11 99 28", x: "58%", y: "7%"  },
+  { text: "22 74 06", x: "63%", y: "11%" },
+  { text: "27 16 64", x: "68%", y: "7%"  },
+  { text: "93 09 32", x: "73%", y: "11%" },
+  { text: "41 23",    x: "78%", y: "7%"  },
+  { text: "49 33",    x: "82%", y: "11%" },
+];
+
 function Hero() {
   return (
     <>
       <section
-        className="relative overflow-hidden"
-        style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}
+        className="relative overflow-hidden select-none"
+        style={{ minHeight: "100vh", background: "hsl(0 0% 2%)" }}
       >
-        {/* Deep radial glow centred behind logo */}
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center -z-0">
-          <div style={{
-            width: 700, height: 700,
-            background: `radial-gradient(ellipse at 50% 50%, ${LIME}1A 0%, ${LIME}08 35%, transparent 65%)`,
-            filter: "blur(60px)",
-          }} />
+
+        {/* ── scattered data numbers top-right ── */}
+        {DATA_BITS.map((d, i) => (
+          <div key={i} className="pointer-events-none absolute font-mono text-[9px] leading-loose"
+            style={{ left: d.x, top: d.y, color: LIME, opacity: 0.18 }}>
+            {d.text}
+          </div>
+        ))}
+
+        {/* ── + symbols ── */}
+        {[
+          { x: "84%", y: "18%", size: 18 },
+          { x: "87%", y: "26%", size: 13 },
+          { x: "82%", y: "32%", size: 10 },
+          { x: "10%", y: "62%", size: 12 },
+        ].map((p, i) => (
+          <div key={i} className="pointer-events-none absolute font-thin"
+            style={{ left: p.x, top: p.y, color: LIME, opacity: 0.3, fontSize: p.size, lineHeight: 1 }}>+</div>
+        ))}
+
+        {/* ── geometric L-brackets centered ── */}
+        {/* top-left of center bracket */}
+        <div className="pointer-events-none absolute"
+          style={{ left: "44%", top: "14%", width: 44, height: 90,
+            borderLeft: `3px solid ${LIME}`, borderTop: `3px solid ${LIME}`, opacity: 0.55 }} />
+        {/* top-right of center bracket */}
+        <div className="pointer-events-none absolute"
+          style={{ right: "44%", top: "14%", width: 44, height: 90,
+            borderRight: `3px solid ${LIME}`, borderTop: `3px solid ${LIME}`, opacity: 0.55 }} />
+        {/* bottom-left of center bracket */}
+        <div className="pointer-events-none absolute"
+          style={{ left: "44%", top: "50%", width: 44, height: 90,
+            borderLeft: `3px solid ${LIME}`, borderBottom: `3px solid ${LIME}`, opacity: 0.55 }} />
+        {/* bottom-right of center bracket */}
+        <div className="pointer-events-none absolute"
+          style={{ right: "44%", top: "50%", width: 44, height: 90,
+            borderRight: `3px solid ${LIME}`, borderBottom: `3px solid ${LIME}`, opacity: 0.55 }} />
+
+        {/* ── LEFT HAND (upper, open palm reaching right) ── */}
+        <div className="pointer-events-none absolute"
+          style={{ left: "-4%", top: "4%", width: "48vw", maxWidth: 580, zIndex: 2 }}>
+          <img src="/hand-left.png" alt=""
+            style={{
+              width: "100%", height: "auto",
+              transform: "rotate(-8deg)",
+              filter: [
+                "drop-shadow(0 0 22px hsl(79 100% 57% / 0.55))",
+                "drop-shadow(0 0 60px hsl(79 100% 57% / 0.2))",
+              ].join(" "),
+            }}
+          />
         </div>
 
-        <div className="relative z-10 flex flex-col px-10 pt-10 pb-10" style={{ flex: 1 }}>
+        {/* ── RIGHT HAND (lower, pointing finger left) ── */}
+        <div className="pointer-events-none absolute"
+          style={{ right: "-4%", bottom: "22%", width: "44vw", maxWidth: 520, zIndex: 2 }}>
+          <img src="/hand-right.png" alt=""
+            style={{
+              width: "100%", height: "auto",
+              transform: "scaleX(-1) rotate(-6deg)",
+              filter: [
+                "drop-shadow(0 0 20px hsl(79 100% 57% / 0.50))",
+                "drop-shadow(0 0 55px hsl(79 100% 57% / 0.18))",
+              ].join(" "),
+            }}
+          />
+        </div>
 
-          {/* ── TOP ROW ── */}
-          <div className="flex items-start justify-between">
-            {/* Left: service tags */}
-            <div className="space-y-1">
-              {["/ MINT USDAX", "/ STAKE APX", "/ EARN YIELD"].map((tag) => (
-                <p key={tag} className="text-[11px] font-mono tracking-[0.18em]"
-                  style={{ color: "hsl(0 0% 30%)" }}>
-                  {tag}
-                </p>
-              ))}
+        {/* ── BOTTOM CONTENT ── */}
+        <div className="absolute inset-x-0 bottom-0 z-10 flex items-end justify-between px-10 pb-10">
+
+          {/* Left: headline + barcode strip + CTAs */}
+          <div>
+            <div className="flex items-center gap-2 mb-4 text-[10px] font-mono tracking-[0.22em] uppercase"
+              style={{ color: "hsl(0 0% 28%)" }}>
+              <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: EMERALD }} />
+              BUILT ON ROBINHOOD CHAIN
             </div>
 
-            {/* Right: one-liner description */}
-            <p className="text-[13px] leading-relaxed text-right max-w-xs"
-              style={{ color: "hsl(0 0% 38%)" }}>
-              We build programmable stablecoins that bring<br />
-              stability, yield, and clarity to your on-chain capital.
+            <h1
+              className="font-black uppercase leading-none tracking-tight"
+              style={{ fontSize: "clamp(3rem, 6.5vw, 6rem)", color: "hsl(0 0% 97%)" }}
+            >
+              ENTER THE<br />
+              <span style={{ color: LIME }}>PROTOCOL</span>
+            </h1>
+
+            {/* Barcode-style strip */}
+            <div className="flex items-center gap-3 mt-5 mb-6">
+              <div className="flex items-end gap-px">
+                {[3,1.5,2,1,3,1.5,1,2.5,1,2,3,1.5,1,2,1,3].map((w, i) => (
+                  <div key={i} style={{ width: w, height: 18 + (i % 3) * 4,
+                    background: LIME, opacity: 0.35 + (i % 2) * 0.2 }} />
+                ))}
+              </div>
+              <span className="font-mono text-[10px]" style={{ color: LIME, opacity: 0.45 }}>⊞</span>
+              <span className="font-mono text-[14px]" style={{ color: LIME, opacity: 0.45 }}>+</span>
+            </div>
+
+            <div className="flex gap-3">
+              <LimeBtn href="/app"><Zap className="h-3.5 w-3.5" /> Launch App</LimeBtn>
+              <OutlineBtn href="#product">Explore Protocol <ArrowRight className="h-3.5 w-3.5" /></OutlineBtn>
+            </div>
+          </div>
+
+          {/* Right: service tags */}
+          <div className="text-right pb-1">
+            <p className="text-[11px] font-mono tracking-[0.18em]" style={{ color: "hsl(0 0% 26%)" }}>
+              // MINT // STAKE // EARN
+            </p>
+            <p className="text-[9px] font-mono mt-1.5" style={{ color: "hsl(0 0% 18%)" }}>
+              USDAX.FINANCE · ROBINHOOD CHAIN 46630
             </p>
           </div>
-
-          {/* ── CENTER — 3D LOGO ── */}
-          <div className="flex flex-1 items-center justify-center py-8 relative">
-            {/* Floor glow */}
-            <div className="pointer-events-none absolute bottom-0 left-1/2 -translate-x-1/2" style={{
-              width: 320, height: 60,
-              background: `radial-gradient(ellipse at 50% 100%, ${LIME}28 0%, transparent 70%)`,
-              filter: "blur(24px)",
-              transform: "translate(-50%, 10px)",
-            }} />
-
-            <img
-              src="/apex-3d.png"
-              alt="APEX Protocol"
-              style={{
-                width: "clamp(340px, 48vw, 620px)",
-                height: "auto",
-                objectFit: "contain",
-                filter: [
-                  "drop-shadow(0 0 18px hsl(79 100% 57% / 0.55))",
-                  "drop-shadow(0 0 48px hsl(79 100% 57% / 0.22))",
-                  "drop-shadow(0 6px 20px hsl(79 100% 57% / 0.30))",
-                ].join(" "),
-                animation: "float 4s ease-in-out infinite",
-              }}
-            />
-          </div>
-
-          {/* ── BOTTOM ROW ── */}
-          <div className="flex items-end justify-between gap-8 flex-wrap">
-            {/* Left: badge + big headline + CTAs */}
-            <div>
-              <div
-                className="inline-flex items-center gap-2 mb-5 text-[10px] font-mono tracking-[0.22em] uppercase"
-                style={{ color: "hsl(0 0% 30%)" }}
-              >
-                <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: EMERALD }} />
-                BUILT ON ROBINHOOD CHAIN
-              </div>
-
-              <h1
-                className="font-extrabold leading-[1.0] tracking-tight"
-                style={{ fontSize: "clamp(2.6rem, 5.5vw, 5rem)", color: "hsl(0 0% 96%)" }}
-              >
-                Stable. Yield-bearing.<br />
-                <span style={{ color: LIME }}>Programmable.</span>
-              </h1>
-
-              <div className="flex items-center gap-3 mt-7">
-                <LimeBtn href="/app">
-                  <Zap className="h-3.5 w-3.5" /> Launch App
-                </LimeBtn>
-                <OutlineBtn href="#product">
-                  Explore Protocol <ArrowRight className="h-3.5 w-3.5" />
-                </OutlineBtn>
-              </div>
-            </div>
-
-            {/* Right: floating stat card */}
-            <div
-              className="rounded-xl p-5 shrink-0"
-              style={{
-                background: "hsl(0 0% 6%)",
-                border: `1px solid ${BORDER}`,
-                minWidth: 190,
-              }}
-            >
-              <p className="text-[9px] font-mono tracking-[0.22em] uppercase mb-1"
-                style={{ color: "hsl(0 0% 26%)" }}>
-                Base APY
-              </p>
-              <p className="text-4xl font-black font-mono" style={{ color: LIME, textShadow: `0 0 20px ${LIME}60` }}>
-                15%
-              </p>
-              <p className="text-[11px] mt-3 leading-relaxed" style={{ color: "hsl(0 0% 34%)" }}>
-                Earned by every USDAX holder<br />automatically, no action needed.
-              </p>
-              <div className="flex items-center gap-2 mt-4 pt-4" style={{ borderTop: `1px solid ${BORDER}` }}>
-                <img src="/robinhood-logo.webp" alt="Robinhood"
-                  style={{ height: 10, filter: "grayscale(1) brightness(1.8)", opacity: 0.45 }} />
-                <span className="text-[9px] font-mono" style={{ color: "hsl(0 0% 26%)" }}>
-                  Chain ID 46630
-                </span>
-              </div>
-            </div>
-          </div>
-
         </div>
+
       </section>
 
       <Ticker />
