@@ -1,34 +1,71 @@
 import { useState } from "react";
 import {
-  useGetStakingStats,
-  useListStakingPositions,
-  useStakeAkx,
-  useUnstakeAkx,
-  useClaimRewards,
-  getGetStakingStatsQueryKey,
-  getListStakingPositionsQueryKey,
+  useGetStakingStats, useListStakingPositions,
+  useStakeAkx, useUnstakeAkx, useClaimRewards,
+  getGetStakingStatsQueryKey, getListStakingPositionsQueryKey,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { formatCurrency, formatNumber, formatPercentage } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
-import { TrendingUp, Users, Coins, Zap, Clock } from "lucide-react";
+import { TrendingUp, Users, Coins, Zap, Clock, ArrowDownRight } from "lucide-react";
+
+/* ─── design tokens ─── */
+const LIME    = "hsl(79 100% 57%)";
+const EMERALD = "hsl(152 70% 48%)";
+const AMBER   = "hsl(35 92% 60%)";
+const BORDER  = "hsl(0 0% 10%)";
+const CARD_BG = "hsl(0 0% 6%)";
+const CARD_BG2= "hsl(0 0% 8%)";
 
 const WALLET_ADDRESS = "0x71C724E627B0e336338bE5f8a00B32E880B3656F";
 
-const panelStyle = {
-  background: "hsl(232 18% 7%)",
-  border: "1px solid hsl(263 20% 13%)",
-  borderRadius: "1rem",
-};
+function LBracket({ size = 10, color = `${LIME}25` }: { size?: number; color?: string }) {
+  const s = { position: "absolute" as const, width: size, height: size };
+  return (
+    <>
+      <span style={{ ...s, top: 0, left: 0, borderTop: `1.5px solid ${color}`, borderLeft: `1.5px solid ${color}` }} />
+      <span style={{ ...s, top: 0, right: 0, borderTop: `1.5px solid ${color}`, borderRight: `1.5px solid ${color}` }} />
+      <span style={{ ...s, bottom: 0, left: 0, borderBottom: `1.5px solid ${color}`, borderLeft: `1.5px solid ${color}` }} />
+      <span style={{ ...s, bottom: 0, right: 0, borderBottom: `1.5px solid ${color}`, borderRight: `1.5px solid ${color}` }} />
+    </>
+  );
+}
+
+function LoadingPulse() {
+  return (
+    <div className="flex h-[80vh] items-center justify-center">
+      <div className="text-center space-y-4">
+        <div className="relative w-12 h-12 mx-auto">
+          <div className="absolute inset-0 rounded-xl animate-pulse" style={{ background: `${LIME}12`, border: `1px solid ${LIME}28` }} />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Coins className="w-5 h-5 animate-pulse" style={{ color: LIME }} />
+          </div>
+        </div>
+        <div className="font-mono text-xs tracking-widest uppercase animate-pulse" style={{ color: "hsl(0 0% 32%)" }}>
+          Loading staking module...
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Panel({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div className={`relative rounded-xl overflow-hidden ${className}`}
+      style={{ background: CARD_BG, border: `1px solid ${BORDER}` }}>
+      {children}
+    </div>
+  );
+}
 
 export default function Staking() {
   const queryClient = useQueryClient();
-  const { toast } = useToast();
+  const { toast }   = useToast();
 
-  const { data: stats, isLoading: statsLoading } = useGetStakingStats();
-  const { data: positions, isLoading: posLoading } = useListStakingPositions();
+  const { data: stats,     isLoading: statsLoading } = useGetStakingStats();
+  const { data: positions, isLoading: posLoading }   = useListStakingPositions();
 
   const stakeMutation = useStakeAkx({
     mutation: {
@@ -61,74 +98,42 @@ export default function Staking() {
     },
   });
 
-  const [stakeAmount, setStakeAmount] = useState("");
+  const [stakeAmount,   setStakeAmount]   = useState("");
   const [unstakeAmount, setUnstakeAmount] = useState("");
 
-  const handleStake = (e: React.FormEvent) => {
-    e.preventDefault();
-    stakeMutation.mutate({ data: { owner: WALLET_ADDRESS, amount: Number(stakeAmount) } });
-  };
+  const handleStake   = (e: React.FormEvent) => { e.preventDefault(); stakeMutation.mutate({ data: { owner: WALLET_ADDRESS, amount: Number(stakeAmount) } }); };
+  const handleUnstake = (e: React.FormEvent) => { e.preventDefault(); unstakeMutation.mutate({ id: 0, data: { amount: Number(unstakeAmount) } }); };
 
-  const handleUnstake = (e: React.FormEvent) => {
-    e.preventDefault();
-    unstakeMutation.mutate({ id: 0, data: { amount: Number(unstakeAmount) } });
-  };
-
-  if (statsLoading || posLoading) {
-    return (
-      <div className="flex h-[80vh] items-center justify-center">
-        <div className="text-center space-y-3">
-          <div
-            className="w-10 h-10 rounded-xl mx-auto animate-pulse"
-            style={{ background: "linear-gradient(135deg,hsl(263 70% 55%),hsl(186 80% 45%))" }}
-          />
-          <div className="font-mono text-sm text-muted-foreground">Loading staking module...</div>
-        </div>
-      </div>
-    );
-  }
-
+  if (statsLoading || posLoading) return <LoadingPulse />;
   if (!stats) return null;
 
   const statCards = [
-    {
-      label: "Total Staked",
-      value: formatNumber(stats.totalStaked),
-      sub: formatCurrency(stats.totalStakedUsd),
-      icon: Coins,
-      color: "hsl(263 70% 62%)",
-    },
-    {
-      label: "Base APY",
-      value: formatPercentage(stats.baseApy),
-      sub: `Effective: ${formatPercentage(stats.effectiveApy)}`,
-      icon: TrendingUp,
-      color: "hsl(142 71% 45%)",
-    },
-    {
-      label: "Distributed",
-      value: `${formatNumber(stats.totalRewardsDistributed, 0)} APX`,
-      sub: `${formatNumber(stats.rewardRatePerDay, 2)} APX / day`,
-      icon: Zap,
-      color: "hsl(186 80% 50%)",
-    },
-    {
-      label: "Active Stakers",
-      value: String(stats.activeStakers),
-      sub: "Protocol participants",
-      icon: Users,
-      color: "hsl(263 70% 62%)",
-    },
+    { label: "Total Staked",   value: formatNumber(stats.totalStaked),              sub: formatCurrency(stats.totalStakedUsd),                           icon: Coins,      color: LIME    },
+    { label: "Base APY",       value: formatPercentage(stats.baseApy),              sub: `Effective: ${formatPercentage(stats.effectiveApy)}`,            icon: TrendingUp, color: EMERALD },
+    { label: "Distributed",    value: `${formatNumber(stats.totalRewardsDistributed, 0)} APX`, sub: `${formatNumber(stats.rewardRatePerDay, 2)} APX / day`, icon: Zap,        color: LIME    },
+    { label: "Active Stakers", value: String(stats.activeStakers),                  sub: "Protocol participants",                                         icon: Users,      color: EMERALD },
   ];
 
+  const inputStyle = {
+    background: "hsl(0 0% 7%)",
+    border: `1px solid ${BORDER}`,
+    borderRadius: "8px",
+    fontFamily: "var(--font-mono)",
+    color: "hsl(0 0% 82%)",
+  };
+
   return (
-    <div className="container mx-auto p-4 md:p-6 space-y-6">
+    <div className="max-w-screen-xl mx-auto p-4 md:p-6 space-y-5">
+
       {/* Header */}
       <div>
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
-          APX <span className="gradient-text">Staking</span>
+        <div className="font-mono text-[10px] tracking-[0.2em] uppercase mb-2" style={{ color: "hsl(0 0% 30%)" }}>
+          ◈ USDEX Finance · Staking Module
+        </div>
+        <h1 className="font-black text-2xl md:text-3xl uppercase tracking-tight">
+          APX <span style={{ color: LIME }}>Staking</span>
         </h1>
-        <p className="text-muted-foreground text-sm mt-1">Secure the protocol & earn yield</p>
+        <p className="text-sm mt-1" style={{ color: "hsl(0 0% 38%)" }}>Secure the protocol & earn real yield</p>
       </div>
 
       {/* Stats */}
@@ -136,200 +141,181 @@ export default function Staking() {
         {statCards.map((s) => {
           const Icon = s.icon;
           return (
-            <div key={s.label} className="rounded-2xl p-5 card-hover" style={panelStyle}>
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs text-muted-foreground">{s.label}</span>
-                <div
-                  className="w-7 h-7 rounded-lg flex items-center justify-center"
-                  style={{ background: `${s.color}18` }}
-                >
+            <div key={s.label} className="relative rounded-xl p-5 overflow-hidden"
+              style={{ background: CARD_BG, border: `1px solid ${BORDER}` }}>
+              <LBracket color={`${s.color}20`} />
+              <div className="flex items-center justify-between mb-4">
+                <span className="font-mono text-[10px] tracking-widest uppercase" style={{ color: "hsl(0 0% 30%)" }}>
+                  {s.label}
+                </span>
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center"
+                  style={{ background: `${s.color}12`, border: `1px solid ${s.color}20` }}>
                   <Icon className="h-3.5 w-3.5" style={{ color: s.color }} />
                 </div>
               </div>
-              <div className="text-2xl font-bold font-mono mb-1" style={{ color: s.color }}>
-                {s.value}
-              </div>
-              <div className="text-xs text-muted-foreground font-mono">{s.sub}</div>
+              <div className="font-black text-2xl font-mono mb-1" style={{ color: s.color }}>{s.value}</div>
+              <div className="text-xs font-mono" style={{ color: "hsl(0 0% 30%)" }}>{s.sub}</div>
             </div>
           );
         })}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
         {/* Action panels */}
         <div className="space-y-4">
+
           {/* Stake */}
-          <div className="rounded-2xl p-5" style={panelStyle}>
-            <h3 className="font-semibold mb-1">Stake APX</h3>
-            <p className="text-xs text-muted-foreground mb-4">
-              Stake to earn rewards. Cooldown starts from your latest stake.
+          <Panel className="p-5">
+            <LBracket color={`${LIME}22`} />
+            <div className="flex items-center gap-2 mb-1">
+              <Zap className="w-4 h-4" style={{ color: LIME }} />
+              <h3 className="font-black text-sm uppercase tracking-wide" style={{ color: "hsl(0 0% 88%)" }}>Stake APX</h3>
+            </div>
+            <p className="text-xs mb-4" style={{ color: "hsl(0 0% 35%)" }}>
+              Stake to earn USDAX rewards. No minimum, no lock period.
             </p>
             <form onSubmit={handleStake} className="space-y-3">
               <div className="relative">
                 <Input
-                  type="number"
-                  placeholder="0.00"
+                  type="number" placeholder="0.00"
                   value={stakeAmount}
                   onChange={(e) => setStakeAmount(e.target.value)}
-                  required
-                  className="rounded-xl font-mono pr-16"
+                  required style={{ ...inputStyle, paddingRight: "48px" }}
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-mono text-muted-foreground">
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-mono" style={{ color: "hsl(0 0% 35%)" }}>
                   APX
                 </span>
               </div>
               <button
                 type="submit"
                 disabled={stakeMutation.isPending}
-                className="btn-gradient w-full text-white font-semibold py-2.5 rounded-xl text-sm disabled:opacity-50"
+                className="w-full font-black py-2.5 rounded-lg text-sm transition-all disabled:opacity-40"
+                style={{ background: LIME, color: "hsl(0 0% 4%)" }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = `0 0 24px ${LIME}30`; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = ""; }}
               >
                 {stakeMutation.isPending ? "Staking..." : "Stake APX"}
               </button>
             </form>
-          </div>
+          </Panel>
 
           {/* Unstake */}
-          <div
-            className="rounded-2xl p-5"
-            style={{
-              background: "hsl(232 18% 7%)",
-              border: "1px solid hsl(35 92% 60% / 0.2)",
-              borderRadius: "1rem",
-            }}
-          >
-            <h3 className="font-semibold mb-1" style={{ color: "hsl(35 92% 65%)" }}>
-              Unstake APX
-            </h3>
-            <p className="text-xs text-muted-foreground mb-4">
+          <div className="relative rounded-xl p-5 overflow-hidden"
+            style={{ background: CARD_BG, border: `1px solid ${AMBER}22` }}>
+            <LBracket color={`${AMBER}30`} />
+            <div className="flex items-center gap-2 mb-1">
+              <ArrowDownRight className="w-4 h-4" style={{ color: AMBER }} />
+              <h3 className="font-black text-sm uppercase tracking-wide" style={{ color: AMBER }}>Unstake APX</h3>
+            </div>
+            <p className="text-xs mb-4" style={{ color: "hsl(0 0% 35%)" }}>
               Initiates the 7-day cooldown. Cannot be cancelled.
             </p>
             <form onSubmit={handleUnstake} className="space-y-3">
               <div className="relative">
                 <Input
-                  type="number"
-                  placeholder="0.00"
+                  type="number" placeholder="0.00"
                   value={unstakeAmount}
                   onChange={(e) => setUnstakeAmount(e.target.value)}
                   required
-                  className="rounded-xl font-mono pr-16"
-                  style={{ borderColor: "hsl(35 92% 60% / 0.3)" }}
+                  style={{ ...inputStyle, paddingRight: "48px", borderColor: `${AMBER}30` }}
                 />
-                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-mono text-muted-foreground">
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-mono" style={{ color: "hsl(0 0% 35%)" }}>
                   APX
                 </span>
               </div>
               <button
                 type="submit"
                 disabled={unstakeMutation.isPending}
-                className="w-full font-semibold py-2.5 rounded-xl text-sm disabled:opacity-50 transition-all"
-                style={{
-                  background: "hsl(35 92% 60% / 0.12)",
-                  color: "hsl(35 92% 65%)",
-                  border: "1px solid hsl(35 92% 60% / 0.3)",
-                }}
+                className="w-full font-black py-2.5 rounded-lg text-sm transition-all disabled:opacity-40"
+                style={{ background: `${AMBER}12`, color: AMBER, border: `1px solid ${AMBER}30` }}
               >
                 {unstakeMutation.isPending ? "Processing..." : "Begin Unstake"}
               </button>
             </form>
             <div className="flex items-center gap-1.5 mt-3">
-              <Clock className="h-3 w-3" style={{ color: "hsl(35 92% 60%)" }} />
-              <p className="text-[10px] text-muted-foreground font-mono">7-day cooldown required</p>
+              <Clock className="h-3 w-3" style={{ color: AMBER }} />
+              <p className="text-[10px] font-mono" style={{ color: "hsl(0 0% 30%)" }}>7-day cooldown required</p>
             </div>
           </div>
         </div>
 
         {/* Positions */}
-        <div className="lg:col-span-2 rounded-2xl p-5" style={panelStyle}>
-          <h3 className="font-semibold mb-4">Your Staking Positions</h3>
+        <Panel className="lg:col-span-2 p-5">
+          <div className="flex items-center gap-2 mb-5 pb-4" style={{ borderBottom: `1px solid ${BORDER}` }}>
+            <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: LIME }} />
+            <h3 className="font-black text-sm uppercase tracking-wide" style={{ color: "hsl(0 0% 82%)" }}>
+              Your Staking Positions
+            </h3>
+          </div>
+
           <div className="space-y-3">
             {positions?.map((pos) => {
               const inCooldown = !!pos.cooldownEndsAt;
               return (
                 <div
                   key={pos.id}
-                  className="rounded-xl p-4 transition-all"
+                  className="relative rounded-xl p-4 overflow-hidden transition-all"
                   style={{
-                    background: "hsl(232 20% 9%)",
-                    border: inCooldown
-                      ? "1px solid hsl(35 92% 60% / 0.25)"
-                      : "1px solid hsl(263 20% 14%)",
+                    background: CARD_BG2,
+                    border: inCooldown ? `1px solid ${AMBER}25` : `1px solid ${BORDER}`,
                   }}
                 >
+                  <LBracket size={8} color={inCooldown ? `${AMBER}35` : `${LIME}20`} />
+
                   <div className="flex justify-between items-start mb-3">
                     <div>
-                      <div className="flex items-center gap-2 mb-1">
+                      <div className="flex items-center gap-2 mb-2">
                         <span
-                          className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded-md uppercase"
+                          className="text-[9px] font-mono font-black px-2 py-0.5 rounded-full uppercase tracking-wider"
                           style={
                             inCooldown
-                              ? {
-                                  background: "hsl(35 92% 60% / 0.12)",
-                                  color: "hsl(35 92% 65%)",
-                                  border: "1px solid hsl(35 92% 60% / 0.25)",
-                                }
-                              : {
-                                  background: "hsl(142 71% 45% / 0.12)",
-                                  color: "hsl(142 71% 55%)",
-                                  border: "1px solid hsl(142 71% 45% / 0.25)",
-                                }
+                              ? { background: `${AMBER}12`, color: AMBER, border: `1px solid ${AMBER}25` }
+                              : { background: `${EMERALD}12`, color: EMERALD, border: `1px solid ${EMERALD}25` }
                           }
                         >
                           {pos.status}
                         </span>
                         {!inCooldown && (
-                          <span className="text-xs font-mono" style={{ color: "hsl(142 71% 55%)" }}>
+                          <span className="text-xs font-mono font-bold" style={{ color: LIME }}>
                             {formatPercentage(pos.apy)} APY
                           </span>
                         )}
                       </div>
-                      <div className="text-xl font-bold font-mono">
+                      <div className="font-black text-xl font-mono" style={{ color: "hsl(0 0% 90%)" }}>
                         {formatNumber(pos.stakedAmount)}{" "}
-                        <span className="text-sm text-muted-foreground">APX</span>
+                        <span className="text-sm font-medium" style={{ color: "hsl(0 0% 35%)" }}>APX</span>
                       </div>
-                      <div className="text-xs text-muted-foreground font-mono mt-0.5">
+                      <div className="text-xs font-mono mt-0.5" style={{ color: "hsl(0 0% 28%)" }}>
                         Since {new Date(pos.stakedAt).toLocaleDateString()}
                       </div>
                     </div>
+
                     <div className="text-right">
-                      <div
-                        className="text-lg font-bold font-mono"
-                        style={{ color: "hsl(142 71% 55%)" }}
-                      >
+                      <div className="text-lg font-black font-mono" style={{ color: LIME }}>
                         +{formatNumber(pos.pendingRewards, 4)}
                       </div>
-                      <div className="text-xs text-muted-foreground font-mono">APX pending</div>
+                      <div className="text-[10px] font-mono" style={{ color: "hsl(0 0% 28%)" }}>USDAX pending</div>
                     </div>
                   </div>
 
-                  <div
-                    className="flex justify-between items-center pt-3"
-                    style={{ borderTop: "1px solid hsl(263 20% 12%)" }}
-                  >
+                  <div className="flex justify-between items-center pt-3" style={{ borderTop: `1px solid ${BORDER}` }}>
                     {inCooldown ? (
-                      <div className="flex items-center gap-1.5 text-xs font-mono" style={{ color: "hsl(35 92% 60%)" }}>
+                      <div className="flex items-center gap-1.5 text-xs font-mono" style={{ color: AMBER }}>
                         <Clock className="h-3 w-3" />
                         Unlocks {formatDistanceToNow(new Date(pos.cooldownEndsAt!), { addSuffix: true })}
                       </div>
                     ) : (
-                      <div className="text-xs font-mono text-muted-foreground">
+                      <div className="text-[11px] font-mono" style={{ color: "hsl(0 0% 28%)" }}>
                         Rewards accumulating in real-time
                       </div>
                     )}
                     <button
-                      className="text-xs font-semibold px-3 py-1.5 rounded-lg transition-all disabled:opacity-30"
+                      className="text-xs font-black px-3 py-1.5 rounded-lg transition-all disabled:opacity-30"
                       style={{
-                        background:
-                          pos.pendingRewards > 0
-                            ? "hsl(142 71% 45% / 0.12)"
-                            : "hsl(240 8% 12%)",
-                        color:
-                          pos.pendingRewards > 0
-                            ? "hsl(142 71% 55%)"
-                            : "hsl(240 8% 45%)",
-                        border:
-                          pos.pendingRewards > 0
-                            ? "1px solid hsl(142 71% 45% / 0.3)"
-                            : "1px solid hsl(240 8% 16%)",
+                        background: pos.pendingRewards > 0 ? `${LIME}12`  : "hsl(0 0% 8%)",
+                        color:      pos.pendingRewards > 0 ? LIME          : "hsl(0 0% 28%)",
+                        border:     pos.pendingRewards > 0 ? `1px solid ${LIME}30` : `1px solid ${BORDER}`,
                       }}
                       disabled={pos.pendingRewards <= 0 || claimMutation.isPending}
                       onClick={() => claimMutation.mutate({ id: pos.id })}
@@ -341,15 +327,13 @@ export default function Staking() {
               );
             })}
             {positions?.length === 0 && (
-              <div
-                className="text-center p-10 rounded-xl font-mono text-sm text-muted-foreground"
-                style={{ border: "1px dashed hsl(263 20% 14%)" }}
-              >
+              <div className="text-center p-10 rounded-xl font-mono text-sm"
+                style={{ border: `1px dashed ${BORDER}`, color: "hsl(0 0% 28%)" }}>
                 No active staking positions
               </div>
             )}
           </div>
-        </div>
+        </Panel>
       </div>
     </div>
   );

@@ -1,49 +1,51 @@
 import { useState } from "react";
 import {
-  useListLiquidations,
-  useExecuteLiquidation,
-  getListLiquidationsQueryKey,
+  useListLiquidations, useExecuteLiquidation, getListLiquidationsQueryKey,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
+  Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { formatCurrency, formatNumber, formatAddress } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { Crosshair, AlertOctagon, Zap, TrendingDown, Shield } from "lucide-react";
 
+/* ─── design tokens ─── */
+const LIME    = "hsl(79 100% 57%)";
+const EMERALD = "hsl(152 70% 48%)";
+const RED     = "hsl(0 84% 60%)";
+const AMBER   = "hsl(35 92% 60%)";
+const BORDER  = "hsl(0 0% 10%)";
+const CARD_BG = "hsl(0 0% 6%)";
+const CARD_BG2= "hsl(0 0% 8%)";
+
 const WALLET_ADDRESS = "0x71C724E627B0e336338bE5f8a00B32E880B3656F";
+
+function LBracket({ size = 10, color = `${LIME}25` }: { size?: number; color?: string }) {
+  const s = { position: "absolute" as const, width: size, height: size };
+  return (
+    <>
+      <span style={{ ...s, top: 0, left: 0, borderTop: `1.5px solid ${color}`, borderLeft: `1.5px solid ${color}` }} />
+      <span style={{ ...s, top: 0, right: 0, borderTop: `1.5px solid ${color}`, borderRight: `1.5px solid ${color}` }} />
+      <span style={{ ...s, bottom: 0, left: 0, borderBottom: `1.5px solid ${color}`, borderLeft: `1.5px solid ${color}` }} />
+      <span style={{ ...s, bottom: 0, right: 0, borderBottom: `1.5px solid ${color}`, borderRight: `1.5px solid ${color}` }} />
+    </>
+  );
+}
 
 function HealthPill({ value }: { value: number }) {
   const critical = value < 1.0;
-  const warning = value < 1.2;
-  const color = critical
-    ? "hsl(0 84% 60%)"
-    : warning
-    ? "hsl(35 92% 60%)"
-    : "hsl(263 70% 62%)";
-  const bg = critical
-    ? "hsl(0 84% 60% / 0.12)"
-    : warning
-    ? "hsl(35 92% 60% / 0.12)"
-    : "hsl(263 70% 62% / 0.12)";
+  const warning  = value < 1.2;
+  const color    = critical ? RED : warning ? AMBER : LIME;
   return (
     <div
-      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg font-mono text-xs font-bold"
-      style={{ background: bg, color, border: `1px solid ${color}30` }}
+      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg font-mono text-xs font-black"
+      style={{ background: `${color}12`, color, border: `1px solid ${color}28` }}
     >
       {critical && <AlertOctagon className="h-3 w-3 animate-pulse" />}
       {formatNumber(value)}x
@@ -51,9 +53,27 @@ function HealthPill({ value }: { value: number }) {
   );
 }
 
+function LoadingPulse() {
+  return (
+    <div className="flex h-[80vh] items-center justify-center">
+      <div className="text-center space-y-4">
+        <div className="relative w-12 h-12 mx-auto">
+          <div className="absolute inset-0 rounded-xl animate-pulse" style={{ background: `${RED}12`, border: `1px solid ${RED}28` }} />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Crosshair className="w-5 h-5 animate-pulse" style={{ color: RED }} />
+          </div>
+        </div>
+        <div className="font-mono text-xs tracking-widest uppercase animate-pulse" style={{ color: "hsl(0 0% 32%)" }}>
+          Scanning targets...
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Liquidations() {
   const queryClient = useQueryClient();
-  const { toast } = useToast();
+  const { toast }   = useToast();
   const { data: targets, isLoading } = useListLiquidations();
 
   const liquidateMutation = useExecuteLiquidation({
@@ -70,7 +90,7 @@ export default function Liquidations() {
   });
 
   const [targetPosition, setTargetPosition] = useState<number | null>(null);
-  const [debtToCover, setDebtToCover] = useState("");
+  const [debtToCover,    setDebtToCover]     = useState("");
 
   const handleLiquidate = (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,59 +100,49 @@ export default function Liquidations() {
     });
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex h-[80vh] items-center justify-center">
-        <div className="text-center space-y-3">
-          <div
-            className="w-10 h-10 rounded-xl mx-auto animate-pulse"
-            style={{ background: "linear-gradient(135deg,hsl(0 84% 55%),hsl(263 70% 55%))" }}
-          />
-          <div className="font-mono text-sm text-muted-foreground">Scanning targets...</div>
-        </div>
-      </div>
-    );
-  }
+  if (isLoading) return <LoadingPulse />;
 
   const selectedTarget = targets?.find((t) => t.positionId === targetPosition);
-  const criticalCount = targets?.filter((t) => t.healthFactor < 1.0).length ?? 0;
+  const criticalCount  = targets?.filter((t) => t.healthFactor < 1.0).length ?? 0;
 
-  const panelStyle = {
-    background: "hsl(232 18% 7%)",
-    border: "1px solid hsl(263 20% 13%)",
-    borderRadius: "1rem",
+  const inputStyle = {
+    background: "hsl(0 0% 7%)",
+    border: `1px solid ${RED}35`,
+    borderRadius: "8px",
+    fontFamily: "var(--font-mono)",
+    color: "hsl(0 0% 82%)",
   };
 
   return (
-    <div className="container mx-auto p-4 md:p-6 space-y-6">
+    <div className="max-w-screen-xl mx-auto p-4 md:p-6 space-y-5">
+
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-3">
+          <div className="font-mono text-[10px] tracking-[0.2em] uppercase mb-2" style={{ color: "hsl(0 0% 30%)" }}>
+            ◈ USDEX Finance · Liquidation Engine
+          </div>
+          <h1 className="font-black text-2xl md:text-3xl uppercase tracking-tight flex items-center gap-3">
             <div
               className="w-9 h-9 rounded-xl flex items-center justify-center"
-              style={{ background: "hsl(0 84% 60% / 0.12)", border: "1px solid hsl(0 84% 60% / 0.25)" }}
+              style={{ background: `${RED}12`, border: `1px solid ${RED}28` }}
             >
-              <Crosshair className="h-5 w-5" style={{ color: "hsl(0 84% 60%)" }} />
+              <Crosshair className="h-5 w-5 animate-pulse" style={{ color: RED }} />
             </div>
-            Liquidation{" "}
-            <span style={{ background: "linear-gradient(135deg,hsl(0 84% 65%),hsl(263 70% 65%))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
-              Hunter
+            <span>
+              Liquidation{" "}
+              <span style={{ color: RED }}>Hunter</span>
             </span>
           </h1>
-          <p className="text-muted-foreground text-sm mt-1 ml-12">
+          <p className="text-sm mt-1 ml-12" style={{ color: "hsl(0 0% 38%)" }}>
             Repay underwater debt · earn 10% collateral bonus
           </p>
         </div>
 
         {criticalCount > 0 && (
           <div
-            className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium"
-            style={{
-              background: "hsl(0 84% 60% / 0.08)",
-              border: "1px solid hsl(0 84% 60% / 0.25)",
-              color: "hsl(0 84% 65%)",
-            }}
+            className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-bold"
+            style={{ background: `${RED}08`, border: `1px solid ${RED}28`, color: RED }}
           >
             <AlertOctagon className="h-4 w-4 animate-pulse" />
             {criticalCount} critical position{criticalCount > 1 ? "s" : ""}
@@ -143,39 +153,22 @@ export default function Liquidations() {
       {/* Info cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
-          {
-            icon: TrendingDown,
-            label: "Liquidation Threshold",
-            value: "HF < 1.0",
-            color: "hsl(0 84% 60%)",
-          },
-          {
-            icon: Zap,
-            label: "Bonus for Liquidators",
-            value: "+10%",
-            color: "hsl(142 71% 45%)",
-          },
-          {
-            icon: Shield,
-            label: "Max Per Liquidation",
-            value: "50% of debt",
-            color: "hsl(263 70% 62%)",
-          },
+          { icon: TrendingDown, label: "Liquidation Threshold", value: "HF < 1.0", color: RED     },
+          { icon: Zap,          label: "Bonus for Liquidators",  value: "+10%",     color: EMERALD },
+          { icon: Shield,       label: "Max Per Liquidation",    value: "50% of debt", color: LIME },
         ].map((c) => {
           const Icon = c.icon;
           return (
-            <div key={c.label} className="rounded-2xl p-4 flex items-center gap-3" style={panelStyle}>
-              <div
-                className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-                style={{ background: `${c.color}18` }}
-              >
-                <Icon className="h-4 w-4" style={{ color: c.color }} />
+            <div key={c.label} className="relative rounded-xl p-4 flex items-center gap-4 overflow-hidden"
+              style={{ background: CARD_BG, border: `1px solid ${BORDER}` }}>
+              <LBracket size={8} color={`${c.color}20`} />
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{ background: `${c.color}12`, border: `1px solid ${c.color}22` }}>
+                <Icon className="h-5 w-5" style={{ color: c.color }} />
               </div>
               <div>
-                <div className="text-xs text-muted-foreground">{c.label}</div>
-                <div className="font-bold font-mono text-sm" style={{ color: c.color }}>
-                  {c.value}
-                </div>
+                <div className="font-mono text-[10px] tracking-widest uppercase" style={{ color: "hsl(0 0% 28%)" }}>{c.label}</div>
+                <div className="font-black font-mono text-lg" style={{ color: c.color }}>{c.value}</div>
               </div>
             </div>
           );
@@ -183,14 +176,15 @@ export default function Liquidations() {
       </div>
 
       {/* Targets table */}
-      <div style={panelStyle} className="overflow-hidden">
+      <div className="relative rounded-xl overflow-hidden" style={{ background: CARD_BG, border: `1px solid ${BORDER}` }}>
         <Table>
           <TableHeader>
-            <TableRow style={{ borderColor: "hsl(263 20% 11%)" }} className="hover:bg-transparent">
-              {["#", "Owner", "Collateral", "Debt", "Health", "Bonus", ""].map((h) => (
+            <TableRow style={{ borderColor: BORDER }} className="hover:bg-transparent">
+              {["#", "Owner", "Collateral", "Debt (USDAX)", "Health", "Bonus", ""].map((h) => (
                 <TableHead
                   key={h}
-                  className={`text-xs text-muted-foreground font-medium ${h === "" ? "text-right" : ""}`}
+                  className={`font-mono text-[10px] tracking-widest uppercase ${h === "" ? "text-right" : ""}`}
+                  style={{ color: "hsl(0 0% 28%)" }}
                 >
                   {h}
                 </TableHead>
@@ -204,29 +198,22 @@ export default function Liquidations() {
                 <TableRow
                   key={target.positionId}
                   style={{
-                    borderColor: "hsl(263 20% 10%)",
-                    background: critical ? "hsl(0 84% 60% / 0.03)" : undefined,
+                    borderColor: BORDER,
+                    background: critical ? `${RED}04` : undefined,
                   }}
-                  className="hover:bg-white/[0.02] transition-colors"
+                  className="hover:bg-white/[0.015] transition-colors"
                 >
-                  <TableCell
-                    className="font-mono text-sm font-semibold"
-                    style={{ color: critical ? "hsl(0 84% 65%)" : "hsl(263 70% 70%)" }}
-                  >
+                  <TableCell className="font-mono text-sm font-black" style={{ color: critical ? RED : `${LIME}90` }}>
                     #{target.positionId}
                   </TableCell>
-                  <TableCell className="font-mono text-xs text-muted-foreground">
+                  <TableCell className="font-mono text-xs" style={{ color: "hsl(0 0% 35%)" }}>
                     {formatAddress(target.owner)}
                   </TableCell>
                   <TableCell className="font-mono text-sm">
-                    <div>
-                      {formatNumber(target.collateralAmount, 4)} {target.collateralToken}
-                    </div>
-                    <div className="text-[10px] text-muted-foreground mt-0.5">
-                      {formatCurrency(target.collateralValueUsd)}
-                    </div>
+                    <div style={{ color: "hsl(0 0% 82%)" }}>{formatNumber(target.collateralAmount, 4)} {target.collateralToken}</div>
+                    <div className="text-[10px] mt-0.5" style={{ color: "hsl(0 0% 30%)" }}>{formatCurrency(target.collateralValueUsd)}</div>
                   </TableCell>
-                  <TableCell className="font-mono text-sm" style={{ color: "hsl(35 92% 60%)" }}>
+                  <TableCell className="font-mono text-sm font-bold" style={{ color: AMBER }}>
                     {formatNumber(target.usdaxDebt, 2)} USDAX
                   </TableCell>
                   <TableCell>
@@ -234,25 +221,23 @@ export default function Liquidations() {
                   </TableCell>
                   <TableCell>
                     <span
-                      className="text-xs font-mono font-semibold px-2 py-0.5 rounded-md"
-                      style={{
-                        background: "hsl(142 71% 45% / 0.12)",
-                        color: "hsl(142 71% 55%)",
-                        border: "1px solid hsl(142 71% 45% / 0.25)",
-                      }}
+                      className="text-xs font-mono font-black px-2 py-0.5 rounded-md"
+                      style={{ background: `${EMERALD}12`, color: EMERALD, border: `1px solid ${EMERALD}25` }}
                     >
                       +{formatNumber(target.liquidationBonus, 1)}%
                     </span>
                   </TableCell>
                   <TableCell className="text-right">
                     <button
-                      className="text-xs font-semibold px-3 py-1.5 rounded-lg transition-all"
+                      className="text-xs font-black px-3 py-1.5 rounded-lg transition-all"
                       style={{
-                        background: "hsl(0 84% 60% / 0.12)",
-                        color: "hsl(0 84% 65%)",
-                        border: "1px solid hsl(0 84% 60% / 0.3)",
-                        boxShadow: critical ? "0 0 12px hsl(0 84% 60% / 0.2)" : undefined,
+                        background: `${RED}12`,
+                        color: RED,
+                        border: `1px solid ${RED}30`,
+                        boxShadow: critical ? `0 0 12px ${RED}20` : undefined,
                       }}
+                      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = `${RED}22`; }}
+                      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = `${RED}12`; }}
                       onClick={() => {
                         setTargetPosition(target.positionId);
                         setDebtToCover(target.maxLiquidatable.toString());
@@ -266,10 +251,7 @@ export default function Liquidations() {
             })}
             {targets?.length === 0 && (
               <TableRow>
-                <TableCell
-                  colSpan={7}
-                  className="h-32 text-center font-mono text-sm text-muted-foreground"
-                >
+                <TableCell colSpan={7} className="h-32 text-center font-mono text-sm" style={{ color: "hsl(0 0% 28%)" }}>
                   No liquidatable targets — all positions are healthy
                 </TableCell>
               </TableRow>
@@ -283,16 +265,13 @@ export default function Liquidations() {
         <DialogContent
           className="sm:max-w-[440px]"
           style={{
-            background: "hsl(232 18% 7%)",
-            border: "1px solid hsl(0 84% 60% / 0.3)",
-            boxShadow: "0 0 40px hsl(0 84% 60% / 0.1)",
+            background: "hsl(0 0% 5%)",
+            border: `1px solid ${RED}30`,
+            boxShadow: `0 0 48px ${RED}10`,
           }}
         >
           <DialogHeader>
-            <DialogTitle
-              className="flex items-center gap-2 font-bold"
-              style={{ color: "hsl(0 84% 65%)" }}
-            >
+            <DialogTitle className="flex items-center gap-2 font-black uppercase" style={{ color: RED }}>
               <Crosshair className="h-5 w-5" />
               Confirm Liquidation
             </DialogTitle>
@@ -301,50 +280,48 @@ export default function Liquidations() {
           {selectedTarget && (
             <div className="space-y-4 mt-2">
               <div
-                className="grid grid-cols-2 gap-3 rounded-xl p-4 font-mono text-sm"
-                style={{ background: "hsl(232 20% 9%)", border: "1px solid hsl(263 20% 13%)" }}
+                className="relative grid grid-cols-2 gap-3 rounded-xl p-4 font-mono text-sm overflow-hidden"
+                style={{ background: CARD_BG2, border: `1px solid ${BORDER}` }}
               >
+                <LBracket size={8} color={`${RED}30`} />
                 {[
-                  { label: "Target ID", value: `#${selectedTarget.positionId}`, color: "hsl(263 70% 70%)" },
-                  { label: "Health Factor", value: `${formatNumber(selectedTarget.healthFactor)}x`, color: "hsl(0 84% 65%)" },
-                  { label: "Max Liquidatable", value: `${formatNumber(selectedTarget.maxLiquidatable)} USDAX`, color: "hsl(35 92% 60%)" },
-                  { label: "Bonus Rate", value: `+${formatNumber(selectedTarget.liquidationBonus, 1)}%`, color: "hsl(142 71% 55%)" },
+                  { label: "Target ID",       value: `#${selectedTarget.positionId}`,                   color: `${LIME}90` },
+                  { label: "Health Factor",   value: `${formatNumber(selectedTarget.healthFactor)}x`,   color: RED         },
+                  { label: "Max Liquidatable",value: `${formatNumber(selectedTarget.maxLiquidatable)} USDAX`, color: AMBER },
+                  { label: "Bonus Rate",      value: `+${formatNumber(selectedTarget.liquidationBonus, 1)}%`, color: EMERALD },
                 ].map((row) => (
                   <div key={row.label}>
-                    <div className="text-[10px] text-muted-foreground mb-1">{row.label}</div>
-                    <div className="font-bold text-sm" style={{ color: row.color }}>
-                      {row.value}
+                    <div className="font-mono text-[10px] tracking-widest uppercase mb-1" style={{ color: "hsl(0 0% 28%)" }}>
+                      {row.label}
                     </div>
+                    <div className="font-black text-sm" style={{ color: row.color }}>{row.value}</div>
                   </div>
                 ))}
               </div>
 
               <form onSubmit={handleLiquidate} className="space-y-3">
-                <div className="space-y-2">
-                  <Label className="text-xs text-muted-foreground">Debt to Cover (USDAX)</Label>
+                <div className="space-y-1.5">
+                  <Label className="font-mono text-[10px] tracking-widest uppercase" style={{ color: "hsl(0 0% 32%)" }}>
+                    Debt to Cover (USDAX)
+                  </Label>
                   <Input
-                    type="number"
-                    step="0.01"
+                    type="number" step="0.01" required
                     max={selectedTarget.maxLiquidatable}
-                    required
                     value={debtToCover}
                     onChange={(e) => setDebtToCover(e.target.value)}
-                    className="rounded-xl font-mono"
-                    style={{ borderColor: "hsl(0 84% 60% / 0.4)" }}
+                    style={inputStyle}
                   />
-                  <p className="text-[10px] font-mono text-muted-foreground">
+                  <p className="text-[10px] font-mono" style={{ color: "hsl(0 0% 30%)" }}>
                     You will receive collateral + 10% bonus instantly.
                   </p>
                 </div>
                 <button
                   type="submit"
                   disabled={liquidateMutation.isPending}
-                  className="w-full font-semibold py-2.5 rounded-xl text-sm transition-all disabled:opacity-50"
-                  style={{
-                    background: "hsl(0 84% 55%)",
-                    color: "white",
-                    boxShadow: "0 0 20px hsl(0 84% 60% / 0.3)",
-                  }}
+                  className="w-full font-black py-2.5 rounded-lg text-sm transition-all disabled:opacity-40"
+                  style={{ background: RED, color: "white", boxShadow: `0 0 24px ${RED}30` }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = `0 0 36px ${RED}50`; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = `0 0 24px ${RED}30`; }}
                 >
                   {liquidateMutation.isPending ? "Broadcasting..." : "Execute Liquidation"}
                 </button>

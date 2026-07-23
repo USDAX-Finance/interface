@@ -5,96 +5,105 @@ import {
   useGetCollateralBreakdown,
   useGetHealthDistribution,
 } from "@workspace/api-client-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import {
-  PieChart,
-  Pie,
-  Cell,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
+  PieChart, Pie, Cell, BarChart, Bar,
+  XAxis, YAxis, Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
 import { formatCurrency, formatNumber, formatPercentage, formatAddress } from "@/lib/utils";
-import { Activity, ShieldAlert, Coins, TrendingUp, AlertTriangle } from "lucide-react";
+import { Activity, ShieldAlert, Coins, TrendingUp, AlertTriangle, Zap } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
-const PIE_COLORS = [
-  "hsl(263 70% 62%)",
-  "hsl(186 80% 50%)",
-  "hsl(142 71% 45%)",
-  "hsl(35 92% 60%)",
-  "hsl(0 84% 60%)",
-];
+/* ─── design tokens ─── */
+const LIME     = "hsl(79 100% 57%)";
+const EMERALD  = "hsl(152 70% 48%)";
+const RED      = "hsl(0 84% 60%)";
+const AMBER    = "hsl(35 92% 60%)";
+const BORDER   = "hsl(0 0% 10%)";
+const CARD_BG  = "hsl(0 0% 6%)";
+const CARD_BG2 = "hsl(0 0% 8%)";
+
+const PIE_COLORS = [LIME, EMERALD, "hsl(200 80% 52%)", AMBER, RED];
 
 const ACTIVITY_BADGE: Record<string, string> = {
-  MINT:      "hsl(263 70% 62%)",
-  BURN:      "hsl(0 84% 60%)",
-  DEPOSIT:   "hsl(186 80% 50%)",
-  REDEEM:    "hsl(35 92% 60%)",
-  STAKE:     "hsl(142 71% 45%)",
-  UNSTAKE:   "hsl(35 92% 60%)",
-  CLAIM:     "hsl(142 71% 45%)",
-  LIQUIDATE: "hsl(0 84% 60%)",
+  MINT:      LIME,
+  BURN:      RED,
+  DEPOSIT:   EMERALD,
+  REDEEM:    AMBER,
+  STAKE:     EMERALD,
+  UNSTAKE:   AMBER,
+  CLAIM:     LIME,
+  LIQUIDATE: RED,
 };
+
+const TOOLTIP_STYLE = {
+  backgroundColor: CARD_BG2,
+  borderColor: BORDER,
+  fontFamily: "var(--font-mono)",
+  fontSize: "11px",
+  borderRadius: "8px",
+};
+
+function LBracket({ size = 10, color = `${LIME}30` }: { size?: number; color?: string }) {
+  const s = { position: "absolute" as const, width: size, height: size };
+  return (
+    <>
+      <span style={{ ...s, top: 0, left: 0, borderTop: `1.5px solid ${color}`, borderLeft: `1.5px solid ${color}` }} />
+      <span style={{ ...s, top: 0, right: 0, borderTop: `1.5px solid ${color}`, borderRight: `1.5px solid ${color}` }} />
+      <span style={{ ...s, bottom: 0, left: 0, borderBottom: `1.5px solid ${color}`, borderLeft: `1.5px solid ${color}` }} />
+      <span style={{ ...s, bottom: 0, right: 0, borderBottom: `1.5px solid ${color}`, borderRight: `1.5px solid ${color}` }} />
+    </>
+  );
+}
 
 function LoadingPulse({ label }: { label: string }) {
   return (
     <div className="flex h-[80vh] items-center justify-center">
-      <div className="text-center space-y-3">
-        <div
-          className="w-10 h-10 rounded-xl mx-auto animate-pulse"
-          style={{ background: "linear-gradient(135deg,hsl(263 70% 55%),hsl(186 80% 45%))" }}
-        />
-        <div className="font-mono text-sm text-muted-foreground animate-pulse">{label}</div>
+      <div className="text-center space-y-4">
+        <div className="relative w-12 h-12 mx-auto">
+          <div className="absolute inset-0 rounded-xl animate-pulse" style={{ background: `${LIME}18`, border: `1px solid ${LIME}30` }} />
+          <div className="absolute inset-0 flex items-center justify-center">
+            <Zap className="w-5 h-5 animate-pulse" style={{ color: LIME }} />
+          </div>
+        </div>
+        <div className="font-mono text-xs tracking-widest uppercase animate-pulse" style={{ color: "hsl(0 0% 32%)" }}>
+          {label}
+        </div>
       </div>
     </div>
   );
 }
 
 function StatCard({
-  title,
-  value,
-  sub,
-  icon: Icon,
-  accent,
-  alert,
+  title, value, sub, icon: Icon, accent, alert,
 }: {
-  title: string;
-  value: string;
-  sub?: React.ReactNode;
-  icon: React.ElementType;
-  accent?: string;
-  alert?: boolean;
+  title: string; value: string; sub?: React.ReactNode;
+  icon: React.ElementType; accent?: string; alert?: boolean;
 }) {
+  const color = accent ?? LIME;
   return (
     <div
-      className="rounded-2xl p-5 card-hover"
+      className="relative rounded-xl p-5 overflow-hidden transition-all"
       style={{
-        background: "hsl(232 18% 7%)",
-        border: alert
-          ? "1px solid hsl(35 92% 60% / 0.35)"
-          : "1px solid hsl(263 20% 13%)",
-        boxShadow: alert ? "0 0 20px hsl(35 92% 60% / 0.08)" : undefined,
+        background: CARD_BG,
+        border: alert ? `1px solid ${AMBER}35` : `1px solid ${BORDER}`,
+        boxShadow: alert ? `0 0 24px ${AMBER}08` : undefined,
       }}
+      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = alert ? `${AMBER}55` : `${LIME}22`; }}
+      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = alert ? `${AMBER}35` : BORDER; }}
     >
-      <div className="flex items-center justify-between mb-3">
-        <span className="text-xs text-muted-foreground">{title}</span>
+      <LBracket color={`${color}20`} />
+      <div className="flex items-center justify-between mb-4">
+        <span className="font-mono text-[10px] tracking-widest uppercase" style={{ color: "hsl(0 0% 30%)" }}>
+          {title}
+        </span>
         <div
           className="w-7 h-7 rounded-lg flex items-center justify-center"
-          style={{ background: `${accent ?? "hsl(263 70% 62%)"}18` }}
+          style={{ background: `${color}12`, border: `1px solid ${color}20` }}
         >
-          <Icon className="h-3.5 w-3.5" style={{ color: accent ?? "hsl(263 70% 62%)" }} />
+          <Icon className="h-3.5 w-3.5" style={{ color }} />
         </div>
       </div>
-      <div
-        className="text-2xl font-bold font-mono mb-1"
-        style={{ color: accent ?? "hsl(0 0% 98%)" }}
-      >
+      <div className="font-black text-2xl font-mono mb-1.5" style={{ color }}>
         {value}
       </div>
       {sub && <div className="text-xs text-muted-foreground font-mono">{sub}</div>}
@@ -102,215 +111,184 @@ function StatCard({
   );
 }
 
+function Panel({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div
+      className={`relative rounded-xl overflow-hidden ${className}`}
+      style={{ background: CARD_BG, border: `1px solid ${BORDER}` }}
+    >
+      {children}
+    </div>
+  );
+}
+
 export default function Dashboard() {
-  const { data: stats, isLoading: statsLoading } = useGetProtocolStats();
-  const { data: activity, isLoading: activityLoading } = useListProtocolActivity();
-  const { data: collateral, isLoading: collateralLoading } = useGetCollateralBreakdown();
-  const { data: health, isLoading: healthLoading } = useGetHealthDistribution();
+  const { data: stats,     isLoading: statsLoading }     = useGetProtocolStats();
+  const { data: activity,  isLoading: activityLoading }  = useListProtocolActivity();
+  const { data: collateral,isLoading: collateralLoading } = useGetCollateralBreakdown();
+  const { data: health,    isLoading: healthLoading }     = useGetHealthDistribution();
 
   if (statsLoading || activityLoading || collateralLoading || healthLoading) {
     return <LoadingPulse label="Syncing protocol state..." />;
   }
-
   if (!stats || !activity || !collateral || !health) return null;
 
   return (
-    <div className="container mx-auto p-4 md:p-6 space-y-6">
+    <div className="max-w-screen-xl mx-auto p-4 md:p-6 space-y-5">
+
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-2">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-1">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
-            Protocol{" "}
-            <span className="gradient-text">Dashboard</span>
+          <div className="font-mono text-[10px] tracking-[0.2em] uppercase mb-2" style={{ color: "hsl(0 0% 30%)" }}>
+            ◈ USDEX Finance · Protocol Layer
+          </div>
+          <h1 className="font-black text-2xl md:text-3xl uppercase tracking-tight">
+            Protocol <span style={{ color: LIME }}>Dashboard</span>
           </h1>
-          <p className="text-muted-foreground text-sm mt-1">
+          <p className="text-sm mt-1" style={{ color: "hsl(0 0% 38%)" }}>
             Real-time state overview & risk monitoring
           </p>
         </div>
         <div
           className="flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-mono"
-          style={{
-            background: "hsl(142 71% 45% / 0.08)",
-            border: "1px solid hsl(142 71% 45% / 0.2)",
-          }}
+          style={{ background: `${EMERALD}08`, border: `1px solid ${EMERALD}22` }}
         >
-          <span className="w-1.5 h-1.5 rounded-full bg-safe animate-pulse" />
-          <span className="text-safe/80">All systems operational</span>
+          <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: EMERALD }} />
+          <span style={{ color: EMERALD }}>All systems operational</span>
         </div>
       </div>
 
-      {/* STATS GRID */}
+      {/* Stats grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title="Total Value Locked"
           value={formatCurrency(stats.tvlUsd)}
-          sub={<>Collateral Ratio: <span className="text-safe">{formatNumber(stats.collateralRatio, 1)}%</span></>}
+          sub={<>C-Ratio: <span style={{ color: EMERALD }}>{formatNumber(stats.collateralRatio, 1)}%</span></>}
           icon={Coins}
-          accent="hsl(263 70% 62%)"
+          accent={LIME}
         />
         <StatCard
           title="USDAX Supply"
           value={formatNumber(stats.usdaxSupply, 0)}
           sub={`${stats.totalPositions} active positions`}
           icon={Activity}
-          accent="hsl(186 80% 50%)"
+          accent={EMERALD}
         />
         <StatCard
           title="APX Market"
           value={formatCurrency(stats.apxPrice)}
           sub={`MCap: ${formatCurrency(stats.apxMarketCap)} · APY: ${formatPercentage(stats.baseApy)}`}
           icon={TrendingUp}
-          accent="hsl(263 70% 62%)"
+          accent={LIME}
         />
         <StatCard
           title="At-Risk Positions"
           value={String(stats.atRiskPositions)}
           sub={stats.atRiskPositions > 0 ? "Requires immediate liquidation" : "All positions healthy"}
           icon={stats.atRiskPositions > 0 ? AlertTriangle : ShieldAlert}
-          accent={stats.atRiskPositions > 0 ? "hsl(35 92% 60%)" : "hsl(142 71% 45%)"}
+          accent={stats.atRiskPositions > 0 ? AMBER : EMERALD}
           alert={stats.atRiskPositions > 0}
         />
       </div>
 
-      {/* CHARTS + ACTIVITY */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        {/* Charts column */}
-        <div className="lg:col-span-2 space-y-5">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            {/* Collateral pie */}
-            <div
-              className="rounded-2xl p-5"
-              style={{ background: "hsl(232 18% 7%)", border: "1px solid hsl(263 20% 13%)" }}
-            >
-              <h3 className="text-sm font-medium mb-1">Collateral Breakdown</h3>
-              <p className="text-xs text-muted-foreground mb-4">By asset type</p>
-              <div className="h-[220px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={collateral}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={55}
-                      outerRadius={75}
-                      paddingAngle={4}
-                      dataKey="valueUsd"
-                      nameKey="symbol"
-                      stroke="none"
-                    >
-                      {collateral.map((_, index) => (
-                        <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      formatter={(v: number) => formatCurrency(v)}
-                      contentStyle={{
-                        backgroundColor: "hsl(232 18% 9%)",
-                        borderColor: "hsl(263 20% 16%)",
-                        fontFamily: "var(--font-mono)",
-                        fontSize: "11px",
-                        borderRadius: "8px",
-                      }}
-                      itemStyle={{ color: "hsl(0 0% 95%)" }}
-                    />
-                    <Legend
-                      wrapperStyle={{ fontFamily: "var(--font-mono)", fontSize: "11px" }}
-                    />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
+      {/* Charts + Activity */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
-            {/* Health factor bar */}
-            <div
-              className="rounded-2xl p-5"
-              style={{ background: "hsl(232 18% 7%)", border: "1px solid hsl(263 20% 13%)" }}
-            >
-              <h3 className="text-sm font-medium mb-1">Health Factor</h3>
-              <p className="text-xs text-muted-foreground mb-4">Position distribution</p>
-              <div className="h-[220px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={health} barCategoryGap="30%">
-                    <XAxis
-                      dataKey="range"
-                      stroke="hsl(240 8% 35%)"
-                      fontSize={10}
-                      tickLine={false}
-                      axisLine={false}
-                    />
-                    <YAxis
-                      stroke="hsl(240 8% 35%)"
-                      fontSize={10}
-                      tickLine={false}
-                      axisLine={false}
-                      allowDecimals={false}
-                    />
-                    <Tooltip
-                      cursor={{ fill: "hsl(263 20% 12%)" }}
-                      contentStyle={{
-                        backgroundColor: "hsl(232 18% 9%)",
-                        borderColor: "hsl(263 20% 16%)",
-                        fontFamily: "var(--font-mono)",
-                        fontSize: "11px",
-                        borderRadius: "8px",
-                      }}
-                    />
-                    <Bar dataKey="count" radius={[6, 6, 0, 0]}>
-                      {health.map((entry, index) => {
-                        let color = "hsl(263 70% 62%)";
-                        if (entry.riskLevel === "critical") color = "hsl(0 84% 60%)";
-                        else if (entry.riskLevel === "warning") color = "hsl(35 92% 60%)";
-                        else if (entry.riskLevel === "safe") color = "hsl(142 71% 45%)";
-                        return <Cell key={`cell-${index}`} fill={color} />;
-                      })}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
+        {/* Charts column */}
+        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+
+          {/* Collateral pie */}
+          <Panel className="p-5">
+            <div className="mb-1">
+              <div className="font-mono text-[10px] tracking-widest uppercase mb-1" style={{ color: "hsl(0 0% 28%)" }}>Collateral Breakdown</div>
+              <div className="font-bold text-sm" style={{ color: "hsl(0 0% 78%)" }}>By asset type</div>
             </div>
-          </div>
+            <div className="h-[220px] mt-3">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={collateral}
+                    cx="50%" cy="50%"
+                    innerRadius={52} outerRadius={72}
+                    paddingAngle={4}
+                    dataKey="valueUsd" nameKey="symbol"
+                    stroke="none"
+                  >
+                    {collateral.map((_, i) => (
+                      <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    formatter={(v: number) => formatCurrency(v)}
+                    contentStyle={TOOLTIP_STYLE}
+                    itemStyle={{ color: "hsl(0 0% 85%)" }}
+                  />
+                  <Legend wrapperStyle={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "hsl(0 0% 45%)" }} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </Panel>
+
+          {/* Health factor bar */}
+          <Panel className="p-5">
+            <div className="mb-1">
+              <div className="font-mono text-[10px] tracking-widest uppercase mb-1" style={{ color: "hsl(0 0% 28%)" }}>Health Factor</div>
+              <div className="font-bold text-sm" style={{ color: "hsl(0 0% 78%)" }}>Position distribution</div>
+            </div>
+            <div className="h-[220px] mt-3">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={health} barCategoryGap="30%">
+                  <XAxis dataKey="range" stroke="hsl(0 0% 22%)" fontSize={10} tickLine={false} axisLine={false} />
+                  <YAxis stroke="hsl(0 0% 22%)" fontSize={10} tickLine={false} axisLine={false} allowDecimals={false} />
+                  <Tooltip cursor={{ fill: "hsl(0 0% 8%)" }} contentStyle={TOOLTIP_STYLE} />
+                  <Bar dataKey="count" radius={[5, 5, 0, 0]}>
+                    {health.map((entry, i) => {
+                      let color = LIME;
+                      if (entry.riskLevel === "critical") color = RED;
+                      else if (entry.riskLevel === "warning") color = AMBER;
+                      else if (entry.riskLevel === "safe") color = EMERALD;
+                      return <Cell key={i} fill={color} />;
+                    })}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </Panel>
         </div>
 
         {/* Activity feed */}
-        <div
-          className="rounded-2xl p-5 flex flex-col"
-          style={{
-            background: "hsl(232 18% 7%)",
-            border: "1px solid hsl(263 20% 13%)",
-            maxHeight: 400,
-          }}
-        >
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-1.5 h-1.5 rounded-full bg-safe animate-pulse" />
-            <h3 className="text-sm font-medium">Live Activity</h3>
+        <Panel className="flex flex-col" style={{ maxHeight: 400 } as React.CSSProperties}>
+          <div className="flex items-center gap-2 px-5 pt-5 pb-3" style={{ borderBottom: `1px solid ${BORDER}` }}>
+            <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: EMERALD }} />
+            <span className="font-mono text-[10px] tracking-widest uppercase" style={{ color: "hsl(0 0% 30%)" }}>Live Activity</span>
           </div>
-          <div className="flex-1 overflow-auto space-y-3 pr-1">
+          <div className="flex-1 overflow-auto px-5 py-3 space-y-3">
             {activity.map((event) => {
-              const color = ACTIVITY_BADGE[event.type] ?? "hsl(263 70% 62%)";
+              const color = ACTIVITY_BADGE[event.type] ?? LIME;
               return (
                 <div
                   key={event.id}
-                  className="flex items-start justify-between pb-3 border-b last:border-0 last:pb-0"
-                  style={{ borderColor: "hsl(263 20% 11%)" }}
+                  className="flex items-start justify-between pb-3"
+                  style={{ borderBottom: `1px solid ${BORDER}` }}
                 >
                   <div className="space-y-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span
-                        className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded-md flex-shrink-0"
-                        style={{ background: `${color}18`, color, border: `1px solid ${color}30` }}
+                        className="text-[9px] font-mono font-black px-1.5 py-0.5 rounded-md flex-shrink-0 tracking-wider uppercase"
+                        style={{ background: `${color}14`, color, border: `1px solid ${color}28` }}
                       >
                         {event.type}
                       </span>
-                      <span className="font-mono text-xs text-muted-foreground truncate">
+                      <span className="font-mono text-[11px] truncate" style={{ color: "hsl(0 0% 35%)" }}>
                         {formatAddress(event.user)}
                       </span>
                     </div>
-                    <div className="font-mono text-sm text-foreground">
+                    <div className="font-mono text-sm font-bold" style={{ color: "hsl(0 0% 82%)" }}>
                       {formatNumber(event.amount)} {event.token}
                     </div>
                   </div>
                   <div className="text-right flex-shrink-0 ml-2 space-y-1">
-                    <div className="font-mono text-[10px] text-muted-foreground">
+                    <div className="font-mono text-[10px]" style={{ color: "hsl(0 0% 28%)" }}>
                       {formatDistanceToNow(new Date(event.timestamp), { addSuffix: true })}
                     </div>
                     <a
@@ -318,7 +296,7 @@ export default function Dashboard() {
                       target="_blank"
                       rel="noreferrer"
                       className="font-mono text-[10px] hover:underline"
-                      style={{ color: "hsl(263 70% 65%)" }}
+                      style={{ color: `${LIME}80` }}
                     >
                       {formatAddress(event.txHash)}
                     </a>
@@ -327,7 +305,7 @@ export default function Dashboard() {
               );
             })}
           </div>
-        </div>
+        </Panel>
       </div>
     </div>
   );
