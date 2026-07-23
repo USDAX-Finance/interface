@@ -277,12 +277,12 @@ export default function Dashboard() {
         </div>
 
         {/* Activity feed */}
-        <Panel className="flex flex-col" style={{ maxHeight: 400 } as React.CSSProperties}>
-          <div className="flex items-center gap-2 px-5 pt-5 pb-3" style={{ borderBottom: `1px solid ${BORDER}` }}>
+        <Panel className="flex flex-col">
+          <div className="flex items-center gap-2 px-5 pt-5 pb-3 flex-shrink-0" style={{ borderBottom: `1px solid ${BORDER}` }}>
             <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: EMERALD }} />
             <span className="font-mono text-[10px] tracking-widest uppercase" style={{ color: "hsl(0 0% 30%)" }}>Live Activity</span>
           </div>
-          <div className="flex-1 overflow-auto px-5 py-3 space-y-3">
+          <div className="overflow-y-auto px-5 py-3 space-y-3" style={{ maxHeight: 420 }}>
             {activity.map((event) => {
               const color = ACTIVITY_BADGE[event.type] ?? LIME;
               return (
