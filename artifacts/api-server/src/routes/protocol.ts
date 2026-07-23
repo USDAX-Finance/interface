@@ -16,8 +16,8 @@ const TOKEN_PRICES: Record<string, number> = {
   WBTC: 67823.0,
 };
 
-const AKX_PRICE = 0.0082;
-const AKX_TOTAL_SUPPLY = 10_000_000;
+const APX_PRICE = 0.0082;
+const APX_TOTAL_SUPPLY = 10_000_000;
 
 router.get("/protocol/stats", async (req, res): Promise<void> => {
   const [positionRows, stakingRows, atRiskRows] = await Promise.all([
@@ -32,14 +32,14 @@ router.get("/protocol/stats", async (req, res): Promise<void> => {
   const tvlUsd = positionRows.reduce((sum, p) => sum + Number(p.collateralValueUsd), 0);
   const usdaxSupply = positionRows.reduce((sum, p) => sum + Number(p.usdaxMinted), 0);
   const totalStaked = stakingRows.reduce((sum, s) => sum + Number(s.stakedAmount), 0);
-  const totalStakedUsd = totalStaked * AKX_PRICE;
+  const totalStakedUsd = totalStaked * APX_PRICE;
   const collateralRatio = usdaxSupply > 0 ? tvlUsd / usdaxSupply : 0;
 
   const stats = {
     tvlUsd: tvlUsd + totalStakedUsd,
     usdaxSupply,
-    akxPrice: AKX_PRICE,
-    akxMarketCap: AKX_PRICE * AKX_TOTAL_SUPPLY,
+    apxPrice: APX_PRICE,
+    apxMarketCap: APX_PRICE * APX_TOTAL_SUPPLY,
     totalPositions: positionRows.length,
     totalStaked,
     totalStakedUsd,

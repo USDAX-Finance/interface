@@ -107,8 +107,8 @@ export default function Staking() {
     },
     {
       label: "Distributed",
-      value: `${formatNumber(stats.totalRewardsDistributed, 0)} AKX`,
-      sub: `${formatNumber(stats.rewardRatePerDay, 2)} AKX / day`,
+      value: `${formatNumber(stats.totalRewardsDistributed, 0)} APX`,
+      sub: `${formatNumber(stats.rewardRatePerDay, 2)} APX / day`,
       icon: Zap,
       color: "hsl(186 80% 50%)",
     },
@@ -126,7 +126,7 @@ export default function Staking() {
       {/* Header */}
       <div>
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
-          AKX <span className="gradient-text">Staking</span>
+          APX <span className="gradient-text">Staking</span>
         </h1>
         <p className="text-muted-foreground text-sm mt-1">Secure the protocol & earn yield</p>
       </div>
@@ -160,7 +160,7 @@ export default function Staking() {
         <div className="space-y-4">
           {/* Stake */}
           <div className="rounded-2xl p-5" style={panelStyle}>
-            <h3 className="font-semibold mb-1">Stake AKX</h3>
+            <h3 className="font-semibold mb-1">Stake APX</h3>
             <p className="text-xs text-muted-foreground mb-4">
               Stake to earn rewards. Cooldown starts from your latest stake.
             </p>
@@ -175,7 +175,7 @@ export default function Staking() {
                   className="rounded-xl font-mono pr-16"
                 />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-mono text-muted-foreground">
-                  AKX
+                  APX
                 </span>
               </div>
               <button
@@ -183,7 +183,7 @@ export default function Staking() {
                 disabled={stakeMutation.isPending}
                 className="btn-gradient w-full text-white font-semibold py-2.5 rounded-xl text-sm disabled:opacity-50"
               >
-                {stakeMutation.isPending ? "Staking..." : "Stake AKX"}
+                {stakeMutation.isPending ? "Staking..." : "Stake APX"}
               </button>
             </form>
           </div>
@@ -198,7 +198,7 @@ export default function Staking() {
             }}
           >
             <h3 className="font-semibold mb-1" style={{ color: "hsl(35 92% 65%)" }}>
-              Unstake AKX
+              Unstake APX
             </h3>
             <p className="text-xs text-muted-foreground mb-4">
               Initiates the 7-day cooldown. Cannot be cancelled.
@@ -215,7 +215,7 @@ export default function Staking() {
                   style={{ borderColor: "hsl(35 92% 60% / 0.3)" }}
                 />
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-mono text-muted-foreground">
-                  AKX
+                  APX
                 </span>
               </div>
               <button
@@ -284,7 +284,7 @@ export default function Staking() {
                       </div>
                       <div className="text-xl font-bold font-mono">
                         {formatNumber(pos.stakedAmount)}{" "}
-                        <span className="text-sm text-muted-foreground">AKX</span>
+                        <span className="text-sm text-muted-foreground">APX</span>
                       </div>
                       <div className="text-xs text-muted-foreground font-mono mt-0.5">
                         Since {new Date(pos.stakedAt).toLocaleDateString()}
@@ -297,7 +297,7 @@ export default function Staking() {
                       >
                         +{formatNumber(pos.pendingRewards, 4)}
                       </div>
-                      <div className="text-xs text-muted-foreground font-mono">AKX pending</div>
+                      <div className="text-xs text-muted-foreground font-mono">APX pending</div>
                     </div>
                   </div>
 

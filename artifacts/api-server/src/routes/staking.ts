@@ -14,7 +14,7 @@ import {
 import { eq, and } from "drizzle-orm";
 
 const BASE_APY = 15;
-const AKX_PRICE = 0.0082;
+const APX_PRICE = 0.0082;
 const COOLDOWN_DAYS = 7;
 
 function calcPendingRewards(stakedAmount: number, lastRewardTime: Date, apyRate: number): number {
@@ -60,14 +60,14 @@ router.get("/staking/stats", async (_req, res): Promise<void> => {
     0
   );
 
-  // Effective APY increases slightly when less AKX is staked
+  // Effective APY increases slightly when less APX is staked
   const maxSupply = 100_000_000;
   const stakingRatio = totalStaked / maxSupply;
   const effectiveApy = BASE_APY + (1 - Math.min(stakingRatio, 1)) * 5;
 
   const stats = {
     totalStaked,
-    totalStakedUsd: totalStaked * AKX_PRICE,
+    totalStakedUsd: totalStaked * APX_PRICE,
     baseApy: BASE_APY,
     effectiveApy: Math.round(effectiveApy * 100) / 100,
     totalRewardsDistributed: totalClaimed + pendingSum,
@@ -112,7 +112,7 @@ router.post("/staking/positions", async (req, res): Promise<void> => {
     type: "STAKE",
     user: owner,
     amount: String(amount),
-    token: "AKX",
+    token: "APX",
     txHash: randomTxHash(),
   });
 
@@ -166,7 +166,7 @@ router.post("/staking/positions/:id/unstake", async (req, res): Promise<void> =>
     type: "UNSTAKE",
     user: existing.owner,
     amount: String(parsed.data.amount),
-    token: "AKX",
+    token: "APX",
     txHash: randomTxHash(),
   });
 
@@ -215,7 +215,7 @@ router.post("/staking/positions/:id/claim", async (req, res): Promise<void> => {
     type: "CLAIM",
     user: existing.owner,
     amount: String(totalRewards),
-    token: "AKX",
+    token: "APX",
     txHash: randomTxHash(),
   });
 

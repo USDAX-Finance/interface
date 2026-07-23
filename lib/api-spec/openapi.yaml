@@ -3,7 +3,7 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: ArchonX Protocol API
+  description: APEX Protocol API
 servers:
   - url: /api
     description: Base API path
@@ -15,7 +15,7 @@ tags:
   - name: positions
     description: Vault/collateral positions
   - name: staking
-    description: AKX staking operations
+    description: APX staking operations
   - name: liquidations
     description: Liquidation operations
 
@@ -215,7 +215,7 @@ paths:
     post:
       operationId: stakeAkx
       tags: [staking]
-      summary: Stake AKX tokens
+      summary: Stake APX tokens
       requestBody:
         required: true
         content:
@@ -234,7 +234,7 @@ paths:
     post:
       operationId: unstakeAkx
       tags: [staking]
-      summary: Initiate unstake (7-day cooldown)
+      summary: Initiate APX unstake (7-day cooldown)
       parameters:
         - name: id
           in: path
@@ -321,8 +321,8 @@ components:
       required:
         - tvlUsd
         - usdaxSupply
-        - akxPrice
-        - akxMarketCap
+        - apxPrice
+        - apxMarketCap
         - totalPositions
         - totalStaked
         - totalStakedUsd
@@ -335,9 +335,9 @@ components:
           type: number
         usdaxSupply:
           type: number
-        akxPrice:
+        apxPrice:
           type: number
-        akxMarketCap:
+        apxMarketCap:
           type: number
         totalPositions:
           type: integer

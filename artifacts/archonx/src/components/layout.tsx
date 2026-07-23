@@ -35,10 +35,10 @@ export function Navbar() {
                 background: "linear-gradient(135deg,hsl(263 70% 55%),hsl(186 80% 45%))",
               }}
             >
-              <span className="text-white font-black text-[10px]">AX</span>
+              <span className="text-white font-black text-[10px]">AP</span>
             </div>
             <span className="font-bold text-sm tracking-tight text-foreground hidden sm:inline">
-              ArchonX
+              APEX
             </span>
           </Link>
 

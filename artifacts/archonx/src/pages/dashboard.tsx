@@ -156,9 +156,9 @@ export default function Dashboard() {
           accent="hsl(186 80% 50%)"
         />
         <StatCard
-          title="AKX Market"
-          value={formatCurrency(stats.akxPrice)}
-          sub={`MCap: ${formatCurrency(stats.akxMarketCap)} · APY: ${formatPercentage(stats.baseApy)}`}
+          title="APX Market"
+          value={formatCurrency(stats.apxPrice)}
+          sub={`MCap: ${formatCurrency(stats.apxMarketCap)} · APY: ${formatPercentage(stats.baseApy)}`}
           icon={TrendingUp}
           accent="hsl(263 70% 62%)"
         />

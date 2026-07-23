@@ -112,10 +112,10 @@ function Nav() {
               className="w-7 h-7 rounded flex items-center justify-center font-black text-[11px]"
               style={{ background: LIME, color: "hsl(0 0% 4%)" }}
             >
-              AX
+              AP
             </div>
             <span className="text-foreground font-bold text-base tracking-tight">
-              ArchonX
+              APEX
             </span>
           </div>
         </Link>
@@ -178,7 +178,7 @@ function Chip({ label }: { label: string }) {
 
 function MockDashboard() {
   const leftChips  = ["Minting", "USDAX", "Yield"];
-  const rightChips = ["Staking", "Governance", "AKX"];
+  const rightChips = ["Staking", "Governance", "APX"];
 
   return (
     <div className="w-full max-w-[460px] mx-auto lg:mx-0">
@@ -200,7 +200,7 @@ function MockDashboard() {
             className="text-[11px] font-bold tracking-[0.18em] uppercase"
             style={{ color: LIME }}
           >
-            ◈ ArchonX
+            ◈ APEX
           </span>
           <span
             className="inline-flex items-center gap-1.5 text-[10px] font-mono rounded-full px-2.5 py-0.5"
@@ -288,7 +288,7 @@ function MockDashboard() {
               {leftChips.map((l) => <Chip key={l} label={l} />)}
             </div>
 
-            {/* Center AX icon */}
+            {/* Center AP icon */}
             <div className="flex flex-col items-center gap-2 px-2">
               <div
                 className="flex items-center justify-center w-12 h-12 rounded-full font-black text-sm"
@@ -297,7 +297,7 @@ function MockDashboard() {
                   color: "hsl(0 0% 4%)",
                 }}
               >
-                AX
+                AP
               </div>
               {/* Liquidation chip below center icon */}
               <div
@@ -368,13 +368,13 @@ function MockDashboard() {
 function Ticker() {
   const items = [
     "USDAX pegged at $1.00",
-    "AKX staking APY: 15%",
+    "APX staking APY: 15%",
     "TVL: $56,333",
     "Robinhood Chain · ID 46630",
     "Collateral ratio: 150%",
     "USDAX minted: 26,700",
     "Active vaults: 8",
-    "AKX supply: 100M max",
+    "APX supply: 100M max",
   ];
   const doubled = [...items, ...items];
 
@@ -575,7 +575,7 @@ function WhatIsUSDax() {
     { value: "150%", label: "Collateral Ratio", color: LIME },
     { value: "15%", label: "Base APY", color: EMERALD },
     { value: "7d", label: "Staking Cooldown", color: WARNING },
-    { value: "100M", label: "AKX Max Supply", color: "hsl(0 0% 65%)" },
+    { value: "100M", label: "APX Max Supply", color: "hsl(0 0% 65%)" },
   ];
 
   return (
@@ -715,7 +715,7 @@ function Features() {
     {
       icon: BarChart2,
       title: "Yield Optimization Engine",
-      desc: "AKX rewards auto-compound. Base 15% APY, higher for long-term stakers.",
+      desc: "APX rewards auto-compound. Base 15% APY, higher for long-term stakers.",
     },
     {
       icon: Zap,
@@ -734,7 +734,7 @@ function Features() {
         <div className="grid lg:grid-cols-2 gap-20 items-start">
           {/* Left */}
           <div>
-            <Tag>ArchonX Engine</Tag>
+            <Tag>APEX Engine</Tag>
             <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight">
               Improve Outcomes &amp;{" "}
               <span className="gradient-text">Automate Workflows</span>
@@ -743,7 +743,7 @@ function Features() {
               className="mt-4 text-[15px] leading-relaxed"
               style={{ color: "hsl(0 0% 42%)" }}
             >
-              ArchonX centralizes financial data, automates repetitive DeFi workflows, and
+              APEX centralizes financial data, automates repetitive DeFi workflows, and
               enhances decision-making with real-time on-chain intelligence.
             </p>
 
@@ -818,8 +818,8 @@ function Features() {
                   bar: EMERALD,
                 },
                 {
-                  label: "AKX Staked",
-                  value: "700,000 AKX",
+                  label: "APX Staked",
+                  value: "700,000 APX",
                   pct: 42,
                   bar: "hsl(0 0% 35%)",
                 },
@@ -915,7 +915,7 @@ function UseCases() {
             className="max-w-xl mx-auto mt-4 text-[15px] leading-relaxed"
             style={{ color: "hsl(0 0% 40%)" }}
           >
-            ArchonX offers use cases for developers, businesses, and treasuries seeking secure,
+            APEX offers use cases for developers, businesses, and treasuries seeking secure,
             profitable stablecoin integrations.
           </p>
         </div>
@@ -992,14 +992,14 @@ function StakingCTA() {
           <div className="relative z-10 p-12 md:p-16 text-center">
             <Tag>Staking</Tag>
             <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight mt-2">
-              Stake <span className="gradient-text">AKX</span> &amp; Earn Up to{" "}
+              Stake <span className="gradient-text">APX</span> &amp; Earn Up to{" "}
               <span style={{ color: LIME }}>15% APY</span>
             </h2>
             <p
               className="max-w-lg mx-auto mt-4 text-[15px] leading-relaxed"
               style={{ color: "hsl(0 0% 42%)" }}
             >
-              Lock AKX tokens, earn passive rewards, and participate in protocol governance.
+              Lock APX tokens, earn passive rewards, and participate in protocol governance.
               7-day cooldown ensures long-term alignment.
             </p>
 
@@ -1018,7 +1018,7 @@ function StakingCTA() {
               {[
                 { value: "15%", label: "Base APY", color: LIME },
                 { value: "7d", label: "Cooldown Period", color: WARNING },
-                { value: "100M", label: "AKX Max Supply", color: EMERALD },
+                { value: "100M", label: "APX Max Supply", color: EMERALD },
               ].map((s) => (
                 <div key={s.label}>
                   <div
@@ -1049,7 +1049,7 @@ function Footer() {
   const cols = [
     {
       title: "Protocol",
-      links: ["USDAX", "AKX Token", "Staking", "Governance"],
+      links: ["USDAX", "APX Token", "Staking", "Governance"],
     },
     {
       title: "Developers",
@@ -1075,9 +1075,9 @@ function Footer() {
                 className="w-7 h-7 rounded flex items-center justify-center font-black text-[11px]"
                 style={{ background: LIME, color: "hsl(0 0% 4%)" }}
               >
-                AX
+                AP
               </div>
-              <span className="font-bold text-base">ArchonX</span>
+              <span className="font-bold text-base">APEX</span>
             </div>
             <p
               className="text-[13px] leading-relaxed max-w-[180px]"
@@ -1137,7 +1137,7 @@ function Footer() {
             color: "hsl(0 0% 25%)",
           }}
         >
-          <span>© 2026 ArchonX Protocol. All rights reserved.</span>
+          <span>© 2026 APEX Protocol · <a href="https://usdax.finance" style={{ color: "inherit" }}>usdax.finance</a> · All rights reserved.</span>
           <div className="flex gap-6">
             {["Privacy Policy", "Terms of Service", "Cookie Policy"].map((l) => (
               <a
