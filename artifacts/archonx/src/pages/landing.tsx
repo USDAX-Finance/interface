@@ -387,61 +387,89 @@ function Ticker() {
 function Hero() {
   return (
     <>
-      <section className="relative pt-16 pb-0 px-8 overflow-hidden">
+      <section
+        className="relative overflow-hidden"
+        style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}
+      >
+        {/* Deep radial glow centred behind logo */}
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center -z-0">
+          <div style={{
+            width: 700, height: 700,
+            background: `radial-gradient(ellipse at 50% 50%, ${LIME}1A 0%, ${LIME}08 35%, transparent 65%)`,
+            filter: "blur(60px)",
+          }} />
+        </div>
 
-        <div className="max-w-6xl mx-auto relative z-10">
+        <div className="relative z-10 flex flex-col px-10 pt-10 pb-10" style={{ flex: 1 }}>
 
-          {/* Brand label */}
-          <div className="flex items-center justify-between mb-10">
-            <p className="text-[10px] font-bold tracking-[0.3em] uppercase"
-              style={{ color: "hsl(0 0% 28%)" }}>
-              ◈ USDAX.FINANCE
-            </p>
-            <div className="flex items-center gap-2 text-[10px] font-mono"
-              style={{ color: "hsl(0 0% 32%)" }}>
-              <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: EMERALD }} />
-              Live ·
-              <img src="/robinhood-logo.webp" alt="Robinhood" className="h-3 opacity-50 inline-block" style={{ filter: "grayscale(1) brightness(2)" }} />
-              Chain 46630
-            </div>
-          </div>
-
-          {/* Giant brackets + headline */}
-          <div className="flex items-stretch">
-            {/* Left brackets — animated wave */}
-            <div className="flex items-center pr-4">
-              {[0, 1, 2].map((i) => (
-                <span key={i} className="font-black select-none"
-                  style={{
-                    color: LIME,
-                    fontSize: "clamp(60px, 10vw, 110px)",
-                    lineHeight: 1,
-                    letterSpacing: "-6px",
-                    animation: `bracket-scan 2.4s ease-in-out ${i * 0.18}s infinite alternate`,
-                  }}>
-                  (
-                </span>
+          {/* ── TOP ROW ── */}
+          <div className="flex items-start justify-between">
+            {/* Left: service tags */}
+            <div className="space-y-1">
+              {["/ MINT USDAX", "/ STAKE APX", "/ EARN YIELD"].map((tag) => (
+                <p key={tag} className="text-[11px] font-mono tracking-[0.18em]"
+                  style={{ color: "hsl(0 0% 30%)" }}>
+                  {tag}
+                </p>
               ))}
             </div>
 
-            {/* Center headline */}
-            <div className="flex-1 text-center py-4">
-              <h1
-                className="font-extrabold uppercase tracking-tight leading-[1.05]"
-                style={{ fontSize: "clamp(2rem, 4.8vw, 4.2rem)", color: "hsl(0 0% 94%)" }}
-              >
-                APEX PROTOCOL<br />
-                <span style={{ color: LIME }}>USDAX STABLECOIN</span><br />
-                ON ROBINHOOD CHAIN
-              </h1>
-              <p className="text-[14px] mt-6 leading-relaxed max-w-xl mx-auto"
-                style={{ color: "hsl(0 0% 38%)" }}>
-                Mint yield-bearing USDAX, stake APX tokens, and earn passive income
-                on Robinhood Chain — the programmable stablecoin built for DeFi.
-              </p>
+            {/* Right: one-liner description */}
+            <p className="text-[13px] leading-relaxed text-right max-w-xs"
+              style={{ color: "hsl(0 0% 38%)" }}>
+              We build programmable stablecoins that bring<br />
+              stability, yield, and clarity to your on-chain capital.
+            </p>
+          </div>
 
-              {/* CTAs */}
-              <div className="flex items-center justify-center gap-3 mt-8">
+          {/* ── CENTER — 3D LOGO ── */}
+          <div className="flex flex-1 items-center justify-center py-8 relative">
+            {/* Floor glow */}
+            <div className="pointer-events-none absolute bottom-0 left-1/2 -translate-x-1/2" style={{
+              width: 320, height: 60,
+              background: `radial-gradient(ellipse at 50% 100%, ${LIME}28 0%, transparent 70%)`,
+              filter: "blur(24px)",
+              transform: "translate(-50%, 10px)",
+            }} />
+
+            <img
+              src="/apex-3d.png"
+              alt="APEX Protocol"
+              style={{
+                width: "clamp(220px, 32vw, 420px)",
+                height: "auto",
+                objectFit: "contain",
+                filter: [
+                  "drop-shadow(0 0 40px hsl(79 100% 57% / 0.55))",
+                  "drop-shadow(0 0 100px hsl(79 100% 57% / 0.25))",
+                  "drop-shadow(0 8px 32px hsl(79 100% 57% / 0.35))",
+                ].join(" "),
+                animation: "float 4s ease-in-out infinite",
+              }}
+            />
+          </div>
+
+          {/* ── BOTTOM ROW ── */}
+          <div className="flex items-end justify-between gap-8 flex-wrap">
+            {/* Left: badge + big headline + CTAs */}
+            <div>
+              <div
+                className="inline-flex items-center gap-2 mb-5 text-[10px] font-mono tracking-[0.22em] uppercase"
+                style={{ color: "hsl(0 0% 30%)" }}
+              >
+                <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: EMERALD }} />
+                BUILT ON ROBINHOOD CHAIN
+              </div>
+
+              <h1
+                className="font-extrabold leading-[1.0] tracking-tight"
+                style={{ fontSize: "clamp(2.6rem, 5.5vw, 5rem)", color: "hsl(0 0% 96%)" }}
+              >
+                Stable. Yield-bearing.<br />
+                <span style={{ color: LIME }}>Programmable.</span>
+              </h1>
+
+              <div className="flex items-center gap-3 mt-7">
                 <LimeBtn href="/app">
                   <Zap className="h-3.5 w-3.5" /> Launch App
                 </LimeBtn>
@@ -451,77 +479,31 @@ function Hero() {
               </div>
             </div>
 
-            {/* Right brackets — mirrored wave */}
-            <div className="flex items-center pl-4">
-              {[2, 1, 0].map((i) => (
-                <span key={i} className="font-black select-none"
-                  style={{
-                    color: LIME,
-                    fontSize: "clamp(60px, 10vw, 110px)",
-                    lineHeight: 1,
-                    letterSpacing: "-6px",
-                    animation: `bracket-scan 2.4s ease-in-out ${i * 0.18}s infinite alternate`,
-                  }}>
-                  )
-                </span>
-              ))}
-            </div>
-          </div>
-
-          {/* Chip node grid — full width, centered */}
-          <div className="relative mt-8">
-            {/* Center glow bloom */}
-            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-              <div style={{
-                width: 280, height: 180,
-                background: `radial-gradient(ellipse at 50% 60%, ${LIME}28 0%, transparent 70%)`,
-                filter: "blur(30px)",
-              }} />
-            </div>
-
+            {/* Right: floating stat card */}
             <div
-              className="rounded-xl p-6 relative z-10"
-              style={{ background: "hsl(0 0% 5%)", border: `1px solid ${BORDER}` }}
+              className="rounded-xl p-5 shrink-0"
+              style={{
+                background: "hsl(0 0% 6%)",
+                border: `1px solid ${BORDER}`,
+                minWidth: 190,
+              }}
             >
-              <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-center">
-                {/* Left chips */}
-                <div className="flex flex-col gap-2.5">
-                  {["Minting", "USDAX", "Yield"].map((l) => <Chip key={l} label={l} />)}
-                </div>
-
-                {/* Center icon + Liquidation */}
-                <div className="flex flex-col items-center gap-3 px-4">
-                  <div className="relative">
-                    <img src="/apex-logo-circle.png" alt="APEX"
-                      className="w-14 h-14 rounded-full" />
-                    <div className="absolute inset-0 rounded-full pointer-events-none"
-                      style={{ boxShadow: `0 0 24px ${LIME}40` }} />
-                  </div>
-                  <Chip label="Liquidation" />
-                </div>
-
-                {/* Right chips */}
-                <div className="flex flex-col gap-2.5">
-                  {["Staking", "Governance", "APX"].map((r) => <Chip key={r} label={r} />)}
-                </div>
-              </div>
-
-              {/* Stats row */}
-              <div className="grid grid-cols-3 mt-5 pt-5" style={{ borderTop: `1px solid ${BORDER}` }}>
-                {[
-                  { value: "$1.00", label: "USDAX Pegged", color: "hsl(0 0% 88%)" },
-                  { value: "15%",   label: "Base APY",     color: LIME },
-                  { value: "150%",  label: "Collateral",   color: EMERALD },
-                ].map((s, i) => (
-                  <div key={s.label} className="text-center py-3"
-                    style={{ borderRight: i < 2 ? `1px solid ${BORDER}` : undefined }}>
-                    <div className="text-[10px] mb-1 select-none" style={{ color: "hsl(0 0% 22%)" }}>+</div>
-                    <div className="text-lg font-black font-mono" style={{ color: s.color }}>{s.value}</div>
-                    <div className="text-[9px] uppercase tracking-widest mt-1" style={{ color: "hsl(0 0% 28%)" }}>
-                      {s.label}
-                    </div>
-                  </div>
-                ))}
+              <p className="text-[9px] font-mono tracking-[0.22em] uppercase mb-1"
+                style={{ color: "hsl(0 0% 26%)" }}>
+                Base APY
+              </p>
+              <p className="text-4xl font-black font-mono" style={{ color: LIME, textShadow: `0 0 20px ${LIME}60` }}>
+                15%
+              </p>
+              <p className="text-[11px] mt-3 leading-relaxed" style={{ color: "hsl(0 0% 34%)" }}>
+                Earned by every USDAX holder<br />automatically, no action needed.
+              </p>
+              <div className="flex items-center gap-2 mt-4 pt-4" style={{ borderTop: `1px solid ${BORDER}` }}>
+                <img src="/robinhood-logo.webp" alt="Robinhood"
+                  style={{ height: 10, filter: "grayscale(1) brightness(1.8)", opacity: 0.45 }} />
+                <span className="text-[9px] font-mono" style={{ color: "hsl(0 0% 26%)" }}>
+                  Chain ID 46630
+                </span>
               </div>
             </div>
           </div>
