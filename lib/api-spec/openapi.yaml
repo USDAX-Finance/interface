@@ -3,13 +3,22 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: ArchonX Protocol API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: protocol
+    description: Protocol-level stats and data
+  - name: positions
+    description: Vault/collateral positions
+  - name: staking
+    description: AKX staking operations
+  - name: liquidations
+    description: Liquidation operations
+
 paths:
   /healthz:
     get:
@@ -24,6 +33,279 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /protocol/stats:
+    get:
+      operationId: getProtocolStats
+      tags: [protocol]
+      summary: Get protocol-level stats
+      responses:
+        "200":
+          description: Protocol stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProtocolStats"
+
+  /protocol/activity:
+    get:
+      operationId: listProtocolActivity
+      tags: [protocol]
+      summary: Recent protocol activity feed
+      responses:
+        "200":
+          description: Activity events
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActivityEvent"
+
+  /protocol/collateral-breakdown:
+    get:
+      operationId: getCollateralBreakdown
+      tags: [protocol]
+      summary: Collateral breakdown by token
+      responses:
+        "200":
+          description: Breakdown by token
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CollateralBreakdown"
+
+  /protocol/health-distribution:
+    get:
+      operationId: getHealthDistribution
+      tags: [protocol]
+      summary: Distribution of health factors across all positions
+      responses:
+        "200":
+          description: Health factor distribution
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/HealthBucket"
+
+  /positions:
+    get:
+      operationId: listPositions
+      tags: [positions]
+      summary: List all vault positions
+      responses:
+        "200":
+          description: All positions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Position"
+    post:
+      operationId: createPosition
+      tags: [positions]
+      summary: Open a new vault (deposit collateral + mint USDAX)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PositionInput"
+      responses:
+        "201":
+          description: Position created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Position"
+
+  /positions/{id}:
+    get:
+      operationId: getPosition
+      tags: [positions]
+      summary: Get a single position
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Position found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Position"
+        "404":
+          description: Not found
+    patch:
+      operationId: updatePosition
+      tags: [positions]
+      summary: Update position (adjust collateral or debt)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PositionUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Position"
+    delete:
+      operationId: closePosition
+      tags: [positions]
+      summary: Close position (redeem all collateral)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Closed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Position"
+
+  /staking/stats:
+    get:
+      operationId: getStakingStats
+      tags: [staking]
+      summary: Global staking stats
+      responses:
+        "200":
+          description: Staking stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StakingStats"
+
+  /staking/positions:
+    get:
+      operationId: listStakingPositions
+      tags: [staking]
+      summary: All user staking positions
+      responses:
+        "200":
+          description: Staking positions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/StakingPosition"
+    post:
+      operationId: stakeAkx
+      tags: [staking]
+      summary: Stake AKX tokens
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StakeInput"
+      responses:
+        "201":
+          description: Staked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StakingPosition"
+
+  /staking/positions/{id}/unstake:
+    post:
+      operationId: unstakeAkx
+      tags: [staking]
+      summary: Initiate unstake (7-day cooldown)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UnstakeInput"
+      responses:
+        "200":
+          description: Unstake initiated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StakingPosition"
+
+  /staking/positions/{id}/claim:
+    post:
+      operationId: claimRewards
+      tags: [staking]
+      summary: Claim pending rewards
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Claimed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StakingPosition"
+
+  /liquidations:
+    get:
+      operationId: listLiquidations
+      tags: [liquidations]
+      summary: List positions eligible or at-risk for liquidation
+      responses:
+        "200":
+          description: At-risk positions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LiquidationTarget"
+    post:
+      operationId: executeLiquidation
+      tags: [liquidations]
+      summary: Execute liquidation on an undercollateralized position
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LiquidationInput"
+      responses:
+        "200":
+          description: Liquidation executed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LiquidationResult"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +316,327 @@ components:
       required:
         - status
 
+    ProtocolStats:
+      type: object
+      required:
+        - tvlUsd
+        - usdaxSupply
+        - akxPrice
+        - akxMarketCap
+        - totalPositions
+        - totalStaked
+        - totalStakedUsd
+        - baseApy
+        - activeStakers
+        - atRiskPositions
+        - collateralRatio
+      properties:
+        tvlUsd:
+          type: number
+        usdaxSupply:
+          type: number
+        akxPrice:
+          type: number
+        akxMarketCap:
+          type: number
+        totalPositions:
+          type: integer
+        totalStaked:
+          type: number
+        totalStakedUsd:
+          type: number
+        baseApy:
+          type: number
+        activeStakers:
+          type: integer
+        atRiskPositions:
+          type: integer
+        collateralRatio:
+          type: number
+
+    ActivityEvent:
+      type: object
+      required:
+        - id
+        - type
+        - user
+        - amount
+        - token
+        - timestamp
+        - txHash
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+          enum: [MINT, BURN, DEPOSIT, REDEEM, STAKE, UNSTAKE, CLAIM, LIQUIDATE]
+        user:
+          type: string
+        amount:
+          type: number
+        token:
+          type: string
+        timestamp:
+          type: string
+        txHash:
+          type: string
+
+    CollateralBreakdown:
+      type: object
+      required:
+        - token
+        - symbol
+        - amountLocked
+        - valueUsd
+        - percentage
+        - price
+      properties:
+        token:
+          type: string
+        symbol:
+          type: string
+        amountLocked:
+          type: number
+        valueUsd:
+          type: number
+        percentage:
+          type: number
+        price:
+          type: number
+
+    HealthBucket:
+      type: object
+      required:
+        - range
+        - count
+        - riskLevel
+      properties:
+        range:
+          type: string
+        count:
+          type: integer
+        riskLevel:
+          type: string
+          enum: [critical, warning, healthy, safe]
+
+    Position:
+      type: object
+      required:
+        - id
+        - owner
+        - collateralToken
+        - collateralAmount
+        - collateralValueUsd
+        - usdaxMinted
+        - healthFactor
+        - collateralRatio
+        - status
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: integer
+        owner:
+          type: string
+        collateralToken:
+          type: string
+        collateralAmount:
+          type: number
+        collateralValueUsd:
+          type: number
+        usdaxMinted:
+          type: number
+        healthFactor:
+          type: number
+        collateralRatio:
+          type: number
+        status:
+          type: string
+          enum: [active, closed, liquidated]
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+
+    PositionInput:
+      type: object
+      required:
+        - owner
+        - collateralToken
+        - collateralAmount
+        - usdaxToMint
+      properties:
+        owner:
+          type: string
+        collateralToken:
+          type: string
+          enum: [WETH, WBTC]
+        collateralAmount:
+          type: number
+        usdaxToMint:
+          type: number
+
+    PositionUpdate:
+      type: object
+      properties:
+        collateralAmount:
+          type: ["number", "null"]
+        usdaxMinted:
+          type: ["number", "null"]
+
+    StakingStats:
+      type: object
+      required:
+        - totalStaked
+        - totalStakedUsd
+        - baseApy
+        - effectiveApy
+        - totalRewardsDistributed
+        - activeStakers
+        - rewardRatePerDay
+      properties:
+        totalStaked:
+          type: number
+        totalStakedUsd:
+          type: number
+        baseApy:
+          type: number
+        effectiveApy:
+          type: number
+        totalRewardsDistributed:
+          type: number
+        activeStakers:
+          type: integer
+        rewardRatePerDay:
+          type: number
+
+    StakingPosition:
+      type: object
+      required:
+        - id
+        - owner
+        - stakedAmount
+        - pendingRewards
+        - totalClaimed
+        - stakedAt
+        - cooldownEndsAt
+        - status
+        - apy
+      properties:
+        id:
+          type: integer
+        owner:
+          type: string
+        stakedAmount:
+          type: number
+        pendingRewards:
+          type: number
+        totalClaimed:
+          type: number
+        stakedAt:
+          type: string
+        cooldownEndsAt:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [active, cooldown, unstaked]
+        apy:
+          type: number
+
+    StakeInput:
+      type: object
+      required:
+        - owner
+        - amount
+      properties:
+        owner:
+          type: string
+        amount:
+          type: number
+
+    UnstakeInput:
+      type: object
+      required:
+        - amount
+      properties:
+        amount:
+          type: number
+
+    LiquidationTarget:
+      type: object
+      required:
+        - positionId
+        - owner
+        - collateralToken
+        - collateralAmount
+        - collateralValueUsd
+        - usdaxDebt
+        - healthFactor
+        - maxLiquidatable
+        - liquidationBonus
+        - riskLevel
+      properties:
+        positionId:
+          type: integer
+        owner:
+          type: string
+        collateralToken:
+          type: string
+        collateralAmount:
+          type: number
+        collateralValueUsd:
+          type: number
+        usdaxDebt:
+          type: number
+        healthFactor:
+          type: number
+        maxLiquidatable:
+          type: number
+        liquidationBonus:
+          type: number
+        riskLevel:
+          type: string
+          enum: [critical, warning]
+
+    LiquidationInput:
+      type: object
+      required:
+        - positionId
+        - liquidator
+        - debtToCover
+      properties:
+        positionId:
+          type: integer
+        liquidator:
+          type: string
+        debtToCover:
+          type: number
+
+    LiquidationResult:
+      type: object
+      required:
+        - positionId
+        - liquidator
+        - debtCovered
+        - collateralSeized
+        - bonusCollateral
+        - totalCollateralReceived
+        - newHealthFactor
+        - timestamp
+      properties:
+        positionId:
+          type: integer
+        liquidator:
+          type: string
+        debtCovered:
+          type: number
+        collateralSeized:
+          type: number
+        bonusCollateral:
+          type: number
+        totalCollateralReceived:
+          type: number
+        newHealthFactor:
+          type: number
+        timestamp:
+          type: string
