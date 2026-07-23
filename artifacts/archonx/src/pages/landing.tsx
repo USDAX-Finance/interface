@@ -594,71 +594,44 @@ function Hero() {
 
 /* ─────────────────────── WHAT IS USDAX ─────────────────────── */
 
-function BracketCard({ title, desc, color, offset = false }: {
+function BracketCard({ title, desc, offset = false }: {
   title: string;
   desc: string;
-  color: string;
+  color?: string;
   offset?: boolean;
 }) {
-  const BW = 18;
+  const BW = 16;
 
   return (
     <div
-      className="relative p-7 overflow-hidden transition-all duration-300 cursor-default"
+      className="relative overflow-hidden rounded-xl transition-all duration-300 cursor-default"
       style={{
         marginLeft: offset ? "2.5rem" : "0",
-        background: "hsl(0 0% 7%)",
-        border: `1px solid hsl(0 0% 12%)`,
-        borderTop: `1px solid ${color}30`,
-      }}
-      onMouseEnter={(e) => {
-        const el = e.currentTarget as HTMLElement;
-        el.style.borderColor = `${color}40`;
-        el.style.borderTopColor = `${color}70`;
-        el.style.background = "hsl(0 0% 8%)";
-      }}
-      onMouseLeave={(e) => {
-        const el = e.currentTarget as HTMLElement;
-        el.style.borderColor = "hsl(0 0% 12%)";
-        el.style.borderTopColor = `${color}30`;
-        el.style.background = "hsl(0 0% 7%)";
+        background: LIME,
       }}
     >
-      {/* Top-left color bloom */}
-      <div className="pointer-events-none absolute -top-6 -left-6 w-32 h-32 rounded-full" style={{
-        background: `radial-gradient(circle, ${color}18 0%, transparent 70%)`,
-        filter: "blur(16px)",
-      }} />
+      {/* Corner L-brackets — black */}
+      {[
+        { top: 0, left: 0,   borderTop:    `2px solid hsl(0 0% 4%)`, borderLeft:  `2px solid hsl(0 0% 4%)` },
+        { top: 0, right: 0,  borderTop:    `2px solid hsl(0 0% 4%)`, borderRight: `2px solid hsl(0 0% 4%)` },
+        { bottom: 0, left: 0,  borderBottom: `2px solid hsl(0 0% 4%)`, borderLeft:  `2px solid hsl(0 0% 4%)` },
+        { bottom: 0, right: 0, borderBottom: `2px solid hsl(0 0% 4%)`, borderRight: `2px solid hsl(0 0% 4%)` },
+      ].map((s, i) => (
+        <span key={i} className="absolute pointer-events-none"
+          style={{ ...s, width: BW, height: BW, display: "block" }} />
+      ))}
 
-      {/* Corner brackets */}
-      <span className="absolute top-0 left-0" style={{
-        display: "block", width: BW, height: BW,
-        borderTop: `2px solid ${color}`, borderLeft: `2px solid ${color}`,
-      }} />
-      <span className="absolute top-0 right-0" style={{
-        display: "block", width: BW, height: BW,
-        borderTop: `2px solid ${color}`, borderRight: `2px solid ${color}`,
-      }} />
-      <span className="absolute bottom-0 left-0" style={{
-        display: "block", width: BW, height: BW,
-        borderBottom: `2px solid ${color}`, borderLeft: `2px solid ${color}`,
-      }} />
-      <span className="absolute bottom-0 right-0" style={{
-        display: "block", width: BW, height: BW,
-        borderBottom: `2px solid ${color}`, borderRight: `2px solid ${color}`,
-      }} />
+      {/* Subtle dark watermark "+" */}
+      <div className="pointer-events-none absolute right-5 top-4 font-black select-none"
+        style={{ fontSize: 64, color: "hsl(0 0% 4%)", opacity: 0.06, lineHeight: 1 }}>+</div>
 
       {/* Content */}
-      <div className="relative z-10">
-        <p className="text-[11px] font-black tracking-[0.22em] uppercase mb-5"
-          style={{ color }}>
+      <div className="relative z-10 p-6">
+        <p className="text-[10px] font-black tracking-[0.26em] uppercase mb-4"
+          style={{ color: "hsl(0 0% 18%)" }}>
           {title}
         </p>
-        <p className="text-[26px] font-extralight text-center leading-none select-none my-4"
-          style={{ color: `${color}50` }}>
-          +
-        </p>
-        <p className="text-[12px] leading-relaxed mt-5" style={{ color: "hsl(0 0% 40%)" }}>
+        <p className="text-[13px] leading-relaxed" style={{ color: "hsl(0 0% 16%)" }}>
           {desc}
         </p>
       </div>
