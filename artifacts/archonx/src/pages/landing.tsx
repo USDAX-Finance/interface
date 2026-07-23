@@ -108,12 +108,7 @@ function Nav() {
         {/* Logo */}
         <Link href="/">
           <div className="flex items-center gap-2.5 cursor-pointer">
-            <div
-              className="w-7 h-7 rounded flex items-center justify-center font-black text-[11px]"
-              style={{ background: LIME, color: "hsl(0 0% 4%)" }}
-            >
-              AP
-            </div>
+            <img src="/favicon.png" alt="APEX" className="w-7 h-7 rounded" />
             <span className="text-foreground font-bold text-base tracking-tight">
               APEX
             </span>
