@@ -453,14 +453,16 @@ function Hero() {
             src="/hands.png"
             alt=""
             style={{
-              width: "clamp(680px, 80vw, 1080px)",
-              height: "auto",
-              objectFit: "contain",
-              marginTop: "-6%",
+              position: "absolute",
+              inset: 0,
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              objectPosition: "center 30%",
               filter: [
-                "drop-shadow(0 0 16px hsl(79 100% 57% / 0.60))",
-                "drop-shadow(0 0 50px hsl(79 100% 57% / 0.28))",
-                "drop-shadow(0 0 100px hsl(79 100% 57% / 0.12))",
+                "drop-shadow(0 0 18px hsl(79 100% 57% / 0.65))",
+                "drop-shadow(0 0 55px hsl(79 100% 57% / 0.30))",
+                "drop-shadow(0 0 110px hsl(79 100% 57% / 0.13))",
               ].join(" "),
             }}
           />
