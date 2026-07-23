@@ -439,16 +439,7 @@ function Hero() {
             borderRight: `3px solid ${LIME}`, borderBottom: `3px solid ${LIME}`, opacity: 0.55 }} />
 
         {/* ── HANDS — single composited image ── */}
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center" style={{ zIndex: 2 }}>
-          {/* Soft glow bloom behind the fingertips meeting point */}
-          <div style={{
-            position: "absolute",
-            width: 320, height: 200,
-            top: "42%", left: "50%",
-            transform: "translate(-50%, -50%)",
-            background: `radial-gradient(ellipse at 50% 50%, ${LIME}22 0%, transparent 70%)`,
-            filter: "blur(36px)",
-          }} />
+        <div className="pointer-events-none absolute inset-0" style={{ zIndex: 2 }}>
           <img
             src="/hands.png"
             alt=""
@@ -467,6 +458,32 @@ function Hero() {
             }}
           />
         </div>
+
+        {/* ── VIGNETTE OVERLAYS — above image, below UI ── */}
+        {/* Left shadow — keeps headline readable */}
+        <div className="pointer-events-none absolute inset-y-0 left-0" style={{
+          zIndex: 3,
+          width: "45%",
+          background: "linear-gradient(to right, hsl(0 0% 2%) 0%, hsl(0 0% 2% / 0.85) 40%, transparent 100%)",
+        }} />
+        {/* Bottom shadow — keeps CTAs + tags readable */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0" style={{
+          zIndex: 3,
+          height: "50%",
+          background: "linear-gradient(to top, hsl(0 0% 2%) 0%, hsl(0 0% 2% / 0.75) 45%, transparent 100%)",
+        }} />
+        {/* Top shadow — softens top edge */}
+        <div className="pointer-events-none absolute inset-x-0 top-0" style={{
+          zIndex: 3,
+          height: "18%",
+          background: "linear-gradient(to bottom, hsl(0 0% 2%) 0%, transparent 100%)",
+        }} />
+        {/* Right shadow — softens right edge */}
+        <div className="pointer-events-none absolute inset-y-0 right-0" style={{
+          zIndex: 3,
+          width: "12%",
+          background: "linear-gradient(to left, hsl(0 0% 2%) 0%, transparent 100%)",
+        }} />
 
         {/* ── BOTTOM CONTENT ── */}
         <div className="absolute inset-x-0 bottom-0 z-10 flex items-end justify-between px-10 pb-10">
