@@ -4,6 +4,7 @@ import {
   Building2, Code2, Vault, ChevronRight,
   Twitter, Github, MessageSquare, FileText,
   Droplets, HandMetal, Leaf,
+  Briefcase, Terminal, Landmark,
 } from "lucide-react";
 
 /* ─────────────────────── Constants ─────────────────────── */
@@ -911,24 +912,34 @@ function Features() {
 /* ─────────────────────── USE CASES ─────────────────────── */
 
 function UseCases() {
+  const BW = 14;
   const cases = [
     {
-      icon: Building2,
+      icon: Briefcase,
+      label: "01",
       title: "Business",
-      desc: "Offer USDAX as a yield-bearing product on your platform. Boost user engagement with passive income on idle capital.",
+      headline: "Yield for your platform.",
+      desc: "Integrate USDAX as a yield-bearing product directly on your platform. Offer passive income on idle user capital, boost engagement, and differentiate with native DeFi infrastructure — no custody required.",
       color: LIME,
+      stat: { val: "0.5%", sub: "annual stability fee" },
     },
     {
-      icon: Code2,
+      icon: Terminal,
+      label: "02",
       title: "Developers",
-      desc: "Integrate via simple ERC-20 interfaces. Leverage open-source contracts for collateral management and staking.",
-      color: "hsl(0 0% 60%)",
+      headline: "Build on open contracts.",
+      desc: "Mint, redeem, and stake via clean ERC-20 interfaces and a typed TypeScript SDK. All contracts are open-source and audited. Deploy integrations on Robinhood Chain in hours, not weeks.",
+      color: "hsl(0 0% 68%)",
+      stat: { val: "SDK", sub: "TypeScript · v0.1" },
     },
     {
-      icon: Vault,
+      icon: Landmark,
+      label: "03",
       title: "Treasuries",
-      desc: "Diversify treasury with a stable, yield-bearing asset. Earn on idle capital while maintaining full dollar parity.",
+      headline: "Stable yield on idle capital.",
+      desc: "Park treasury funds in USDAX and stake APX to earn real protocol revenue. Full dollar parity, on-chain transparency, and no lock-up periods — purpose-built for DAO and corporate treasury management.",
       color: EMERALD,
+      stat: { val: "40%+", sub: "APX staking APY" },
     },
   ];
 
@@ -939,54 +950,88 @@ function UseCases() {
       style={{ borderTop: `1px solid ${BORDER}` }}
     >
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-16">
+
+        {/* Header */}
+        <div className="mb-14">
           <Tag>Use Cases</Tag>
-          <h2 className="text-4xl md:text-5xl font-extrabold tracking-tight">
-            Built for{" "}
-            <span className="gradient-text">Everyone</span>
+          <h2 className="font-black text-4xl md:text-5xl uppercase leading-tight mb-4"
+            style={{ color: "hsl(0 0% 94%)" }}>
+            Built for <span style={{ color: LIME }}>Every</span><br className="hidden md:block" />
+            Participant.
           </h2>
-          <p
-            className="max-w-xl mx-auto mt-4 text-[15px] leading-relaxed"
-            style={{ color: "hsl(0 0% 40%)" }}
-          >
-            APEX offers use cases for developers, businesses, and treasuries seeking secure,
-            profitable stablecoin integrations.
+          <p className="text-[14px] max-w-md" style={{ color: "hsl(0 0% 38%)" }}>
+            Whether you're a business, a developer, or a treasury — APEX Protocol has
+            a purpose-built integration for you.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-4">
+        {/* Cards */}
+        <div className="grid md:grid-cols-3 gap-5">
           {cases.map((c) => {
             const Icon = c.icon;
             return (
               <div
                 key={c.title}
-                className="rounded-xl p-8 card-hover"
-                style={{
-                  background: CARD_BG,
-                  border: `1px solid ${BORDER}`,
-                }}
+                className="relative rounded-xl overflow-hidden flex flex-col"
+                style={{ background: CARD_BG, border: `1px solid ${BORDER}` }}
               >
-                <div
-                  className="w-11 h-11 rounded flex items-center justify-center mb-6"
-                  style={{ background: `${c.color}10`, border: `1px solid ${c.color}18` }}
-                >
-                  <Icon className="h-5 w-5" style={{ color: c.color }} />
+                {/* Top accent line */}
+                <div className="h-0.5 w-full" style={{ background: `${c.color}60` }} />
+
+                {/* Icon block */}
+                <div className="px-7 pt-8 pb-6"
+                  style={{ borderBottom: `1px solid ${BORDER}` }}>
+                  {/* Corner brackets */}
+                  <span className="absolute top-1 left-0" style={{ display:"block", width: BW, height: BW, borderTop:`2px solid ${c.color}40`, borderLeft:`2px solid ${c.color}40` }} />
+                  <span className="absolute top-1 right-0" style={{ display:"block", width: BW, height: BW, borderTop:`2px solid ${c.color}40`, borderRight:`2px solid ${c.color}40` }} />
+
+                  {/* Big icon */}
+                  <div className="relative inline-flex items-center justify-center rounded-2xl mb-5"
+                    style={{
+                      width: 72, height: 72,
+                      background: `${c.color}10`,
+                      border: `1px solid ${c.color}25`,
+                    }}>
+                    <Icon style={{ width: 32, height: 32, color: c.color, strokeWidth: 1.5 }} />
+                  </div>
+
+                  {/* Number + title row */}
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="font-mono text-[10px] tracking-widest"
+                      style={{ color: `${c.color}70` }}>{c.label}</span>
+                    <span className="w-4 h-px" style={{ background: `${c.color}30` }} />
+                    <span className="font-black text-[11px] tracking-[0.2em] uppercase"
+                      style={{ color: `${c.color}90` }}>{c.title}</span>
+                  </div>
+                  <h3 className="font-black text-[20px] leading-tight"
+                    style={{ color: "hsl(0 0% 90%)" }}>
+                    {c.headline}
+                  </h3>
                 </div>
-                <h3 className="text-lg font-bold mb-3">{c.title}</h3>
-                <p
-                  className="text-[13px] leading-relaxed"
-                  style={{ color: "hsl(0 0% 40%)" }}
-                >
-                  {c.desc}
-                </p>
-                <Link href="/app">
-                  <span
-                    className="inline-flex items-center gap-1.5 mt-6 text-[13px] font-semibold transition-all hover:gap-2.5"
-                    style={{ color: c.color }}
-                  >
-                    Launch App <ChevronRight className="h-3.5 w-3.5" />
-                  </span>
-                </Link>
+
+                {/* Body */}
+                <div className="px-7 py-6 flex-1 flex flex-col">
+                  <p className="text-[13px] leading-relaxed flex-1 mb-6"
+                    style={{ color: "hsl(0 0% 40%)" }}>
+                    {c.desc}
+                  </p>
+
+                  {/* Stat pill */}
+                  <div className="flex items-center justify-between mb-5 px-4 py-3 rounded-lg"
+                    style={{ background: "hsl(0 0% 5%)", border: `1px solid ${BORDER}` }}>
+                    <span className="font-black text-[22px]" style={{ color: c.color }}>{c.stat.val}</span>
+                    <span className="text-[11px] text-right" style={{ color: "hsl(0 0% 30%)" }}>{c.stat.sub}</span>
+                  </div>
+
+                  <Link href="/app">
+                    <button className="w-full inline-flex items-center justify-center gap-2 py-2.5 rounded-lg text-[13px] font-semibold transition-all"
+                      style={{ border: `1px solid ${c.color}30`, color: c.color }}
+                      onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = `${c.color}10`; }}
+                      onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}>
+                      Get Started <ChevronRight className="h-4 w-4" />
+                    </button>
+                  </Link>
+                </div>
               </div>
             );
           })}
