@@ -9,9 +9,8 @@ import {
   PieChart, Pie, Cell, BarChart, Bar,
   XAxis, YAxis, Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
-import { formatCurrency, formatNumber, formatPercentage, formatAddress } from "@/lib/utils";
+import { formatCurrency, formatNumber, formatPercentage, formatAddress, formatTimeAgoUTC } from "@/lib/utils";
 import { Activity, ShieldAlert, Coins, TrendingUp, AlertTriangle, Zap } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
 
 /* ─── design tokens ─── */
 const LIME     = "hsl(79 100% 57%)";
@@ -310,7 +309,7 @@ export default function Dashboard() {
                   </div>
                   <div className="text-right flex-shrink-0 ml-2 space-y-1">
                     <div className="font-mono text-[10px]" style={{ color: "hsl(0 0% 28%)" }}>
-                      {formatDistanceToNow(new Date(event.timestamp), { addSuffix: true })}
+                      {formatTimeAgoUTC(event.timestamp)}
                     </div>
                     <a
                       href={`https://explorer.robinhood.com/tx/${event.txHash}`}

@@ -6,7 +6,7 @@ import {
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
-import { formatCurrency, formatNumber, formatPercentage } from "@/lib/utils";
+import { formatCurrency, formatNumber, formatPercentage, formatShortDateUTC } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { TrendingUp, Users, Coins, Zap, Clock, ArrowDownRight, ChevronRight, AlertTriangle } from "lucide-react";
 
@@ -286,7 +286,7 @@ function PositionCard({
           </span>
           <span className="w-0.5 h-0.5 rounded-full" style={{ background: "hsl(0 0% 22%)" }} />
           <span className="font-mono text-[10px]" style={{ color: "hsl(0 0% 26%)" }}>
-            Since {new Date(pos.stakedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+            Since {formatShortDateUTC(pos.stakedAt)}
           </span>
         </div>
       </div>
