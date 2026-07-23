@@ -438,31 +438,29 @@ function Hero() {
           style={{ right: "44%", top: "50%", width: 44, height: 90,
             borderRight: `3px solid ${LIME}`, borderBottom: `3px solid ${LIME}`, opacity: 0.55 }} />
 
-        {/* ── LEFT HAND (upper, open palm reaching right) ── */}
-        <div className="pointer-events-none absolute"
-          style={{ left: "-4%", top: "4%", width: "48vw", maxWidth: 580, zIndex: 2 }}>
-          <img src="/hand-left.png" alt=""
+        {/* ── HANDS — single composited image ── */}
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center" style={{ zIndex: 2 }}>
+          {/* Soft glow bloom behind the fingertips meeting point */}
+          <div style={{
+            position: "absolute",
+            width: 320, height: 200,
+            top: "42%", left: "50%",
+            transform: "translate(-50%, -50%)",
+            background: `radial-gradient(ellipse at 50% 50%, ${LIME}22 0%, transparent 70%)`,
+            filter: "blur(36px)",
+          }} />
+          <img
+            src="/hands.png"
+            alt=""
             style={{
-              width: "100%", height: "auto",
-              transform: "rotate(-8deg)",
+              width: "clamp(680px, 80vw, 1080px)",
+              height: "auto",
+              objectFit: "contain",
+              marginTop: "-6%",
               filter: [
-                "drop-shadow(0 0 22px hsl(79 100% 57% / 0.55))",
-                "drop-shadow(0 0 60px hsl(79 100% 57% / 0.2))",
-              ].join(" "),
-            }}
-          />
-        </div>
-
-        {/* ── RIGHT HAND (lower, pointing finger left) ── */}
-        <div className="pointer-events-none absolute"
-          style={{ right: "-4%", bottom: "22%", width: "44vw", maxWidth: 520, zIndex: 2 }}>
-          <img src="/hand-right.png" alt=""
-            style={{
-              width: "100%", height: "auto",
-              transform: "scaleX(-1) rotate(-6deg)",
-              filter: [
-                "drop-shadow(0 0 20px hsl(79 100% 57% / 0.50))",
-                "drop-shadow(0 0 55px hsl(79 100% 57% / 0.18))",
+                "drop-shadow(0 0 16px hsl(79 100% 57% / 0.60))",
+                "drop-shadow(0 0 50px hsl(79 100% 57% / 0.28))",
+                "drop-shadow(0 0 100px hsl(79 100% 57% / 0.12))",
               ].join(" "),
             }}
           />
