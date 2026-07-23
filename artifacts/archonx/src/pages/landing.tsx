@@ -223,15 +223,22 @@ function MockDashboard() {
           >
             Yield-bearing stablecoin
           </p>
-          <div className="flex items-center justify-center gap-3">
-            <span
-              className="text-5xl font-black leading-none select-none"
-              style={{ color: LIME, lineHeight: 1 }}
-            >
-              (
-            </span>
+          <div className="flex items-center justify-center">
+            {/* Left brackets — outermost to innermost, opacity increases */}
+            <div className="flex items-center" style={{ gap: "-1px" }}>
+              {[0.08, 0.18, 0.42, 1].map((opacity, i) => (
+                <span
+                  key={i}
+                  className="font-black select-none"
+                  style={{ color: LIME, opacity, fontSize: 48, lineHeight: 1, letterSpacing: "-4px" }}
+                >
+                  (
+                </span>
+              ))}
+            </div>
+
             <h3
-              className="text-[17px] font-black uppercase leading-[1.2] tracking-wide"
+              className="text-[17px] font-black uppercase leading-[1.2] tracking-wide mx-4"
               style={{ color: "hsl(0 0% 92%)" }}
             >
               USDAX{" "}
@@ -241,12 +248,19 @@ function MockDashboard() {
                 ON ROBINHOOD CHAIN
               </span>
             </h3>
-            <span
-              className="text-5xl font-black leading-none select-none"
-              style={{ color: LIME, lineHeight: 1 }}
-            >
-              )
-            </span>
+
+            {/* Right brackets — innermost to outermost, opacity decreases */}
+            <div className="flex items-center" style={{ gap: "-1px" }}>
+              {[1, 0.42, 0.18, 0.08].map((opacity, i) => (
+                <span
+                  key={i}
+                  className="font-black select-none"
+                  style={{ color: LIME, opacity, fontSize: 48, lineHeight: 1, letterSpacing: "-4px" }}
+                >
+                  )
+                </span>
+              ))}
+            </div>
           </div>
         </div>
 
