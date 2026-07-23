@@ -8,11 +8,9 @@ import {
   NetworkStatsSchema,
 } from "@workspace/api-zod";
 import { eq, sql, desc, lt, and, not } from "drizzle-orm";
-import { TOKEN_PRICES, APX_PRICE } from "../lib/prices.js";
+import { TOKEN_PRICES } from "../lib/prices.js";
 
 const router: IRouter = Router();
-
-const APX_TOTAL_SUPPLY = 10_000_000;
 
 router.get("/protocol/stats", async (req, res): Promise<void> => {
   const [positionRows, stakingRows, atRiskRows] = await Promise.all([
@@ -27,17 +25,16 @@ router.get("/protocol/stats", async (req, res): Promise<void> => {
   const tvlUsd = positionRows.reduce((sum, p) => sum + Number(p.collateralValueUsd), 0);
   const usdaxSupply = positionRows.reduce((sum, p) => sum + Number(p.usdaxMinted), 0);
   const totalStaked = stakingRows.reduce((sum, s) => sum + Number(s.stakedAmount), 0);
-  const totalStakedUsd = totalStaked * APX_PRICE;
   const collateralRatio = usdaxSupply > 0 ? tvlUsd / usdaxSupply : 0;
 
   const stats = {
-    tvlUsd: tvlUsd + totalStakedUsd,
+    tvlUsd,
     usdaxSupply,
-    apxPrice: APX_PRICE,
-    apxMarketCap: APX_PRICE * APX_TOTAL_SUPPLY,
+    apxPrice:      0,   // set from your price oracle before launch
+    apxMarketCap:  0,   // set from your price oracle before launch
     totalPositions: positionRows.length,
     totalStaked,
-    totalStakedUsd,
+    totalStakedUsd: 0,  // requires APX price oracle
     baseApy: 15,
     activeStakers: stakingRows.length,
     atRiskPositions: atRiskRows.length,
@@ -146,7 +143,7 @@ router.get("/protocol/network-stats", async (_req, res): Promise<void> => {
 
   const tvlUsd     = positionRows.reduce((s, p) => s + Number(p.collateralValueUsd), 0);
   const usdaxSupply= positionRows.reduce((s, p) => s + Number(p.usdaxMinted), 0);
-  const totalStakedUsd = stakingRows.reduce((s, p) => s + Number(p.stakedAmount), 0) * APX_PRICE;
+  const totalStakedUsd = 0; // requires APX price oracle
   const uniqueUsers= new Set(events.map((e) => e.user)).size;
 
   res.json(NetworkStatsSchema.parse({

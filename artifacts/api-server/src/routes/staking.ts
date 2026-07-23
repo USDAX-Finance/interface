@@ -12,7 +12,6 @@ import {
   ClaimRewardsResponse,
 } from "@workspace/api-zod";
 import { eq, and } from "drizzle-orm";
-import { APX_PRICE } from "../lib/prices.js";
 import { generateTxHash } from "../lib/txHash.js";
 
 const BASE_APY = 15;
@@ -64,7 +63,7 @@ router.get("/staking/stats", async (_req, res): Promise<void> => {
 
   const stats = {
     totalStaked,
-    totalStakedUsd: totalStaked * APX_PRICE,
+    totalStakedUsd: 0, // requires APX price oracle
     baseApy: BASE_APY,
     effectiveApy: Math.round(effectiveApy * 100) / 100,
     totalRewardsDistributed: totalClaimed + pendingSum,

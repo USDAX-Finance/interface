@@ -4,6 +4,7 @@ import {
   useListProtocolActivity,
   useGetCollateralBreakdown,
   useGetHealthDistribution,
+  useGetNetworkStats,
 } from "@workspace/api-client-react";
 import {
   PieChart, Pie, Cell, BarChart, Bar,
@@ -141,6 +142,7 @@ export default function Dashboard() {
   const { data: activity,  isLoading: activityLoading }  = useListProtocolActivity();
   const { data: collateral,isLoading: collateralLoading } = useGetCollateralBreakdown();
   const { data: health,    isLoading: healthLoading }     = useGetHealthDistribution();
+  const { data: netStats }                                = useGetNetworkStats();
 
   if (statsLoading || activityLoading || collateralLoading || healthLoading) {
     return <LoadingPulse label="Syncing protocol state..." />;
@@ -189,9 +191,9 @@ export default function Dashboard() {
           accent={EMERALD}
         />
         <StatCard
-          title="APX Market"
-          value={formatCurrency(stats.apxPrice)}
-          sub={`MCap: ${formatCurrency(stats.apxMarketCap)} · APY: ${formatPercentage(stats.baseApy)}`}
+          title="Vol 24h"
+          value={netStats ? formatCurrency(netStats.volume24hUsd) : "—"}
+          sub={netStats ? `${netStats.transactions24h} txns · ${netStats.uniqueUsers} users` : "Loading…"}
           icon={TrendingUp}
           accent={LIME}
         />

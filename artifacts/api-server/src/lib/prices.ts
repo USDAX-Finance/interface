@@ -21,5 +21,9 @@ export const TOKEN_PRICES: Record<string, number> = {
   AAPL:     230.00,
 };
 
-/** APX governance token price (testnet reference). */
-export const APX_PRICE = 0.0082;
+/**
+ * APX governance token price.
+ * Set this from your live price feed before launch.
+ * Returns 0 until configured — the API will surface 0 for APX-derived fields.
+ */
+export const APX_PRICE = 0;
