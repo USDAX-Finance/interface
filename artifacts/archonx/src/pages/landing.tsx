@@ -283,17 +283,13 @@ function MockDashboard() {
               {leftChips.map((l) => <Chip key={l} label={l} />)}
             </div>
 
-            {/* Center AP icon */}
+            {/* Center logo icon */}
             <div className="flex flex-col items-center gap-2 px-2">
-              <div
-                className="flex items-center justify-center w-12 h-12 rounded-full font-black text-sm"
-                style={{
-                  background: LIME,
-                  color: "hsl(0 0% 4%)",
-                }}
-              >
-                AP
-              </div>
+              <img
+                src="/apex-logo-circle.png"
+                alt="APEX"
+                className="w-12 h-12 rounded-full"
+              />
               {/* Liquidation chip below center icon */}
               <div
                 className="text-[10px] font-semibold px-2.5 py-1 rounded-md whitespace-nowrap"
