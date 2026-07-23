@@ -531,39 +531,6 @@ function Hero() {
 
 /* ─────────────────────── TRUSTED BY ─────────────────────── */
 
-function TrustedBy() {
-  const logos = [
-    "CHAINLINK", "Robinhood", "OpenAI", "Perplexity",
-    "KUKUIN", "MGC", "NxGen", "Matter Labs",
-    "DEXTools", "NGRAVE", "emergent", "Lovalib",
-  ];
-
-  return (
-    <section className="py-16 px-8">
-      <div className="max-w-7xl mx-auto">
-        <p
-          className="text-center text-[10px] uppercase tracking-[0.2em] font-semibold mb-10"
-          style={{ color: "hsl(0 0% 28%)" }}
-        >
-          Backed by the best companies &amp; visionary angels
-        </p>
-        <div className="flex flex-wrap justify-center gap-x-10 gap-y-4">
-          {logos.map((name) => (
-            <span
-              key={name}
-              className="text-[13px] font-semibold tracking-wider cursor-default transition-colors duration-200"
-              style={{ color: "hsl(0 0% 20%)" }}
-              onMouseEnter={(e) => ((e.target as HTMLElement).style.color = "hsl(0 0% 55%)")}
-              onMouseLeave={(e) => ((e.target as HTMLElement).style.color = "hsl(0 0% 20%)")}
-            >
-              {name}
-            </span>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
 
 /* ─────────────────────── WHAT IS USDAX ─────────────────────── */
 
@@ -1209,7 +1176,6 @@ export default function Landing() {
     <div className="min-h-screen bg-background text-foreground overflow-x-hidden">
       <Nav />
       <Hero />
-      <TrustedBy />
       <WhatIsUSDax />
       <Features />
       <UseCases />
