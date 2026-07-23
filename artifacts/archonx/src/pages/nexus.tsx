@@ -339,13 +339,6 @@ function CollateralMatrix({ live }: { live: any[] }) {
 
 /* Peg Mechanics */
 function PegMechanics() {
-  const pegStats = [
-    { label: "24h Deviation", val: "< 0.01%", color: EMERALD },
-    { label: "Redemptions",   val: "Instant",  color: LIME    },
-    { label: "Oracle Feeds",  val: "4 sources",color: LIME    },
-    { label: "Peg Uptime",    val: "99.98%",   color: EMERALD },
-  ];
-
   const mechanisms = [
     { title: "Redemption Floor",
       body: "Any holder can always redeem 1 USDAX for $1.00 of collateral at face value — creating a hard price floor." },
@@ -418,7 +411,12 @@ function PegMechanics() {
             </div>
 
             <div className="grid grid-cols-2 gap-2">
-              {pegStats.map((s) => (
+              {[
+                { label: "Redemption", val: "Instant", color: LIME },
+                { label: "Mint Fee",   val: "0.50%",   color: EMERALD },
+                { label: "Stability Fee", val: "0.50% / yr", color: LIME },
+                { label: "Peg Target", val: "$1.0000", color: EMERALD },
+              ].map((s) => (
                 <div key={s.label} className="text-center p-2 rounded-lg"
                   style={{ background: "hsl(0 0% 5%)", border: `1px solid ${BORDER}` }}>
                   <div className="font-black text-sm font-mono" style={{ color: s.color }}>{s.val}</div>
@@ -608,18 +606,28 @@ function UseCases() {
   );
 }
 
-/* Risk Params Table */
+/* Risk Params Table — values match LIQ_THRESHOLDS in api-server/src/lib/prices.ts */
 const RISK_ROWS = [
-  { asset: "WETH",   type: "Crypto", ltv: "75%", liq: "80%", bonus: "10%", ceil: "$20M",  oracle: "Chainlink + Pyth" },
-  { asset: "WBTC",   type: "Crypto", ltv: "65%", liq: "70%", bonus: "10%", ceil: "$15M",  oracle: "Chainlink + Pyth" },
-  { asset: "stETH",  type: "Yield",  ltv: "63%", liq: "68%", bonus: "10%", ceil: "$10M",  oracle: "Chainlink + Lido" },
-  { asset: "RWA-TB", type: "RWA",    ltv: "92%", liq: "95%", bonus: "5%",  ceil: "$50M",  oracle: "Ondo Daily NAV"   },
-  { asset: "RWA-RE", type: "RWA",    ltv: "68%", liq: "73%", bonus: "8%",  ceil: "$25M",  oracle: "Centrifuge Feed"  },
-  { asset: "RWA-CB", type: "RWA",    ltv: "78%", liq: "83%", bonus: "7%",  ceil: "$30M",  oracle: "Maple Monthly"    },
+  // ── Crypto ──
+  { asset: "WETH",   type: "Crypto", ltv: "75%", liq: "80%", bonus: "10%", ceil: "$20M", oracle: "Chainlink + Pyth"     },
+  { asset: "WBTC",   type: "Crypto", ltv: "65%", liq: "75%", bonus: "10%", ceil: "$15M", oracle: "Chainlink + Pyth"     },
+  { asset: "stETH",  type: "Yield",  ltv: "63%", liq: "68%", bonus: "10%", ceil: "$10M", oracle: "Chainlink + Lido"     },
+  // ── RWA ──
+  { asset: "RWA-TB", type: "RWA",    ltv: "92%", liq: "95%", bonus: "5%",  ceil: "$50M", oracle: "Ondo Daily NAV"      },
+  { asset: "RWA-RE", type: "RWA",    ltv: "68%", liq: "73%", bonus: "8%",  ceil: "$25M", oracle: "Centrifuge Feed"     },
+  { asset: "RWA-CB", type: "RWA",    ltv: "78%", liq: "83%", bonus: "7%",  ceil: "$30M", oracle: "Maple Monthly"       },
+  // ── Robinhood Chain Stock Tokens ──
+  { asset: "TSLA",   type: "Stock",  ltv: "65%", liq: "67%", bonus: "10%", ceil: "$5M",  oracle: "Robinhood Price Feed" },
+  { asset: "AMZN",   type: "Stock",  ltv: "70%", liq: "72%", bonus: "10%", ceil: "$5M",  oracle: "Robinhood Price Feed" },
+  { asset: "PLTR",   type: "Stock",  ltv: "60%", liq: "63%", bonus: "10%", ceil: "$3M",  oracle: "Robinhood Price Feed" },
+  { asset: "NFLX",   type: "Stock",  ltv: "67%", liq: "70%", bonus: "10%", ceil: "$5M",  oracle: "Robinhood Price Feed" },
+  { asset: "AMD",    type: "Stock",  ltv: "65%", liq: "68%", bonus: "10%", ceil: "$5M",  oracle: "Robinhood Price Feed" },
+  { asset: "NVDA",   type: "Stock",  ltv: "70%", liq: "72%", bonus: "10%", ceil: "$5M",  oracle: "Robinhood Price Feed" },
+  { asset: "AAPL",   type: "Stock",  ltv: "72%", liq: "75%", bonus: "10%", ceil: "$5M",  oracle: "Robinhood Price Feed" },
 ];
 
 function RiskParams() {
-  const typeColor: Record<string, string> = { Crypto: INDIGO, Yield: EMERALD, RWA: LIME };
+  const typeColor: Record<string, string> = { Crypto: INDIGO, Yield: EMERALD, RWA: LIME, Stock: ROSE };
   return (
     <div className="relative rounded-xl overflow-hidden"
       style={{ background: CARD, border: `1px solid ${BORDER}` }}>

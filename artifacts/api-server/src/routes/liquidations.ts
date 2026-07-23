@@ -6,33 +6,11 @@ import {
   ExecuteLiquidationResponse,
 } from "@workspace/api-zod";
 import { eq, lt, and, asc } from "drizzle-orm";
+import { TOKEN_PRICES } from "../lib/prices.js";
+import { generateTxHash } from "../lib/txHash.js";
 
 const LIQUIDATION_BONUS = 10; // 10%
 const MIN_HEALTH_FACTOR = 1.0;
-
-// Token prices (simulated — in production these come from Chainlink / Robinhood Chain oracle)
-const TOKEN_PRICES: Record<string, number> = {
-  // Crypto
-  WETH:     3247.5,
-  WBTC:     67823.0,
-  stETH:    3190.0,
-  // RWA
-  "RWA-TB": 1.00,
-  "RWA-RE": 1.00,
-  "RWA-CB": 1.00,
-  // Robinhood Chain Stock Tokens
-  TSLA:     315.0,
-  AMZN:     225.0,
-  PLTR:     45.0,
-  NFLX:     1050.0,
-  AMD:      155.0,
-  NVDA:     135.0,
-  AAPL:     230.0,
-};
-
-function randomTxHash(): string {
-  return "0x" + Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join("");
-}
 
 const router: IRouter = Router();
 
@@ -134,7 +112,7 @@ router.post("/liquidations", async (req, res): Promise<void> => {
     user: liquidator,
     amount: String(debtToCover),
     token: "USDAX",
-    txHash: randomTxHash(),
+    txHash: generateTxHash(),
   });
 
   const result = {

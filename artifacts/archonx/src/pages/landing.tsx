@@ -1,4 +1,6 @@
 import { Link } from "wouter";
+import { useGetProtocolStats } from "@workspace/api-client-react";
+import { formatCompact } from "@/lib/utils";
 import {
   ArrowRight, Lock, BarChart2, Zap,
   Building2, Code2, Vault, ChevronRight,
@@ -302,7 +304,7 @@ function MockDashboard() {
           {[
             { value: "$1.00", label: "USDAX Pegged", color: "hsl(0 0% 88%)" },
             { value: "15%",   label: "Base APY",     color: LIME },
-            { value: "150%",  label: "Collateral",   color: EMERALD },
+            { value: "13",    label: "Collaterals",  color: EMERALD },
           ].map((s, i) => (
             <div
               key={s.label}
@@ -341,18 +343,26 @@ function MockDashboard() {
 /* ─────────────────────── TICKER ─────────────────────── */
 
 function Ticker() {
+  const { data: proto } = useGetProtocolStats();
+  const tvl       = proto ? `TVL: $${formatCompact(proto.tvlUsd)}` : "TVL: —";
+  const minted    = proto ? `USDAX minted: ${formatCompact(proto.usdaxSupply)}` : "USDAX minted: —";
+  const vaults    = proto ? `Active vaults: ${proto.totalPositions}` : "Active vaults: —";
+  const cratio    = proto && proto.usdaxSupply > 0
+    ? `C-Ratio: ${(proto.tvlUsd / proto.usdaxSupply * 100).toFixed(0)}%`
+    : "C-Ratio: —";
+
   const items: React.ReactNode[] = [
     "USDAX pegged at $1.00",
     "APX staking APY: 15%",
-    "TVL: $56,333",
+    tvl,
     <span key="rh" className="inline-flex items-center gap-1.5">
       <img src="/robinhood-logo.webp" alt="Robinhood" style={{ height: 11, filter: "grayscale(1) brightness(1.8)", opacity: 0.55 }} />
       Chain · ID 46630
     </span>,
-    "Collateral ratio: 150%",
-    "USDAX minted: 26,700",
-    "Active vaults: 8",
-    "APX supply: 100M max",
+    cratio,
+    minted,
+    vaults,
+    "APX supply: 100M fixed",
   ];
   const doubled = [...items, ...items];
 

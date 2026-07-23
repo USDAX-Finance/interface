@@ -13,26 +13,7 @@ import {
   ClosePositionResponse,
 } from "@workspace/api-zod";
 import { eq, desc } from "drizzle-orm";
-
-// Token prices (simulated — in production these come from Chainlink / Robinhood Chain oracle)
-const TOKEN_PRICES: Record<string, number> = {
-  // Crypto
-  WETH:     3247.5,
-  WBTC:     67823.0,
-  stETH:    3190.0,
-  // RWA
-  "RWA-TB": 1.00,
-  "RWA-RE": 1.00,
-  "RWA-CB": 1.00,
-  // Robinhood Chain Stock Tokens
-  TSLA:     315.0,
-  AMZN:     225.0,
-  PLTR:     45.0,
-  NFLX:     1050.0,
-  AMD:      155.0,
-  NVDA:     135.0,
-  AAPL:     230.0,
-};
+import { TOKEN_PRICES } from "../lib/prices.js";
 
 // Per-token liquidation thresholds (match seed.ts)
 const LIQ_THRESHOLDS: Record<string, number> = {
@@ -62,9 +43,7 @@ function calcCollateralRatio(collateralValueUsd: number, usdaxMinted: number): n
   return (collateralValueUsd / usdaxMinted) * 100;
 }
 
-function randomTxHash(): string {
-  return "0x" + Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join("");
-}
+import { generateTxHash } from "../lib/txHash.js";
 
 function mapPosition(p: any) {
   return {
@@ -128,14 +107,14 @@ router.post("/positions", async (req, res): Promise<void> => {
       user: owner,
       amount: String(collateralAmount),
       token: collateralToken,
-      txHash: randomTxHash(),
+      txHash: generateTxHash(),
     },
     {
       type: "MINT",
       user: owner,
       amount: String(usdaxToMint),
       token: "USDAX",
-      txHash: randomTxHash(),
+      txHash: generateTxHash(),
     },
   ]);
 
@@ -232,14 +211,14 @@ router.delete("/positions/:id", async (req, res): Promise<void> => {
       user: existing.owner,
       amount: existing.usdaxMinted,
       token: "USDAX",
-      txHash: randomTxHash(),
+      txHash: generateTxHash(),
     },
     {
       type: "REDEEM",
       user: existing.owner,
       amount: existing.collateralAmount,
       token: existing.collateralToken,
-      txHash: randomTxHash(),
+      txHash: generateTxHash(),
     },
   ]);
 

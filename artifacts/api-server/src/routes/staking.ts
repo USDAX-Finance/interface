@@ -12,9 +12,10 @@ import {
   ClaimRewardsResponse,
 } from "@workspace/api-zod";
 import { eq, and } from "drizzle-orm";
+import { APX_PRICE } from "../lib/prices.js";
+import { generateTxHash } from "../lib/txHash.js";
 
 const BASE_APY = 15;
-const APX_PRICE = 0.0082;
 const COOLDOWN_DAYS = 7;
 
 function calcPendingRewards(stakedAmount: number, lastRewardTime: Date, apyRate: number): number {
@@ -22,10 +23,6 @@ function calcPendingRewards(stakedAmount: number, lastRewardTime: Date, apyRate:
   const elapsed = (now.getTime() - lastRewardTime.getTime()) / 1000; // seconds
   const rewardRate = (stakedAmount * apyRate) / (365 * 24 * 3600 * 100);
   return rewardRate * elapsed;
-}
-
-function randomTxHash(): string {
-  return "0x" + Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join("");
 }
 
 function mapStakingPosition(s: any) {
@@ -113,7 +110,7 @@ router.post("/staking/positions", async (req, res): Promise<void> => {
     user: owner,
     amount: String(amount),
     token: "APX",
-    txHash: randomTxHash(),
+    txHash: generateTxHash(),
   });
 
   res.status(201).json(StakeAkxResponse.parse(mapStakingPosition(position)));
@@ -167,7 +164,7 @@ router.post("/staking/positions/:id/unstake", async (req, res): Promise<void> =>
     user: existing.owner,
     amount: String(parsed.data.amount),
     token: "APX",
-    txHash: randomTxHash(),
+    txHash: generateTxHash(),
   });
 
   res.json(UnstakeAkxResponse.parse(mapStakingPosition(updated)));
@@ -216,7 +213,7 @@ router.post("/staking/positions/:id/claim", async (req, res): Promise<void> => {
     user: existing.owner,
     amount: String(totalRewards),
     token: "APX",
-    txHash: randomTxHash(),
+    txHash: generateTxHash(),
   });
 
   res.json(ClaimRewardsResponse.parse(mapStakingPosition(updated)));
