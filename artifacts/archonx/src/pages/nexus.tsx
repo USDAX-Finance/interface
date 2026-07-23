@@ -177,18 +177,18 @@ function MintFlow() {
         style={{ background: `linear-gradient(90deg, ${LIME}55, transparent)` }} />
       <LBracket color={`${LIME}22`} />
 
-      <div className="p-5">
-        <div className="flex items-center gap-2 mb-1">
+      <div className="p-5 flex flex-col h-full">
+        <div className="flex items-center gap-2 mb-1 flex-shrink-0">
           <span className="w-1.5 h-1.5 rounded-full" style={{ background: LIME }} />
           <span className="font-mono text-[10px] tracking-[0.2em] uppercase" style={{ color: "hsl(0 0% 30%)" }}>
             Minting Flow
           </span>
         </div>
-        <h2 className="font-black text-lg uppercase tracking-tight mb-5" style={{ color: "hsl(0 0% 90%)" }}>
+        <h2 className="font-black text-lg uppercase tracking-tight mb-5 flex-shrink-0" style={{ color: "hsl(0 0% 90%)" }}>
           How USDAX is Created
         </h2>
 
-        <div className="space-y-0">
+        <div className="flex-1 overflow-y-auto space-y-0 min-h-0">
           {FLOW_STEPS.map((step, i) => {
             const Icon = step.icon;
             const isLast = i === FLOW_STEPS.length - 1;
@@ -215,8 +215,8 @@ function MintFlow() {
           })}
         </div>
 
-        <Link href="/app/positions">
-          <button className="mt-1 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl
+        <Link href="/app/positions" className="flex-shrink-0 mt-3">
+          <button className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl
             font-black text-[13px] transition-all"
             style={{ background: LIME, color: "hsl(0 0% 4%)" }}
             onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = `0 0 28px ${LIME}28`; }}
@@ -238,25 +238,28 @@ function CollateralMatrix({ live }: { live: any[] }) {
   const typeLabel: Record<string, string> = { crypto: "Crypto", yield: "Yield", rwa: "RWA", stock: "Stock" };
 
   return (
-    <div className="relative rounded-xl overflow-hidden"
+    <div className="relative rounded-xl overflow-hidden h-full flex flex-col"
       style={{ background: CARD, border: `1px solid ${BORDER}` }}>
       <div className="absolute inset-x-0 top-0 h-0.5"
         style={{ background: `linear-gradient(90deg, ${EMERALD}40, ${LIME}20, transparent)` }} />
       <LBracket color={`${LIME}18`} />
 
-      <div className="p-5">
+      {/* Fixed header */}
+      <div className="px-5 pt-5 pb-3 flex-shrink-0" style={{ borderBottom: `1px solid ${BORDER}` }}>
         <div className="flex items-center gap-2 mb-1">
           <span className="w-1.5 h-1.5 rounded-full" style={{ background: EMERALD }} />
           <span className="font-mono text-[10px] tracking-[0.2em] uppercase" style={{ color: "hsl(0 0% 30%)" }}>
             Collateral Matrix
           </span>
         </div>
-        <h2 className="font-black text-lg uppercase tracking-tight mb-4" style={{ color: "hsl(0 0% 90%)" }}>
+        <h2 className="font-black text-lg uppercase tracking-tight" style={{ color: "hsl(0 0% 90%)" }}>
           Accepted Collateral
         </h2>
+      </div>
 
-        <div className="space-y-2">
-          {Object.entries(COLL).map(([sym, cfg]) => {
+      {/* Scrollable token list */}
+      <div className="flex-1 overflow-y-auto px-5 py-3 space-y-2 min-h-0">
+        {Object.entries(COLL).map(([sym, cfg]) => {
             const lv = liveMap[sym];
             const tc = typeColor[cfg.type];
             return (
@@ -329,7 +332,6 @@ function CollateralMatrix({ live }: { live: any[] }) {
               </div>
             );
           })}
-        </div>
       </div>
     </div>
   );
@@ -696,9 +698,9 @@ export default function Nexus() {
     <div className="max-w-screen-xl mx-auto p-4 md:p-6 space-y-4">
       <Hero stats={stats} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-        <div className="lg:col-span-2"><MintFlow /></div>
-        <div className="lg:col-span-3"><CollateralMatrix live={collateral ?? []} /></div>
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-4 lg:h-[600px]">
+        <div className="lg:col-span-2 h-full"><MintFlow /></div>
+        <div className="lg:col-span-3 h-full"><CollateralMatrix live={collateral ?? []} /></div>
       </div>
 
       <PegMechanics />
