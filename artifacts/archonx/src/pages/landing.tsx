@@ -122,16 +122,13 @@ function Nav() {
             { label: "Product",  href: "#product" },
             { label: "Features", href: "#features" },
             { label: "Use Cases",href: "#use-cases" },
-            { label: "Staking",  href: "#staking" },
           ].map((l) => (
-            <a
-              key={l.label}
-              href={l.href}
-              className="hover:text-foreground transition-colors"
-            >
+            <a key={l.label} href={l.href} className="hover:text-foreground transition-colors">
               {l.label}
             </a>
           ))}
+          <Link href="/staking" className="hover:text-foreground transition-colors">Staking</Link>
+          <Link href="/governance" className="hover:text-foreground transition-colors">Governance</Link>
           <Link href="/docs" className="hover:text-foreground transition-colors">Docs</Link>
         </div>
 
