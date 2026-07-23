@@ -71,7 +71,7 @@ export default function Staking() {
 
   const handleUnstake = (e: React.FormEvent) => {
     e.preventDefault();
-    unstakeMutation.mutate({ data: { amount: Number(unstakeAmount) } });
+    unstakeMutation.mutate({ id: 0, data: { amount: Number(unstakeAmount) } });
   };
 
   if (statsLoading || posLoading) {
