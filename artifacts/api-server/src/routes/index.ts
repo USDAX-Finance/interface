@@ -4,6 +4,7 @@ import protocolRouter from "./protocol";
 import positionsRouter from "./positions";
 import stakingRouter from "./staking";
 import liquidationsRouter from "./liquidations";
+import yieldRouter from "./yield";
 
 const router: IRouter = Router();
 
@@ -12,5 +13,6 @@ router.use(protocolRouter);
 router.use(positionsRouter);
 router.use(stakingRouter);
 router.use(liquidationsRouter);
+router.use(yieldRouter);
 
 export default router;

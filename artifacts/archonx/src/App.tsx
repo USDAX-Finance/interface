@@ -15,6 +15,7 @@ import Positions from '@/pages/positions';
 import Staking from '@/pages/staking';
 import Liquidations from '@/pages/liquidations';
 import Nexus from '@/pages/nexus';
+import Yield from '@/pages/yield';
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ function AppLayout() {
         <Switch>
           <Route path="/app" component={Dashboard} />
           <Route path="/app/nexus" component={Nexus} />
+          <Route path="/app/yield" component={Yield} />
           <Route path="/app/positions" component={Positions} />
           <Route path="/app/staking" component={Staking} />
           <Route path="/app/liquidations" component={Liquidations} />

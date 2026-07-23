@@ -1,7 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 import {
-  Activity, Layers, TrendingUp, Crosshair, Network, ArrowLeft,
+  Activity, Layers, TrendingUp, Crosshair, Network, ArrowLeft, Sprout,
 } from "lucide-react";
 
 const WALLET_ADDRESS = "0x71C7...656F";
@@ -13,6 +13,7 @@ const navLinks = [
   { href: "/app",              label: "Pulse",    icon: Activity,    tip: "Protocol overview"  },
   { href: "/app/nexus",        label: "Nexus",    icon: Network,     tip: "USDAX flow & RWA"   },
   { href: "/app/positions",    label: "Vaults",   icon: Layers,      tip: "Debt positions"     },
+  { href: "/app/yield",        label: "Harvest",  icon: Sprout,      tip: "Yield pools"        },
   { href: "/app/staking",      label: "Earn",     icon: TrendingUp,  tip: "APX staking"        },
   { href: "/app/liquidations", label: "Hunt",     icon: Crosshair,   tip: "Liquidation hunter" },
 ];
