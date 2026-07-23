@@ -11,14 +11,24 @@ import { eq, sql, desc, lt, and, not } from "drizzle-orm";
 
 const router: IRouter = Router();
 
-// Prices (simulated — in production these come from Chainlink)
+// Prices (simulated — in production these come from Chainlink / Robinhood Chain oracle)
 const TOKEN_PRICES: Record<string, number> = {
+  // Crypto
   WETH:     3247.5,
   WBTC:     67823.0,
   stETH:    3190.0,
+  // RWA
   "RWA-TB": 1.00,
   "RWA-RE": 1.00,
   "RWA-CB": 1.00,
+  // Robinhood Chain Stock Tokens
+  TSLA:     315.0,
+  AMZN:     225.0,
+  PLTR:     45.0,
+  NFLX:     1050.0,
+  AMD:      155.0,
+  NVDA:     135.0,
+  AAPL:     230.0,
 };
 
 const APX_PRICE = 0.0082;

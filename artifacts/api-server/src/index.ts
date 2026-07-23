@@ -1,6 +1,6 @@
 import app from "./app";
 import { logger } from "./lib/logger";
-import { seedProtocolData } from "./lib/seed";
+import { seedProtocolData, seedStockTokens } from "./lib/seed";
 
 const rawPort = process.env["PORT"];
 
@@ -26,4 +26,5 @@ app.listen(port, (err) => {
 
   // Seed diverse collateral types on startup (idempotent)
   seedProtocolData();
+  seedStockTokens();
 });

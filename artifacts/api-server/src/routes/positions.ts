@@ -14,20 +14,47 @@ import {
 } from "@workspace/api-zod";
 import { eq, desc } from "drizzle-orm";
 
-// Token prices (simulated — in production these come from Chainlink)
+// Token prices (simulated — in production these come from Chainlink / Robinhood Chain oracle)
 const TOKEN_PRICES: Record<string, number> = {
+  // Crypto
   WETH:     3247.5,
   WBTC:     67823.0,
   stETH:    3190.0,
+  // RWA
   "RWA-TB": 1.00,
   "RWA-RE": 1.00,
   "RWA-CB": 1.00,
+  // Robinhood Chain Stock Tokens
+  TSLA:     315.0,
+  AMZN:     225.0,
+  PLTR:     45.0,
+  NFLX:     1050.0,
+  AMD:      155.0,
+  NVDA:     135.0,
+  AAPL:     230.0,
 };
 
-function calcHealthFactor(collateralValueUsd: number, usdaxMinted: number): number {
+// Per-token liquidation thresholds (match seed.ts)
+const LIQ_THRESHOLDS: Record<string, number> = {
+  WETH:     0.80,
+  WBTC:     0.75,
+  stETH:    0.68,
+  "RWA-TB": 0.95,
+  "RWA-RE": 0.73,
+  "RWA-CB": 0.83,
+  TSLA:     0.67,
+  AMZN:     0.72,
+  PLTR:     0.63,
+  NFLX:     0.70,
+  AMD:      0.68,
+  NVDA:     0.72,
+  AAPL:     0.75,
+};
+
+function calcHealthFactor(collateralValueUsd: number, usdaxMinted: number, token?: string): number {
   if (usdaxMinted === 0) return 999;
-  // Protocol uses 80% liquidation threshold
-  return (collateralValueUsd * 0.8) / usdaxMinted;
+  const thresh = LIQ_THRESHOLDS[token ?? ""] ?? 0.75;
+  return (collateralValueUsd * thresh) / usdaxMinted;
 }
 
 function calcCollateralRatio(collateralValueUsd: number, usdaxMinted: number): number {
@@ -72,7 +99,7 @@ router.post("/positions", async (req, res): Promise<void> => {
   const { owner, collateralToken, collateralAmount, usdaxToMint } = parsed.data;
   const price = TOKEN_PRICES[collateralToken] ?? 0;
   const collateralValueUsd = collateralAmount * price;
-  const healthFactor = calcHealthFactor(collateralValueUsd, usdaxToMint);
+  const healthFactor = calcHealthFactor(collateralValueUsd, usdaxToMint, collateralToken);
   const collateralRatio = calcCollateralRatio(collateralValueUsd, usdaxToMint);
 
   if (healthFactor < 1.0) {

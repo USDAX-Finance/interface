@@ -3,7 +3,7 @@ import { useGetCollateralBreakdown, useGetProtocolStats } from "@workspace/api-c
 import {
   Zap, Lock, RefreshCw, TrendingUp, Coins,
   Globe, Shield, Landmark, Building2, FileText,
-  BarChart3, ArrowRight, Check, Package, ChevronRight,
+  BarChart3, ArrowRight, Check, Package, ChevronRight, LineChart,
 } from "lucide-react";
 import { formatCurrency, formatNumber, formatCompact } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
@@ -15,6 +15,7 @@ const AMBER   = "hsl(35 92% 60%)";
 const INDIGO  = "hsl(231 92% 72%)";
 const VIOLET  = "hsl(280 70% 65%)";
 const BLUE    = "hsl(200 80% 55%)";
+const ROSE    = "hsl(346 84% 61%)";
 const BORDER  = "hsl(0 0% 10%)";
 const CARD    = "hsl(0 0% 6%)";
 const CARD2   = "hsl(0 0% 7.5%)";
@@ -47,7 +48,7 @@ type CollCfg = {
   icon?: LucideIcon;
   ltv: number;
   liqThreshold: number;
-  type: "crypto" | "yield" | "rwa";
+  type: "crypto" | "yield" | "rwa" | "stock";
   color: string;
   badge: string;
   desc: string;
@@ -56,18 +57,35 @@ type CollCfg = {
 };
 
 const COLL: Record<string, CollCfg> = {
+  // ── Crypto ──────────────────────────────────────────────────────────────
   WETH:    { symbol: "Ξ",  ltv: 75, liqThreshold: 80, type: "crypto", color: INDIGO,
              badge: "Core Crypto", desc: "Wrapped Ether — most liquid EVM asset with deep Chainlink + Pyth oracle coverage.", oracle: "Chainlink + Pyth", ceil: "$20M" },
   WBTC:    { symbol: "₿",  ltv: 65, liqThreshold: 70, type: "crypto", color: AMBER,
              badge: "Core Crypto", desc: "Wrapped Bitcoin — highest market-cap crypto, accepted at conservative LTV for safety.", oracle: "Chainlink + Pyth", ceil: "$15M" },
   stETH:   { symbol: "∞",  ltv: 63, liqThreshold: 68, type: "yield",  color: EMERALD,
              badge: "Yield-bearing", desc: "Lido staked ETH — yield-bearing collateral, accrued rewards reduce effective borrow cost.", oracle: "Chainlink + Lido", ceil: "$10M" },
+  // ── RWA ─────────────────────────────────────────────────────────────────
   "RWA-TB":{ symbol: "",   icon: Landmark,  ltv: 92, liqThreshold: 95, type: "rwa", color: LIME,
-             badge: "T-Bills",  desc: "Tokenized US Treasury Bills via Ondo Finance. Daily NAV attestation by BigFour auditors.", oracle: "Ondo Daily NAV", ceil: "$50M" },
+             badge: "T-Bills",     desc: "Tokenized US Treasury Bills via Ondo Finance. Daily NAV attestation by BigFour auditors.", oracle: "Ondo Daily NAV",    ceil: "$50M" },
   "RWA-RE":{ symbol: "",   icon: Building2, ltv: 68, liqThreshold: 73, type: "rwa", color: VIOLET,
-             badge: "Real Estate", desc: "Tokenized first-lien commercial real estate senior debt via Centrifuge.", oracle: "Centrifuge Feed", ceil: "$25M" },
+             badge: "Real Estate", desc: "Tokenized first-lien commercial real estate senior debt via Centrifuge.", oracle: "Centrifuge Feed",  ceil: "$25M" },
   "RWA-CB":{ symbol: "",   icon: FileText,  ltv: 78, liqThreshold: 83, type: "rwa", color: BLUE,
-             badge: "Corp. Bonds", desc: "Tokenized investment-grade corporate bonds via Maple Finance. Monthly oracle feeds.", oracle: "Maple Monthly", ceil: "$30M" },
+             badge: "Corp. Bonds", desc: "Tokenized investment-grade corporate bonds via Maple Finance. Monthly oracle feeds.", oracle: "Maple Monthly",   ceil: "$30M" },
+  // ── Robinhood Chain Stock Tokens ─────────────────────────────────────────
+  TSLA:    { symbol: "",  icon: LineChart, ltv: 60, liqThreshold: 67, type: "stock", color: ROSE,
+             badge: "Stock Token", desc: "Tesla Inc. tokenized equity on Robinhood Chain. Tracks NASDAQ:TSLA price via Robinhood oracle.", oracle: "Robinhood Oracle", ceil: "$10M" },
+  AMZN:    { symbol: "",  icon: LineChart, ltv: 65, liqThreshold: 72, type: "stock", color: ROSE,
+             badge: "Stock Token", desc: "Amazon.com Inc. tokenized equity. Large-cap stable growth stock accepted at moderate LTV.", oracle: "Robinhood Oracle", ceil: "$10M" },
+  PLTR:    { symbol: "",  icon: LineChart, ltv: 55, liqThreshold: 63, type: "stock", color: ROSE,
+             badge: "Stock Token", desc: "Palantir Technologies — high-growth AI analytics. Conservative LTV reflects higher volatility.", oracle: "Robinhood Oracle", ceil: "$5M" },
+  NFLX:    { symbol: "",  icon: LineChart, ltv: 63, liqThreshold: 70, type: "stock", color: ROSE,
+             badge: "Stock Token", desc: "Netflix Inc. tokenized equity. Streaming leader with strong cash flow and moderate volatility.", oracle: "Robinhood Oracle", ceil: "$8M" },
+  AMD:     { symbol: "",  icon: LineChart, ltv: 62, liqThreshold: 68, type: "stock", color: ROSE,
+             badge: "Stock Token", desc: "Advanced Micro Devices — semiconductor leader in CPU & GPU. Cyclical but liquid.", oracle: "Robinhood Oracle", ceil: "$8M" },
+  NVDA:    { symbol: "",  icon: LineChart, ltv: 65, liqThreshold: 72, type: "stock", color: ROSE,
+             badge: "Stock Token", desc: "NVIDIA Corp — dominant AI/GPU chipmaker. Large-cap, high liquidity, accepted at standard LTV.", oracle: "Robinhood Oracle", ceil: "$10M" },
+  AAPL:    { symbol: "",  icon: LineChart, ltv: 68, liqThreshold: 75, type: "stock", color: ROSE,
+             badge: "Stock Token", desc: "Apple Inc. — highest market-cap stock. Most stable of the stock tokens, highest LTV allowed.", oracle: "Robinhood Oracle", ceil: "$12M" },
 };
 
 function TokenBadge({ sym, cfg }: { sym: string; cfg: CollCfg }) {
@@ -140,7 +158,7 @@ function Hero({ stats }: { stats: any }) {
 /* Mint Flow */
 const FLOW_STEPS = [
   { n: "01", icon: Coins,     title: "Deposit Collateral",
-    body: "Lock WETH, WBTC, stETH or RWA tokens into a USDAX Vault smart contract on Robinhood Chain (EVM 46630)." },
+    body: "Lock WETH, WBTC, stETH, RWA tokens, or Robinhood Chain Stock Tokens (TSLA, AMZN, NVDA, AAPL…) into a USDAX Vault on Robinhood Chain (EVM 46630)." },
   { n: "02", icon: Lock,      title: "Open CDP Vault",
     body: "The Vault Manager creates a Collateralised Debt Position (CDP) tracking your deposit and outstanding USDAX debt." },
   { n: "03", icon: Zap,       title: "Mint USDAX",
@@ -216,8 +234,8 @@ function CollateralMatrix({ live }: { live: any[] }) {
   const liveMap: Record<string, { amount: number; valueUsd: number }> = {};
   live?.forEach((c) => { liveMap[c.symbol] = { amount: c.amountLocked, valueUsd: c.valueUsd }; });
 
-  const typeColor: Record<string, string> = { crypto: INDIGO, yield: EMERALD, rwa: LIME };
-  const typeLabel: Record<string, string> = { crypto: "Crypto", yield: "Yield",  rwa: "RWA"   };
+  const typeColor: Record<string, string> = { crypto: INDIGO, yield: EMERALD, rwa: LIME, stock: ROSE };
+  const typeLabel: Record<string, string> = { crypto: "Crypto", yield: "Yield", rwa: "RWA", stock: "Stock" };
 
   return (
     <div className="relative rounded-xl overflow-hidden"
