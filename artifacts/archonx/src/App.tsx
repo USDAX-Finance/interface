@@ -5,6 +5,7 @@ import NotFound from '@/pages/not-found';
 import { Route, Switch, Router as WouterRouter } from 'wouter';
 
 import Landing from '@/pages/landing';
+import Docs from '@/pages/docs';
 import { Navbar } from '@/components/layout';
 import Dashboard from '@/pages/dashboard';
 import Positions from '@/pages/positions';
@@ -34,6 +35,7 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Landing} />
+      <Route path="/docs" component={Docs} />
       <Route component={AppLayout} />
     </Switch>
   );

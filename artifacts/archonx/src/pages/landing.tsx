@@ -118,10 +118,10 @@ function Nav() {
         {/* Center links */}
         <div className="hidden md:flex items-center gap-8 text-[13px] text-muted-foreground">
           {[
-            { label: "Product", href: "#product" },
+            { label: "Product",  href: "#product" },
             { label: "Features", href: "#features" },
-            { label: "Use Cases", href: "#use-cases" },
-            { label: "Staking", href: "#staking" },
+            { label: "Use Cases",href: "#use-cases" },
+            { label: "Staking",  href: "#staking" },
           ].map((l) => (
             <a
               key={l.label}
@@ -131,6 +131,7 @@ function Nav() {
               {l.label}
             </a>
           ))}
+          <Link href="/docs" className="hover:text-foreground transition-colors">Docs</Link>
         </div>
 
       </div>
@@ -523,6 +524,12 @@ function Hero() {
               ENTER THE<br />
               <span style={{ color: LIME }}>PROTOCOL</span>
             </h1>
+
+            <p className="mt-4 mb-2 max-w-sm text-[13px] leading-relaxed"
+              style={{ color: "hsl(0 0% 48%)" }}>
+              Mint yield-bearing USDAX, stake APX, and earn passive income on Robinhood Chain —
+              the programmable stablecoin built for DeFi.
+            </p>
 
             {/* Barcode-style strip */}
             <div className="flex items-center gap-3 mt-5 mb-6">
