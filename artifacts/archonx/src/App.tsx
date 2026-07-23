@@ -10,6 +10,7 @@ import Protocol from '@/pages/protocol';
 import StakingPage from '@/pages/staking-page';
 import GovernancePage from '@/pages/governance-page';
 import { Navbar } from '@/components/layout';
+import { Footer } from '@/components/footer';
 import Dashboard from '@/pages/dashboard';
 import Positions from '@/pages/positions';
 import Staking from '@/pages/staking';
@@ -34,6 +35,7 @@ function AppLayout() {
           <Route component={NotFound} />
         </Switch>
       </main>
+      <Footer />
     </div>
   );
 }

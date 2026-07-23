@@ -56,6 +56,20 @@ export function formatPercentage(value: number) {
   }).format(value / 100)
 }
 
+export function formatCompact(value: number): string {
+  if (value >= 1_000_000_000) return `$${(value / 1_000_000_000).toFixed(2)}B`;
+  if (value >= 1_000_000)     return `$${(value / 1_000_000).toFixed(2)}M`;
+  if (value >= 1_000)         return `$${(value / 1_000).toFixed(1)}K`;
+  return `$${value.toFixed(0)}`;
+}
+
+export function formatCompactNum(value: number): string {
+  if (value >= 1_000_000_000) return `${(value / 1_000_000_000).toFixed(2)}B`;
+  if (value >= 1_000_000)     return `${(value / 1_000_000).toFixed(2)}M`;
+  if (value >= 1_000)         return `${(value / 1_000).toFixed(1)}K`;
+  return `${value.toFixed(0)}`;
+}
+
 export function formatAddress(address: string) {
   if (!address || address.length < 10) return address;
   return `${address.slice(0, 6)}...${address.slice(-4)}`;

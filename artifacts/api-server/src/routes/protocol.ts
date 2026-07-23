@@ -5,6 +5,7 @@ import {
   ListProtocolActivityResponse,
   GetCollateralBreakdownResponse,
   GetHealthDistributionResponse,
+  NetworkStatsSchema,
 } from "@workspace/api-zod";
 import { eq, sql, desc, lt, and, not } from "drizzle-orm";
 
@@ -130,6 +131,44 @@ router.get("/protocol/health-distribution", async (req, res): Promise<void> => {
   }));
 
   res.json(GetHealthDistributionResponse.parse(distribution));
+});
+
+router.get("/protocol/network-stats", async (_req, res): Promise<void> => {
+  const [positionRows, stakingRows, events] = await Promise.all([
+    db.select().from(positionsTable).where(eq(positionsTable.status, "active")),
+    db.select().from(stakingPositionsTable).where(eq(stakingPositionsTable.status, "active")),
+    db.select().from(activityEventsTable),
+  ]);
+
+  const now = Date.now();
+  const h24ago = now - 24 * 3_600_000;
+
+  const events24h  = events.filter((e) => e.timestamp.getTime() >= h24ago);
+  const usdaxEvents = events.filter((e) => ["MINT", "BURN"].includes(e.type));
+  const usdaxEvents24h = events24h.filter((e) => ["MINT", "BURN"].includes(e.type));
+
+  const totalVolumeUsd = usdaxEvents.reduce((s, e) => s + Number(e.amount), 0);
+  const volume24hUsd   = usdaxEvents24h.reduce((s, e) => s + Number(e.amount), 0);
+
+  const tvlUsd     = positionRows.reduce((s, p) => s + Number(p.collateralValueUsd), 0);
+  const usdaxSupply= positionRows.reduce((s, p) => s + Number(p.usdaxMinted), 0);
+  const totalStakedUsd = stakingRows.reduce((s, p) => s + Number(p.stakedAmount), 0) * APX_PRICE;
+  const uniqueUsers= new Set(events.map((e) => e.user)).size;
+
+  res.json(NetworkStatsSchema.parse({
+    chainId: 46630,
+    networkName: "Robinhood Chain Testnet",
+    rpcUrl: "https://testnet-rpc.robinhoodchain.io",
+    explorerUrl: "https://testnet-explorer.robinhoodchain.io",
+    totalTransactions: events.length,
+    transactions24h:   events24h.length,
+    volume24hUsd,
+    totalVolumeUsd,
+    uniqueUsers,
+    usdaxSupply,
+    tvlUsd: tvlUsd + totalStakedUsd,
+    lastUpdated: new Date().toISOString(),
+  }));
 });
 
 export default router;
