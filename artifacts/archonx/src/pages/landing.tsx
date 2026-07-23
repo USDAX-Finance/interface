@@ -224,13 +224,19 @@ function MockDashboard() {
             Yield-bearing stablecoin
           </p>
           <div className="flex items-center justify-center">
-            {/* Left brackets — outermost to innermost, opacity increases */}
-            <div className="flex items-center" style={{ gap: "-1px" }}>
-              {[0.08, 0.18, 0.42, 1].map((opacity, i) => (
+            {/* Left brackets — wave travels outer→inner (delay increases inward) */}
+            <div className="flex items-center">
+              {[0, 1, 2, 3].map((i) => (
                 <span
                   key={i}
                   className="font-black select-none"
-                  style={{ color: LIME, opacity, fontSize: 48, lineHeight: 1, letterSpacing: "-4px" }}
+                  style={{
+                    color: LIME,
+                    fontSize: 48,
+                    lineHeight: 1,
+                    letterSpacing: "-4px",
+                    animation: `bracket-scan 2.4s ease-in-out ${i * 0.18}s infinite alternate`,
+                  }}
                 >
                   (
                 </span>
@@ -249,13 +255,19 @@ function MockDashboard() {
               </span>
             </h3>
 
-            {/* Right brackets — innermost to outermost, opacity decreases */}
-            <div className="flex items-center" style={{ gap: "-1px" }}>
-              {[1, 0.42, 0.18, 0.08].map((opacity, i) => (
+            {/* Right brackets — wave mirrors left: inner→outer (delay decreases outward) */}
+            <div className="flex items-center">
+              {[3, 2, 1, 0].map((i) => (
                 <span
                   key={i}
                   className="font-black select-none"
-                  style={{ color: LIME, opacity, fontSize: 48, lineHeight: 1, letterSpacing: "-4px" }}
+                  style={{
+                    color: LIME,
+                    fontSize: 48,
+                    lineHeight: 1,
+                    letterSpacing: "-4px",
+                    animation: `bracket-scan 2.4s ease-in-out ${i * 0.18}s infinite alternate`,
+                  }}
                 >
                   )
                 </span>

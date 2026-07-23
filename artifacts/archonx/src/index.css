@@ -251,6 +251,12 @@
     animation: ticker 28s linear infinite;
   }
 
+  /* Bracket scan-wave — each bracket pulses to full brightness in sequence */
+  @keyframes bracket-scan {
+    0%, 100% { opacity: 0.06; }
+    40%, 60% { opacity: 1; }
+  }
+
   @keyframes float {
     0%, 100% { transform: translateY(0px); }
     50%       { transform: translateY(-8px); }
