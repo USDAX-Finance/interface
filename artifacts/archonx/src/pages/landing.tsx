@@ -384,101 +384,143 @@ function Ticker() {
 function Hero() {
   return (
     <>
-      <section className="relative pt-28 pb-20 px-8 overflow-hidden grid-bg">
-        {/* Radial lime glow top-right */}
-        <div
-          className="pointer-events-none absolute top-0 right-0 w-[55%] h-[65%]"
-          style={{
-            background: `radial-gradient(ellipse at 80% 10%, ${LIME}0D 0%, transparent 65%)`,
-          }}
-        />
+      <section className="relative pt-16 pb-0 px-8 overflow-hidden">
 
-        <div className="max-w-7xl mx-auto relative z-10">
-          <div className="grid lg:grid-cols-[1fr_1fr] gap-20 items-center">
-            {/* Left */}
-            <div>
-              {/* Live badge */}
-              <div
-                className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-mono mb-7"
-                style={{
-                  background: "hsl(0 0% 7%)",
-                  border: `1px solid ${BORDER}`,
-                  color: "hsl(0 0% 45%)",
-                }}
-              >
-                <span
-                  className="w-1.5 h-1.5 rounded-full animate-ping-slow"
-                  style={{ background: EMERALD }}
-                />
-                Live · Robinhood Chain 46630
-              </div>
+        <div className="max-w-6xl mx-auto relative z-10">
 
+          {/* Brand label */}
+          <div className="flex items-center justify-between mb-10">
+            <p className="text-[10px] font-bold tracking-[0.3em] uppercase"
+              style={{ color: "hsl(0 0% 28%)" }}>
+              ◈ USDAX.FINANCE
+            </p>
+            <div className="flex items-center gap-2 text-[10px] font-mono"
+              style={{ color: "hsl(0 0% 32%)" }}>
+              <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: EMERALD }} />
+              Live · Robinhood Chain 46630
+            </div>
+          </div>
+
+          {/* Giant brackets + headline */}
+          <div className="flex items-stretch">
+            {/* Left brackets — animated wave */}
+            <div className="flex items-center pr-4">
+              {[0, 1, 2].map((i) => (
+                <span key={i} className="font-black select-none"
+                  style={{
+                    color: LIME,
+                    fontSize: "clamp(60px, 10vw, 110px)",
+                    lineHeight: 1,
+                    letterSpacing: "-6px",
+                    animation: `bracket-scan 2.4s ease-in-out ${i * 0.18}s infinite alternate`,
+                  }}>
+                  (
+                </span>
+              ))}
+            </div>
+
+            {/* Center headline */}
+            <div className="flex-1 text-center py-4">
               <h1
-                className="text-[clamp(3rem,6vw,5.5rem)] font-extrabold leading-[1.0] tracking-tight text-foreground"
+                className="font-extrabold uppercase tracking-tight leading-[1.05]"
+                style={{ fontSize: "clamp(2rem, 4.8vw, 4.2rem)", color: "hsl(0 0% 94%)" }}
               >
-                Where
-                <br />
-                Money{" "}
-                <span className="gradient-text">Grows</span>
+                APEX PROTOCOL<br />
+                <span style={{ color: LIME }}>USDAX STABLECOIN</span><br />
+                ON ROBINHOOD CHAIN
               </h1>
-
-              <p className="text-[15px] text-muted-foreground mt-6 max-w-md leading-relaxed">
-                A programmable, yield-bearing stablecoin for native value accrual and seamless
-                DeFi integration on Robinhood Chain.
+              <p className="text-[14px] mt-6 leading-relaxed max-w-xl mx-auto"
+                style={{ color: "hsl(0 0% 38%)" }}>
+                Mint yield-bearing USDAX, stake APX tokens, and earn passive income
+                on Robinhood Chain — the programmable stablecoin built for DeFi.
               </p>
 
-              <div className="flex flex-wrap items-center gap-3 mt-8">
+              {/* CTAs */}
+              <div className="flex items-center justify-center gap-3 mt-8">
                 <LimeBtn href="/app">
-                  <Zap className="h-3.5 w-3.5" /> Try it now
+                  <Zap className="h-3.5 w-3.5" /> Launch App
                 </LimeBtn>
                 <OutlineBtn href="#product">
                   Explore Protocol <ArrowRight className="h-3.5 w-3.5" />
                 </OutlineBtn>
               </div>
+            </div>
 
-              {/* Social proof */}
-              <div className="flex items-center gap-3 mt-8">
-                <div className="flex -space-x-2">
-                  {[LIME, EMERALD, "hsl(38 92% 58%)", "hsl(0 0% 45%)"].map((bg, i) => (
-                    <div
-                      key={i}
-                      className="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold"
-                      style={{
-                        background: bg,
-                        color: "hsl(0 0% 4%)",
-                        border: "2px solid hsl(0 0% 3%)",
-                      }}
-                    >
-                      {["A", "B", "C", "+"][i]}
-                    </div>
-                  ))}
-                </div>
-                <span className="text-[13px] text-muted-foreground">
-                  <span className="text-foreground font-semibold">2,000+</span> early adopters
+            {/* Right brackets — mirrored wave */}
+            <div className="flex items-center pl-4">
+              {[2, 1, 0].map((i) => (
+                <span key={i} className="font-black select-none"
+                  style={{
+                    color: LIME,
+                    fontSize: "clamp(60px, 10vw, 110px)",
+                    lineHeight: 1,
+                    letterSpacing: "-6px",
+                    animation: `bracket-scan 2.4s ease-in-out ${i * 0.18}s infinite alternate`,
+                  }}>
+                  )
                 </span>
+              ))}
+            </div>
+          </div>
+
+          {/* Chip node grid — full width, centered */}
+          <div className="relative mt-8">
+            {/* Center glow bloom */}
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+              <div style={{
+                width: 280, height: 180,
+                background: `radial-gradient(ellipse at 50% 60%, ${LIME}28 0%, transparent 70%)`,
+                filter: "blur(30px)",
+              }} />
+            </div>
+
+            <div
+              className="rounded-xl p-6 relative z-10"
+              style={{ background: "hsl(0 0% 5%)", border: `1px solid ${BORDER}` }}
+            >
+              <div className="grid grid-cols-[1fr_auto_1fr] gap-4 items-center">
+                {/* Left chips */}
+                <div className="flex flex-col gap-2.5">
+                  {["Minting", "USDAX", "Yield"].map((l) => <Chip key={l} label={l} />)}
+                </div>
+
+                {/* Center icon + Liquidation */}
+                <div className="flex flex-col items-center gap-3 px-4">
+                  <div className="relative">
+                    <img src="/apex-logo-circle.png" alt="APEX"
+                      className="w-14 h-14 rounded-full" />
+                    <div className="absolute inset-0 rounded-full pointer-events-none"
+                      style={{ boxShadow: `0 0 24px ${LIME}40` }} />
+                  </div>
+                  <Chip label="Liquidation" />
+                </div>
+
+                {/* Right chips */}
+                <div className="flex flex-col gap-2.5">
+                  {["Staking", "Governance", "APX"].map((r) => <Chip key={r} label={r} />)}
+                </div>
               </div>
 
-              {/* Quick stat pills */}
-              <div className="flex gap-6 mt-10 pt-10" style={{ borderTop: `1px solid ${BORDER}` }}>
+              {/* Stats row */}
+              <div className="grid grid-cols-3 mt-5 pt-5" style={{ borderTop: `1px solid ${BORDER}` }}>
                 {[
-                  { value: "1400+", label: "Active users" },
-                  { value: "28+", label: "Vault types" },
-                ].map((s) => (
-                  <div key={s.label}>
-                    <div className="text-2xl font-extrabold font-mono" style={{ color: LIME }}>
-                      {s.value}
-                    </div>
-                    <div className="text-[11px] text-muted-foreground mt-0.5 tracking-wide">
+                  { value: "$1.00", label: "USDAX Pegged", color: "hsl(0 0% 88%)" },
+                  { value: "15%",   label: "Base APY",     color: LIME },
+                  { value: "150%",  label: "Collateral",   color: EMERALD },
+                ].map((s, i) => (
+                  <div key={s.label} className="text-center py-3"
+                    style={{ borderRight: i < 2 ? `1px solid ${BORDER}` : undefined }}>
+                    <div className="text-[10px] mb-1 select-none" style={{ color: "hsl(0 0% 22%)" }}>+</div>
+                    <div className="text-lg font-black font-mono" style={{ color: s.color }}>{s.value}</div>
+                    <div className="text-[9px] uppercase tracking-widest mt-1" style={{ color: "hsl(0 0% 28%)" }}>
                       {s.label}
                     </div>
                   </div>
                 ))}
               </div>
             </div>
-
-            {/* Right */}
-            <MockDashboard />
           </div>
+
         </div>
       </section>
 
@@ -729,23 +771,26 @@ function WhatIsUSDax() {
 /* ─────────────────────── FEATURES ─────────────────────── */
 
 function Features() {
-  const bullets = [
+  const items = [
     {
-      icon: Lock,
-      title: "Smart Liquidation Protection",
-      desc: "Real-time health factor monitoring keeps positions safe above 1.0x threshold.",
+      title: "Mint USDAX",
+      desc: "deposit collateral, instantly mint dollar-pegged USDAX at up to 66% LTV — no intermediaries",
     },
     {
-      icon: BarChart2,
-      title: "Yield Optimization Engine",
-      desc: "APX rewards auto-compound. Base 15% APY, higher for long-term stakers.",
+      title: "Earn Yield",
+      desc: "15% base APY compounds automatically into your balance, no manual action required",
     },
     {
-      icon: Zap,
-      title: "Cross-Chain Ready",
-      desc: "Native on Robinhood Chain (Arbitrum Orbit) with future Ethereum bridges.",
+      title: "Stake APX",
+      desc: "lock governance tokens, earn higher APY, and vote on protocol upgrades on-chain",
+    },
+    {
+      title: "Stay Protected",
+      desc: "real-time health factor monitoring and automated liquidations keep the protocol solvent",
     },
   ];
+
+  const bars = [28, 40, 52, 60, 72, 85, 100];
 
   return (
     <section
@@ -754,46 +799,78 @@ function Features() {
       style={{ borderTop: `1px solid ${BORDER}` }}
     >
       <div className="max-w-7xl mx-auto">
+
+        {/* Section headline */}
+        <h2
+          className="text-3xl md:text-4xl font-extrabold uppercase tracking-tight leading-tight mb-16"
+          style={{ color: "hsl(0 0% 94%)" }}
+        >
+          WE ACCELERATE YOUR<br />
+          <span style={{ color: LIME }}>CAPITAL GROWTH</span>
+        </h2>
+
         <div className="grid lg:grid-cols-2 gap-20 items-start">
-          {/* Left */}
+
+          {/* LEFT — big stat + ascending bar chart */}
           <div>
-            <Tag>APEX Engine</Tag>
-            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight leading-tight">
-              Improve Outcomes &amp;{" "}
-              <span className="gradient-text">Automate Workflows</span>
-            </h2>
-            <p
-              className="mt-4 text-[15px] leading-relaxed"
-              style={{ color: "hsl(0 0% 42%)" }}
-            >
-              APEX centralizes financial data, automates repetitive DeFi workflows, and
-              enhances decision-making with real-time on-chain intelligence.
+            {/* Giant stat */}
+            <div className="relative inline-block mb-4">
+              <div className="pointer-events-none absolute inset-0 -z-10" style={{
+                background: `radial-gradient(ellipse 90% 60% at 15% 80%, ${LIME}32 0%, transparent 60%)`,
+                filter: "blur(24px)",
+                transform: "translateY(12px)",
+              }} />
+              <span
+                className="font-extrabold font-mono leading-none select-none"
+                style={{
+                  fontSize: "clamp(90px, 14vw, 140px)",
+                  color: "hsl(0 0% 93%)",
+                  display: "block",
+                  lineHeight: 1,
+                  textShadow: `0 0 60px ${LIME}35`,
+                }}
+              >
+                40
+              </span>
+              <span
+                className="absolute font-extrabold font-mono"
+                style={{
+                  fontSize: "clamp(44px, 7vw, 68px)",
+                  color: LIME,
+                  bottom: "6px",
+                  right: "-0.55em",
+                  lineHeight: 1,
+                  textShadow: `0 0 30px ${LIME}80`,
+                }}
+              >
+                %
+              </span>
+            </div>
+
+            <p className="text-[13px] mt-8 max-w-[200px] leading-relaxed"
+              style={{ color: "hsl(0 0% 34%)" }}>
+              average yield increase for USDAX holders
             </p>
 
-            <div className="mt-10 space-y-6">
-              {bullets.map((b, i) => {
-                const Icon = b.icon;
-                return (
-                  <div key={b.title} className="flex items-start gap-4">
-                    <div
-                      className="flex-shrink-0 w-8 h-8 rounded flex items-center justify-center mt-0.5"
-                      style={{ background: "hsl(0 0% 8%)", border: `1px solid ${BORDER}` }}
-                    >
-                      <Icon
-                        className="h-3.5 w-3.5"
-                        style={{ color: i === 0 ? LIME : i === 1 ? EMERALD : "hsl(0 0% 55%)" }}
-                      />
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-semibold text-foreground mb-1">{b.title}</h4>
-                      <p className="text-[13px] leading-relaxed" style={{ color: "hsl(0 0% 40%)" }}>
-                        {b.desc}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
+            {/* Ascending bar chart */}
+            <div className="flex items-end gap-1.5 mt-8" style={{ height: 80 }}>
+              {bars.map((h, i) => (
+                <div
+                  key={i}
+                  className="flex-1 rounded-sm"
+                  style={{
+                    height: `${h}%`,
+                    background: i === bars.length - 1
+                      ? LIME
+                      : `hsl(79 100% 57% / ${0.1 + i * 0.08})`,
+                    boxShadow: i === bars.length - 1 ? `0 0 12px ${LIME}60` : undefined,
+                  }}
+                />
+              ))}
             </div>
+            <p className="text-[10px] mt-3 font-mono" style={{ color: "hsl(0 0% 20%)" }}>
+              Growing protocol TVL · usdax.finance
+            </p>
 
             <div className="mt-10">
               <LimeBtn href="/app">
@@ -802,95 +879,42 @@ function Features() {
             </div>
           </div>
 
-          {/* Right — protocol panel */}
-          <div
-            className="rounded-xl p-6"
-            style={{ background: CARD_BG, border: `1px solid ${BORDER}` }}
-          >
-            {/* Panel header */}
-            <div className="flex items-center justify-between mb-7">
-              <div className="flex items-center gap-2 text-[13px]" style={{ color: "hsl(0 0% 45%)" }}>
-                <BarChart2 className="h-4 w-4" style={{ color: LIME }} />
-                Protocol Dashboard
-              </div>
-              <span
-                className="text-[10px] font-semibold px-2.5 py-1 rounded-full font-mono"
+          {/* RIGHT — "+" list, DarkPixel style */}
+          <div style={{ borderTop: `1px solid ${BORDER}` }}>
+            {items.map((item) => (
+              <div
+                key={item.title}
+                className="grid gap-6 py-7"
                 style={{
-                  background: `${EMERALD}14`,
-                  color: EMERALD,
-                  border: `1px solid ${EMERALD}25`,
+                  gridTemplateColumns: "auto 1fr 1.6fr",
+                  borderBottom: `1px solid ${BORDER}`,
                 }}
               >
-                ● LIVE
-              </span>
-            </div>
-
-            {/* Progress bars */}
-            <div className="space-y-6">
-              {[
-                {
-                  label: "Total Value Locked",
-                  value: "$56,333.75",
-                  pct: 68,
-                  bar: LIME,
-                },
-                {
-                  label: "USDAX Minted",
-                  value: "26,700 USDAX",
-                  pct: 47,
-                  bar: EMERALD,
-                },
-                {
-                  label: "APX Staked",
-                  value: "700,000 APX",
-                  pct: 42,
-                  bar: "hsl(0 0% 35%)",
-                },
-              ].map((row) => (
-                <div key={row.label}>
-                  <div className="flex justify-between text-[13px] mb-2.5">
-                    <span style={{ color: "hsl(0 0% 42%)" }}>{row.label}</span>
-                    <span className="font-mono font-semibold text-foreground">{row.value}</span>
-                  </div>
-                  <div
-                    className="h-1.5 rounded-full overflow-hidden"
-                    style={{ background: "hsl(0 0% 10%)" }}
-                  >
-                    <div
-                      className="h-full rounded-full transition-all"
-                      style={{
-                        width: `${row.pct}%`,
-                        background: row.bar,
-                        boxShadow: row.bar === LIME ? `0 0 8px ${LIME_BORDER}` : undefined,
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Bottom stats */}
-            <div
-              className="mt-7 pt-6 grid grid-cols-3"
-              style={{ borderTop: `1px solid ${BORDER}` }}
-            >
-              {[
-                { label: "Active Vaults", value: "8" },
-                { label: "Stakers", value: "5" },
-                { label: "At-Risk", value: "1" },
-              ].map((s) => (
-                <div key={s.label} className="text-center">
-                  <div className="text-xl font-extrabold font-mono text-foreground">{s.value}</div>
-                  <div
-                    className="text-[10px] mt-1 uppercase tracking-widest"
-                    style={{ color: "hsl(0 0% 32%)" }}
-                  >
-                    {s.label}
-                  </div>
-                </div>
-              ))}
-            </div>
+                {/* "+" icon */}
+                <span
+                  className="font-extralight select-none mt-0.5"
+                  style={{ fontSize: 22, color: LIME, lineHeight: 1 }}
+                >
+                  +
+                </span>
+                {/* Title */}
+                <p
+                  className="font-bold text-[14px] leading-snug"
+                  style={{ color: "hsl(0 0% 88%)" }}
+                >
+                  {item.title}
+                </p>
+                {/* Description */}
+                <p
+                  className="text-[12px] leading-relaxed"
+                  style={{ color: "hsl(0 0% 38%)" }}
+                >
+                  {item.desc}
+                </p>
+              </div>
+            ))}
           </div>
+
         </div>
       </div>
     </section>
