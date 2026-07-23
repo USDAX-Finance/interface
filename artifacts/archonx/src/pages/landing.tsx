@@ -522,25 +522,75 @@ function WhatIsUSDax() {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-px" style={{ background: BORDER }}>
+        <div className="grid md:grid-cols-3 gap-5">
           {pillars.map((p) => {
             const Icon = p.icon;
             return (
               <div
                 key={p.title}
-                className="p-8 card-hover"
-                style={{ background: CARD_BG }}
+                className="relative p-8 rounded-2xl overflow-hidden group"
+                style={{
+                  background: "linear-gradient(145deg, rgba(255,255,255,0.055) 0%, rgba(255,255,255,0.018) 60%, rgba(0,0,0,0.1) 100%)",
+                  border: "1px solid rgba(255,255,255,0.09)",
+                  borderTop: "1px solid rgba(255,255,255,0.18)",
+                  borderLeft: "1px solid rgba(255,255,255,0.12)",
+                  backdropFilter: "blur(24px)",
+                  WebkitBackdropFilter: "blur(24px)",
+                  boxShadow: "0 8px 40px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.1), inset 0 -1px 0 rgba(0,0,0,0.3)",
+                  transition: "transform 0.25s, box-shadow 0.25s",
+                }}
+                onMouseEnter={(e) => {
+                  const el = e.currentTarget as HTMLElement;
+                  el.style.transform = "translateY(-4px) scale(1.015)";
+                  el.style.boxShadow = `0 20px 60px rgba(0,0,0,0.65), 0 0 30px ${p.color}18, inset 0 1px 0 rgba(255,255,255,0.14), inset 0 -1px 0 rgba(0,0,0,0.3)`;
+                }}
+                onMouseLeave={(e) => {
+                  const el = e.currentTarget as HTMLElement;
+                  el.style.transform = "";
+                  el.style.boxShadow = "0 8px 40px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.1), inset 0 -1px 0 rgba(0,0,0,0.3)";
+                }}
               >
+                {/* Corner light refraction */}
                 <div
-                  className="w-12 h-12 rounded flex items-center justify-center mb-6"
-                  style={{ background: `${p.color}12` }}
-                >
-                  <Icon className="h-5 w-5" style={{ color: p.color }} />
+                  className="pointer-events-none absolute -top-12 -right-12 w-28 h-28 rounded-full"
+                  style={{
+                    background: `radial-gradient(circle, ${p.color}22 0%, transparent 70%)`,
+                    filter: "blur(12px)",
+                  }}
+                />
+                {/* Bottom dark tint for depth */}
+                <div
+                  className="pointer-events-none absolute bottom-0 inset-x-0 h-1/2 rounded-b-2xl"
+                  style={{
+                    background: "linear-gradient(to bottom, transparent, rgba(0,0,0,0.18))",
+                  }}
+                />
+
+                <div className="relative z-10">
+                  {/* Icon with lime-tinted glass badge */}
+                  <div
+                    className="w-12 h-12 rounded-xl flex items-center justify-center mb-7"
+                    style={{
+                      background: `linear-gradient(135deg, ${p.color}22, ${p.color}08)`,
+                      border: `1px solid ${p.color}30`,
+                      boxShadow: `0 2px 12px ${p.color}18`,
+                    }}
+                  >
+                    <Icon className="h-5 w-5" style={{ color: p.color }} />
+                  </div>
+                  <h3
+                    className="font-semibold mb-3"
+                    style={{ color: "hsl(0 0% 92%)" }}
+                  >
+                    {p.title}
+                  </h3>
+                  <p
+                    className="text-[13px] leading-relaxed"
+                    style={{ color: "hsl(0 0% 48%)" }}
+                  >
+                    {p.desc}
+                  </p>
                 </div>
-                <h3 className="font-semibold text-foreground mb-2.5">{p.title}</h3>
-                <p className="text-[13px] leading-relaxed" style={{ color: "hsl(0 0% 42%)" }}>
-                  {p.desc}
-                </p>
               </div>
             );
           })}
