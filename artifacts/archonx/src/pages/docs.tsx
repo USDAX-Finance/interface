@@ -49,7 +49,6 @@ const SECTIONS = [
     icon: Layers,
     items: [
       { id: "apx-overview",        label: "Overview" },
-      { id: "tokenomics",          label: "Tokenomics" },
       { id: "governance",          label: "Governance" },
     ],
   },
@@ -388,20 +387,6 @@ await window.ethereum.request({
         { param: "Revenue Share",     value: "100%",             desc: "All protocol fees flow to APX stakers." },
         { param: "Voting",            value: "1 APX = 1 vote",   desc: "Direct on-chain governance." },
         { param: "Unbonding Period",  value: "7 days",           desc: "Cooldown before unstaked APX is returned." },
-      ]} />
-
-      {/* ── TOKENOMICS ── */}
-      <SectionHeading id="tokenomics">Tokenomics</SectionHeading>
-      <Prose>
-        APX has a hard-capped supply of 100 million tokens distributed across the following buckets.
-        There are no inflationary emissions — all staking rewards come from real protocol revenue.
-      </Prose>
-      <ParamTable rows={[
-        { param: "Community & Ecosystem", value: "40%  · 40M APX",  desc: "Grants, liquidity incentives, hackathons." },
-        { param: "Staking Rewards Pool",  value: "25%  · 25M APX",  desc: "Bootstrapping rewards until fee revenue scales." },
-        { param: "Team & Contributors",   value: "18%  · 18M APX",  desc: "4-year vesting, 1-year cliff." },
-        { param: "Investors",             value: "12%  · 12M APX",  desc: "2-year vesting, 6-month cliff." },
-        { param: "Treasury",             value: "5%   · 5M APX",   desc: "Protocol-owned reserve for emergencies." },
       ]} />
 
       {/* ── GOVERNANCE ── */}
