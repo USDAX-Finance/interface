@@ -1040,76 +1040,127 @@ function UseCases() {
 
 function StakingCTA() {
   return (
-    <section
-      id="staking"
-      className="py-24 px-8"
-      style={{ borderTop: `1px solid ${BORDER}` }}
-    >
-      <div className="max-w-3xl mx-auto">
+    <section id="staking" className="px-8 py-16" style={{ borderTop: `1px solid ${BORDER}` }}>
+      <div className="max-w-7xl mx-auto">
         <div
-          className="relative rounded-xl overflow-hidden"
-          style={{
-            background: CARD_BG,
-            border: `1px solid ${BORDER}`,
-          }}
+          className="relative rounded-2xl overflow-hidden"
+          style={{ background: LIME }}
         >
-          {/* Lime glow bg */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background: `radial-gradient(ellipse 60% 50% at 50% 0%, ${LIME}08 0%, transparent 70%)`,
-            }}
-          />
-          {/* Top lime line */}
-          <div className="absolute top-0 inset-x-0 h-px" style={{ background: `linear-gradient(90deg, transparent, ${LIME}40, transparent)` }} />
+          {/* Corner L-brackets — black, matching hero style */}
+          {[
+            { top: 0, left: 0, borderTop: "3px solid hsl(0 0% 4%)", borderLeft: "3px solid hsl(0 0% 4%)" },
+            { top: 0, right: 0, borderTop: "3px solid hsl(0 0% 4%)", borderRight: "3px solid hsl(0 0% 4%)" },
+            { bottom: 0, left: 0, borderBottom: "3px solid hsl(0 0% 4%)", borderLeft: "3px solid hsl(0 0% 4%)" },
+            { bottom: 0, right: 0, borderBottom: "3px solid hsl(0 0% 4%)", borderRight: "3px solid hsl(0 0% 4%)" },
+          ].map((s, i) => (
+            <div key={i} className="pointer-events-none absolute" style={{ ...s, width: 36, height: 36 }} />
+          ))}
 
-          <div className="relative z-10 p-12 md:p-16 text-center">
-            <Tag>Staking</Tag>
-            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight mt-2">
-              Stake <span className="gradient-text">APX</span> &amp; Earn Up to{" "}
-              <span style={{ color: LIME }}>15% APY</span>
-            </h2>
-            <p
-              className="max-w-lg mx-auto mt-4 text-[15px] leading-relaxed"
-              style={{ color: "hsl(0 0% 42%)" }}
-            >
-              Lock APX tokens, earn passive rewards, and participate in protocol governance.
-              7-day cooldown ensures long-term alignment.
-            </p>
+          {/* Scattered dark data bits */}
+          {["02", "178", "46630", "APX"].map((t, i) => (
+            <div key={i} className="pointer-events-none absolute font-mono font-black select-none"
+              style={{
+                color: "hsl(0 0% 4%)",
+                opacity: 0.06,
+                fontSize: ["5rem","7rem","4rem","6rem"][i],
+                top: ["10%","55%","70%","20%"][i],
+                left: ["5%","70%","20%","78%"][i],
+                lineHeight: 1,
+              }}>
+              {t}
+            </div>
+          ))}
 
-            <div className="flex flex-wrap justify-center gap-3 mt-8">
-              <LimeBtn href="/app/staking">
-                <Lock className="h-3.5 w-3.5" /> Stake Now
-              </LimeBtn>
-              <OutlineBtn href="/app">View Dashboard</OutlineBtn>
+          <div className="relative z-10 grid lg:grid-cols-2 gap-0">
+
+            {/* LEFT — headline + CTA */}
+            <div className="p-12 md:p-14 flex flex-col justify-between">
+              <div>
+                <p className="text-[10px] font-mono font-bold tracking-[0.28em] uppercase mb-6"
+                  style={{ color: "hsl(0 0% 20%)" }}>
+                  ◈ STAKING · APEX PROTOCOL
+                </p>
+                <h2 className="font-black uppercase leading-[1.0] tracking-tight"
+                  style={{ fontSize: "clamp(2.4rem, 5vw, 4.2rem)", color: "hsl(0 0% 4%)" }}>
+                  STAKE APX.<br />
+                  EARN YIELD.<br />
+                  OWN THE<br />PROTOCOL.
+                </h2>
+                <p className="mt-6 text-[14px] leading-relaxed max-w-sm"
+                  style={{ color: "hsl(0 0% 22%)" }}>
+                  Lock APX tokens, earn passive rewards, and vote on protocol governance.
+                  7-day unstake cooldown ensures long-term alignment.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-3 mt-10">
+                {/* Dark CTA button */}
+                <Link href="/app/staking">
+                  <button
+                    className="inline-flex items-center gap-2 font-bold px-6 py-3 rounded text-[14px] transition-all hover:opacity-90"
+                    style={{ background: "hsl(0 0% 4%)", color: LIME }}
+                  >
+                    <Lock className="h-4 w-4" /> Stake Now
+                  </button>
+                </Link>
+                <Link href="/app">
+                  <button
+                    className="inline-flex items-center gap-2 font-semibold px-6 py-3 rounded text-[14px] transition-all hover:bg-black/10"
+                    style={{ color: "hsl(0 0% 10%)", border: "1.5px solid hsl(0 0% 10% / 0.25)" }}
+                  >
+                    View Dashboard <ArrowRight className="h-4 w-4" />
+                  </button>
+                </Link>
+              </div>
             </div>
 
-            {/* Stats */}
+            {/* RIGHT — stats grid */}
             <div
-              className="grid grid-cols-3 gap-0 mt-12 pt-10"
-              style={{ borderTop: `1px solid ${BORDER}` }}
+              className="p-12 md:p-14 flex flex-col justify-between"
+              style={{ borderLeft: "1px solid hsl(0 0% 4% / 0.12)" }}
             >
-              {[
-                { value: "15%", label: "Base APY", color: LIME },
-                { value: "7d", label: "Cooldown Period", color: WARNING },
-                { value: "100M", label: "APX Max Supply", color: EMERALD },
-              ].map((s) => (
-                <div key={s.label}>
-                  <div
-                    className="text-3xl font-extrabold font-mono"
-                    style={{ color: s.color }}
-                  >
-                    {s.value}
-                  </div>
-                  <div
-                    className="text-[10px] mt-2 uppercase tracking-widest"
-                    style={{ color: "hsl(0 0% 32%)" }}
-                  >
-                    {s.label}
-                  </div>
+              {/* APX coin icon */}
+              <div className="flex items-center gap-3 mb-10">
+                <div style={{
+                  width: 48, height: 48, borderRadius: "50%",
+                  background: "hsl(0 0% 4%)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  boxShadow: "0 0 0 3px hsl(0 0% 4% / 0.15)",
+                }}>
+                  <img src="/apex-coin-logo.png" alt="APX" style={{ width: 28, height: 28, objectFit: "contain" }} />
                 </div>
-              ))}
+                <div>
+                  <p className="font-black text-[15px]" style={{ color: "hsl(0 0% 4%)" }}>APX Token</p>
+                  <p className="text-[11px] font-mono" style={{ color: "hsl(0 0% 22%)" }}>Governance · Staking</p>
+                </div>
+              </div>
+
+              {/* 3 big stats */}
+              <div className="space-y-0">
+                {[
+                  { value: "15%", label: "Base Staking APY",    sub: "compounding rewards" },
+                  { value: "7d",  label: "Unstake Cooldown",     sub: "long-term alignment" },
+                  { value: "100M",label: "APX Max Supply",       sub: "fixed, no inflation" },
+                ].map((s, i) => (
+                  <div key={s.label} className="flex items-center justify-between py-5"
+                    style={{ borderBottom: i < 2 ? "1px solid hsl(0 0% 4% / 0.12)" : undefined }}>
+                    <div>
+                      <p className="text-[12px] font-bold uppercase tracking-wider" style={{ color: "hsl(0 0% 18%)" }}>{s.label}</p>
+                      <p className="text-[10px] font-mono mt-0.5" style={{ color: "hsl(0 0% 30%)" }}>{s.sub}</p>
+                    </div>
+                    <p className="font-black font-mono" style={{ fontSize: "clamp(1.6rem, 3vw, 2.4rem)", color: "hsl(0 0% 4%)" }}>
+                      {s.value}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Bottom tag */}
+              <p className="text-[9px] font-mono tracking-[0.2em] mt-8" style={{ color: "hsl(0 0% 28%)" }}>
+                // ROBINHOOD CHAIN · ID 46630 · USDAX.FINANCE
+              </p>
             </div>
+
           </div>
         </div>
       </div>
