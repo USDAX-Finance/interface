@@ -507,10 +507,10 @@ function Hero() {
 
           {/* Right: service tags */}
           <div className="text-right pb-1">
-            <p className="text-[11px] font-mono tracking-[0.18em]" style={{ color: "hsl(0 0% 26%)" }}>
+            <p className="text-[12px] font-mono tracking-[0.2em] font-semibold" style={{ color: LIME }}>
               // MINT // STAKE // EARN
             </p>
-            <p className="text-[9px] font-mono mt-1.5" style={{ color: "hsl(0 0% 18%)" }}>
+            <p className="text-[10px] font-mono mt-1.5" style={{ color: "hsl(0 0% 62%)" }}>
               USDAX.FINANCE · ROBINHOOD CHAIN 46630
             </p>
           </div>
