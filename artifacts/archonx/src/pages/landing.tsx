@@ -1211,10 +1211,17 @@ function Footer() {
               Programmable stablecoin infrastructure for the next generation of DeFi.
             </p>
             <div className="flex gap-4 mt-6">
-              {[Twitter, Github, MessageSquare, FileText].map((Icon, i) => (
+              {[
+                { Icon: Twitter,      href: "https://x.com/Usdax_Finance" },
+                { Icon: Github,       href: "#" },
+                { Icon: MessageSquare,href: "#" },
+                { Icon: FileText,     href: "#" },
+              ].map(({ Icon, href }, i) => (
                 <a
                   key={i}
-                  href="#"
+                  href={href}
+                  target={href !== "#" ? "_blank" : undefined}
+                  rel={href !== "#" ? "noopener noreferrer" : undefined}
                   className="transition-colors"
                   style={{ color: "hsl(0 0% 22%)" }}
                   onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "hsl(0 0% 55%)")}
