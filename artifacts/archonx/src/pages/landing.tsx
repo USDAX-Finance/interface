@@ -158,130 +158,235 @@ function Nav() {
   );
 }
 
-/* ─────────────────────── MOCK DASHBOARD (dark / flat) ─────────────────────── */
+/* ─────────────────────── MOCK DASHBOARD — DarkPixel style ─────────────────────── */
+
+/** SVG connector lines from chip positions to center */
+function NodeLines() {
+  // center of the 340×200 node area is (170, 100)
+  const cx = 170; const cy = 104;
+  const points = [
+    [46, 28], [220, 18], [310, 72], [18, 110],
+    [290, 148], [60, 178], [196, 182],
+  ];
+  return (
+    <svg
+      className="absolute inset-0 w-full h-full pointer-events-none"
+      style={{ opacity: 0.18 }}
+    >
+      {points.map(([x, y], i) => (
+        <line
+          key={i}
+          x1={`${(x / 340) * 100}%`} y1={`${(y / 200) * 100}%`}
+          x2="50%" y2="52%"
+          stroke={LIME} strokeWidth="1"
+          strokeDasharray="3 4"
+        />
+      ))}
+    </svg>
+  );
+}
+
+const NODES = [
+  { label: "Minting",     style: { top: "6%",  left: "4%" } },
+  { label: "Staking",     style: { top: "2%",  left: "54%" } },
+  { label: "Governance",  style: { top: "28%", right: "2%" } },
+  { label: "USDAX",       style: { top: "48%", left: "2%" } },
+  { label: "Liquidation", style: { bottom: "22%", right: "3%" } },
+  { label: "Yield",       style: { bottom: "8%", left: "8%" } },
+  { label: "AKX",         style: { bottom: "4%", left: "52%" } },
+] as const;
 
 function MockDashboard() {
   return (
-    <div className="relative animate-float">
+    <div className="relative animate-float w-full max-w-[480px] mx-auto lg:mx-0">
       <div
-        className="rounded-xl p-5"
+        className="rounded-2xl overflow-hidden"
         style={{
-          background: CARD_BG,
-          border: `1px solid ${BORDER}`,
-          boxShadow: "0 40px 80px hsl(0 0% 0% / 0.7)",
+          background: "hsl(0 0% 5%)",
+          border: `1px solid hsl(0 0% 11%)`,
+          boxShadow: "0 40px 100px hsl(0 0% 0% / 0.8), 0 0 0 1px hsl(0 0% 9%)",
         }}
       >
-        {/* Window dots */}
-        <div className="flex items-center gap-1.5 mb-5">
-          <div className="w-2 h-2 rounded-full" style={{ background: DANGER }} />
-          <div className="w-2 h-2 rounded-full" style={{ background: WARNING }} />
-          <div className="w-2 h-2 rounded-full" style={{ background: EMERALD }} />
-          <span className="ml-auto text-[10px] font-mono text-muted-foreground tracking-widest">
-            USDAX · USD
+        {/* ── Header bar ── */}
+        <div
+          className="flex items-center justify-between px-5 py-3"
+          style={{ borderBottom: "1px solid hsl(0 0% 9%)" }}
+        >
+          <span
+            className="text-[11px] font-bold tracking-[0.18em] uppercase"
+            style={{ color: LIME }}
+          >
+            ◈ ArchonX
+          </span>
+          <span
+            className="inline-flex items-center gap-1.5 text-[10px] font-mono rounded-full px-2.5 py-0.5"
+            style={{
+              background: `${EMERALD}12`,
+              color: EMERALD,
+              border: `1px solid ${EMERALD}25`,
+            }}
+          >
+            <span
+              className="w-1.5 h-1.5 rounded-full animate-pulse"
+              style={{ background: EMERALD }}
+            />
+            LIVE
           </span>
         </div>
 
-        {/* Price */}
-        <div className="flex items-end justify-between mb-5">
-          <div>
-            <div className="text-4xl font-black font-mono text-foreground tracking-tight">
-              $1.00
-            </div>
-            <div className="flex items-center gap-2 mt-1">
-              <span
-                className="text-[11px] font-mono font-bold px-2 py-0.5 rounded"
-                style={{ background: `${EMERALD}18`, color: EMERALD }}
-              >
-                +0.00%
-              </span>
-              <span className="text-[10px] text-muted-foreground">Pegged stable</span>
-            </div>
-          </div>
-          <div className="text-right">
-            <div className="text-xs text-muted-foreground">24h vol</div>
-            <div className="text-sm font-mono font-semibold text-foreground">$24.5M</div>
+        {/* ── Title with brackets ── */}
+        <div className="relative px-6 pt-6 pb-3 text-center">
+          {/* Large bracket left */}
+          <span
+            className="absolute select-none pointer-events-none font-black leading-none"
+            style={{
+              left: 10, top: 8,
+              fontSize: 88,
+              color: LIME,
+              opacity: 0.85,
+              lineHeight: 1,
+              fontFamily: "'Inter', sans-serif",
+            }}
+          >
+            (
+          </span>
+          {/* Large bracket right */}
+          <span
+            className="absolute select-none pointer-events-none font-black leading-none"
+            style={{
+              right: 10, top: 8,
+              fontSize: 88,
+              color: LIME,
+              opacity: 0.85,
+              lineHeight: 1,
+              fontFamily: "'Inter', sans-serif",
+            }}
+          >
+            )
+          </span>
+
+          <div className="relative z-10 px-10">
+            <p
+              className="text-[10px] font-semibold tracking-[0.22em] uppercase mb-2"
+              style={{ color: "hsl(0 0% 32%)" }}
+            >
+              Yield-bearing stablecoin
+            </p>
+            <h3
+              className="text-[19px] font-black uppercase leading-[1.15] tracking-wide"
+              style={{ color: "hsl(0 0% 92%)" }}
+            >
+              USDAX{" "}
+              <span style={{ color: LIME }}>PROTOCOL</span>
+              <br />
+              ON ROBINHOOD CHAIN
+            </h3>
           </div>
         </div>
 
-        {/* Chart bars */}
-        <div className="flex items-end gap-1 h-16 mb-5">
-          {[30, 45, 28, 55, 38, 65, 42, 52, 70, 44, 60, 80].map((h, i) => (
+        {/* ── Node cluster ── */}
+        <div className="relative mx-5 mb-0 rounded-xl overflow-hidden" style={{ height: 200, background: "hsl(0 0% 4%)", border: "1px solid hsl(0 0% 8%)" }}>
+          <NodeLines />
+
+          {/* Lime radial glow behind center */}
+          <div
+            className="absolute"
+            style={{
+              top: "50%", left: "50%",
+              transform: "translate(-50%,-50%)",
+              width: 90, height: 90,
+              borderRadius: "50%",
+              background: `${LIME}18`,
+              filter: "blur(20px)",
+              pointerEvents: "none",
+            }}
+          />
+
+          {/* Central AX icon */}
+          <div
+            className="absolute flex items-center justify-center font-black text-sm rounded-full"
+            style={{
+              top: "50%", left: "50%",
+              transform: "translate(-50%,-50%)",
+              width: 44, height: 44,
+              background: LIME,
+              color: "hsl(0 0% 4%)",
+              boxShadow: `0 0 0 6px ${LIME}18, 0 0 28px ${LIME}55`,
+              zIndex: 10,
+            }}
+          >
+            AX
+          </div>
+
+          {/* Orbit ring */}
+          <div
+            className="absolute rounded-full pointer-events-none"
+            style={{
+              top: "50%", left: "50%",
+              transform: "translate(-50%,-50%)",
+              width: 90, height: 90,
+              border: `1px dashed ${LIME}22`,
+            }}
+          />
+
+          {/* Floating node chips */}
+          {NODES.map((node) => (
             <div
-              key={i}
-              className="flex-1 rounded-sm"
+              key={node.label}
+              className="absolute text-[10px] font-semibold tracking-wide rounded-md px-2.5 py-1"
               style={{
-                height: `${h}%`,
-                background:
-                  i === 11
-                    ? LIME
-                    : i >= 8
-                    ? `${LIME}50`
-                    : "hsl(0 0% 14%)",
+                ...node.style,
+                background: "hsl(0 0% 9%)",
+                border: "1px solid hsl(0 0% 14%)",
+                color: "hsl(0 0% 55%)",
+                whiteSpace: "nowrap",
               }}
-            />
+            >
+              {node.label}
+            </div>
           ))}
         </div>
 
-        {/* Stats */}
+        {/* ── Bottom stat boxes ── */}
         <div
-          className="grid grid-cols-3 gap-0 pt-4"
-          style={{ borderTop: `1px solid ${BORDER}` }}
+          className="grid grid-cols-3"
+          style={{ borderTop: "1px solid hsl(0 0% 9%)" }}
         >
           {[
-            { label: "APY", value: "15%", color: LIME },
-            { label: "TVL", value: "$56K", color: "hsl(0 0% 80%)" },
-            { label: "Collat.", value: "150%", color: EMERALD },
-          ].map((s) => (
-            <div key={s.label} className="text-center">
+            { plus: true, value: "$1.00",  label: "USDAX Pegged",  color: "hsl(0 0% 88%)" },
+            { plus: true, value: "15%",    label: "Base APY",      color: LIME },
+            { plus: true, value: "150%",   label: "Collateral",    color: EMERALD },
+          ].map((s, i) => (
+            <div
+              key={s.label}
+              className="relative py-4 px-3 text-center"
+              style={{
+                borderRight: i < 2 ? "1px solid hsl(0 0% 9%)" : undefined,
+                background: i === 1 ? `${LIME}05` : "transparent",
+              }}
+            >
+              {/* + symbol top-left */}
+              <span
+                className="absolute top-2 left-2.5 text-[13px] font-black leading-none"
+                style={{ color: i === 1 ? LIME : "hsl(0 0% 18%)" }}
+              >
+                +
+              </span>
               <div
-                className="text-base font-bold font-mono"
+                className="text-xl font-black font-mono mt-1"
                 style={{ color: s.color }}
               >
                 {s.value}
               </div>
-              <div className="text-[10px] text-muted-foreground mt-0.5">{s.label}</div>
+              <div
+                className="text-[9px] uppercase tracking-widest mt-1"
+                style={{ color: "hsl(0 0% 28%)" }}
+              >
+                {s.label}
+              </div>
             </div>
           ))}
         </div>
-      </div>
-
-      {/* Floating badge — yield */}
-      <div
-        className="absolute -bottom-4 -right-4 hidden lg:flex items-center gap-2.5 rounded-lg px-3.5 py-2"
-        style={{
-          background: LIME,
-          boxShadow: `0 8px 30px hsl(79 100% 57% / 0.35)`,
-        }}
-      >
-        <Zap className="h-3.5 w-3.5" style={{ color: "hsl(0 0% 4%)" }} />
-        <div>
-          <div className="text-[9px] font-semibold" style={{ color: "hsl(0 0% 20%)" }}>
-            Yield Active
-          </div>
-          <div className="text-xs font-bold" style={{ color: "hsl(0 0% 4%)" }}>
-            +15% APY
-          </div>
-        </div>
-      </div>
-
-      {/* Floating badge — health */}
-      <div
-        className="absolute -top-3 -left-4 hidden lg:flex items-center gap-2 rounded-lg px-3 py-2"
-        style={{
-          background: "hsl(0 0% 8%)",
-          border: `1px solid ${EMERALD}35`,
-        }}
-      >
-        <div
-          className="w-2 h-2 rounded-full animate-pulse"
-          style={{ background: EMERALD }}
-        />
-        <span className="text-[11px] font-mono">
-          <span className="text-muted-foreground">HF </span>
-          <span className="font-bold" style={{ color: EMERALD }}>
-            2.13x
-          </span>
-        </span>
       </div>
     </div>
   );
