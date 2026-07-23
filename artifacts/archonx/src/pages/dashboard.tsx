@@ -9,7 +9,7 @@ import {
   PieChart, Pie, Cell, BarChart, Bar,
   XAxis, YAxis, Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
-import { formatCurrency, formatNumber, formatPercentage, formatAddress, formatTimeAgoUTC } from "@/lib/utils";
+import { formatCurrency, formatNumber, formatPercentage, formatAddress, formatTimeAgoUTC, formatCompact } from "@/lib/utils";
 import { Activity, ShieldAlert, Coins, TrendingUp, AlertTriangle, Zap } from "lucide-react";
 
 /* ─── design tokens ─── */
@@ -162,7 +162,7 @@ export default function Dashboard() {
         <StatCard
           title="Total Value Locked"
           value={formatCurrency(stats.tvlUsd)}
-          sub={<>C-Ratio: <span style={{ color: EMERALD }}>{formatNumber(stats.collateralRatio, 1)}%</span></>}
+          sub={<>C-Ratio: <span style={{ color: EMERALD }}>{formatNumber(stats.collateralRatio * 100, 1)}%</span></>}
           icon={Coins}
           accent={LIME}
         />
@@ -224,14 +224,14 @@ export default function Dashboard() {
                 </PieChart>
               </ResponsiveContainer>
             </div>
-            {/* Custom legend row — consistent height for both cards */}
-            <div className="flex items-center gap-4 mt-2 pt-3" style={{ borderTop: `1px solid ${BORDER}` }}>
+            {/* Custom legend — wraps to 2 rows when many collateral types */}
+            <div className="flex flex-wrap gap-x-4 gap-y-1.5 mt-2 pt-3" style={{ borderTop: `1px solid ${BORDER}` }}>
               {collateral.map((c, i) => (
-                <div key={c.symbol} className="flex items-center gap-1.5">
+                <div key={c.symbol} className="flex items-center gap-1.5 flex-shrink-0">
                   <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: PIE_COLORS[i % PIE_COLORS.length] }} />
                   <span className="font-mono text-[10px]" style={{ color: "hsl(0 0% 42%)" }}>{c.symbol}</span>
                   <span className="font-mono text-[10px] font-bold" style={{ color: PIE_COLORS[i % PIE_COLORS.length] }}>
-                    {formatCurrency(c.valueUsd)}
+                    {formatCompact(c.valueUsd)}
                   </span>
                 </div>
               ))}

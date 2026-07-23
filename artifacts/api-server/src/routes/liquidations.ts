@@ -10,10 +10,14 @@ import { eq, lt, and, asc } from "drizzle-orm";
 const LIQUIDATION_BONUS = 10; // 10%
 const MIN_HEALTH_FACTOR = 1.0;
 
-// Token prices (simulated)
+// Token prices (simulated — in production these come from Chainlink)
 const TOKEN_PRICES: Record<string, number> = {
-  WETH: 3247.5,
-  WBTC: 67823.0,
+  WETH:     3247.5,
+  WBTC:     67823.0,
+  stETH:    3190.0,
+  "RWA-TB": 1.00,
+  "RWA-RE": 1.00,
+  "RWA-CB": 1.00,
 };
 
 function randomTxHash(): string {

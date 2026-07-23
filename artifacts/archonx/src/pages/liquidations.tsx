@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
-import { formatCurrency, formatNumber, formatAddress } from "@/lib/utils";
+import { formatCurrency, formatNumber, formatAddress, formatCompact } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { Crosshair, AlertOctagon, Zap, TrendingDown, Shield } from "lucide-react";
 
@@ -224,7 +224,7 @@ export default function Liquidations() {
                       className="text-xs font-mono font-black px-2 py-0.5 rounded-md"
                       style={{ background: `${EMERALD}12`, color: EMERALD, border: `1px solid ${EMERALD}25` }}
                     >
-                      +{formatNumber(target.liquidationBonus, 1)}%
+                      +{formatCompact(target.liquidationBonus)} USDAX
                     </span>
                   </TableCell>
                   <TableCell className="text-right">

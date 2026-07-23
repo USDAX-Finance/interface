@@ -13,8 +13,12 @@ const router: IRouter = Router();
 
 // Prices (simulated — in production these come from Chainlink)
 const TOKEN_PRICES: Record<string, number> = {
-  WETH: 3247.5,
-  WBTC: 67823.0,
+  WETH:     3247.5,
+  WBTC:     67823.0,
+  stETH:    3190.0,
+  "RWA-TB": 1.00,
+  "RWA-RE": 1.00,
+  "RWA-CB": 1.00,
 };
 
 const APX_PRICE = 0.0082;

@@ -5,10 +5,12 @@ import positionsRouter from "./positions";
 import stakingRouter from "./staking";
 import liquidationsRouter from "./liquidations";
 import yieldRouter from "./yield";
+import configRouter from "./config";
 
 const router: IRouter = Router();
 
 router.use(healthRouter);
+router.use(configRouter);
 router.use(protocolRouter);
 router.use(positionsRouter);
 router.use(stakingRouter);
