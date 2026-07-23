@@ -436,13 +436,13 @@ function Hero() {
               src="/apex-3d.png"
               alt="APEX Protocol"
               style={{
-                width: "clamp(220px, 32vw, 420px)",
+                width: "clamp(340px, 48vw, 620px)",
                 height: "auto",
                 objectFit: "contain",
                 filter: [
-                  "drop-shadow(0 0 40px hsl(79 100% 57% / 0.55))",
-                  "drop-shadow(0 0 100px hsl(79 100% 57% / 0.25))",
-                  "drop-shadow(0 8px 32px hsl(79 100% 57% / 0.35))",
+                  "drop-shadow(0 0 18px hsl(79 100% 57% / 0.55))",
+                  "drop-shadow(0 0 48px hsl(79 100% 57% / 0.22))",
+                  "drop-shadow(0 6px 20px hsl(79 100% 57% / 0.30))",
                 ].join(" "),
                 animation: "float 4s ease-in-out infinite",
               }}
