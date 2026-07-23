@@ -110,7 +110,7 @@ function Nav() {
           <div className="flex items-center gap-2.5 cursor-pointer">
             <img src="/favicon.png" alt="APEX" className="w-7 h-7 rounded" />
             <span className="text-foreground font-bold text-base tracking-tight">
-              APEX
+              USDAX <span style={{ color: "hsl(0 0% 40%)" }}>finance</span>
             </span>
           </div>
         </Link>
