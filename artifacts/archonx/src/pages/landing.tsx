@@ -1196,12 +1196,7 @@ function Footer() {
           {/* Brand */}
           <div>
             <div className="flex items-center gap-2 mb-5">
-              <div
-                className="w-7 h-7 rounded flex items-center justify-center font-black text-[11px]"
-                style={{ background: LIME, color: "hsl(0 0% 4%)" }}
-              >
-                AP
-              </div>
+              <img src="/favicon.png" alt="APEX" className="w-7 h-7 object-contain" />
               <span className="font-bold text-base">APEX</span>
             </div>
             <p
