@@ -545,7 +545,16 @@ function Hero() {
 
             <div className="flex gap-3">
               <LimeBtn href="/app"><Zap className="h-3.5 w-3.5" /> Launch App</LimeBtn>
-              <OutlineBtn href="#product">Explore Protocol <ArrowRight className="h-3.5 w-3.5" /></OutlineBtn>
+              <Link href="/protocol">
+                <button
+                  className="inline-flex items-center gap-2 font-semibold px-6 py-2.5 rounded text-sm transition-all text-muted-foreground hover:text-foreground"
+                  style={{ border: `1px solid ${BORDER}` }}
+                  onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.borderColor = "hsl(0 0% 20%)")}
+                  onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.borderColor = BORDER)}
+                >
+                  Explore Protocol <ArrowRight className="h-3.5 w-3.5" />
+                </button>
+              </Link>
             </div>
           </div>
 

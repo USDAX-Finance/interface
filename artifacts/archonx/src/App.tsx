@@ -6,6 +6,7 @@ import { Route, Switch, Router as WouterRouter } from 'wouter';
 
 import Landing from '@/pages/landing';
 import Docs from '@/pages/docs';
+import Protocol from '@/pages/protocol';
 import { Navbar } from '@/components/layout';
 import Dashboard from '@/pages/dashboard';
 import Positions from '@/pages/positions';
@@ -36,6 +37,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Landing} />
       <Route path="/docs" component={Docs} />
+      <Route path="/protocol" component={Protocol} />
       <Route component={AppLayout} />
     </Switch>
   );
