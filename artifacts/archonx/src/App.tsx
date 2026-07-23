@@ -14,6 +14,7 @@ import Dashboard from '@/pages/dashboard';
 import Positions from '@/pages/positions';
 import Staking from '@/pages/staking';
 import Liquidations from '@/pages/liquidations';
+import Nexus from '@/pages/nexus';
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ function AppLayout() {
       <main className="flex-1 overflow-x-hidden">
         <Switch>
           <Route path="/app" component={Dashboard} />
+          <Route path="/app/nexus" component={Nexus} />
           <Route path="/app/positions" component={Positions} />
           <Route path="/app/staking" component={Staking} />
           <Route path="/app/liquidations" component={Liquidations} />

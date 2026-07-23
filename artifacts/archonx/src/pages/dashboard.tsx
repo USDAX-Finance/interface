@@ -199,17 +199,16 @@ export default function Dashboard() {
 
           {/* Collateral pie */}
           <Panel className="p-5">
-            <div className="mb-1">
-              <div className="font-mono text-[10px] tracking-widest uppercase mb-1" style={{ color: "hsl(0 0% 28%)" }}>Collateral Breakdown</div>
-              <div className="font-bold text-sm" style={{ color: "hsl(0 0% 78%)" }}>By asset type</div>
-            </div>
-            <div className="h-[220px] mt-3">
+            <div className="font-mono text-[10px] tracking-widest uppercase mb-0.5" style={{ color: "hsl(0 0% 28%)" }}>Collateral Breakdown</div>
+            <div className="font-bold text-sm mb-2" style={{ color: "hsl(0 0% 78%)" }}>By asset type</div>
+            {/* Fixed-height chart — no Legend inside so Recharts never mis-sizes the SVG */}
+            <div style={{ height: 186 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
                     data={collateral}
                     cx="50%" cy="50%"
-                    innerRadius={52} outerRadius={72}
+                    innerRadius={54} outerRadius={76}
                     paddingAngle={4}
                     dataKey="valueUsd" nameKey="symbol"
                     stroke="none"
@@ -223,19 +222,28 @@ export default function Dashboard() {
                     contentStyle={TOOLTIP_STYLE}
                     itemStyle={{ color: "hsl(0 0% 85%)" }}
                   />
-                  <Legend wrapperStyle={{ fontFamily: "var(--font-mono)", fontSize: "11px", color: "hsl(0 0% 45%)" }} />
                 </PieChart>
               </ResponsiveContainer>
+            </div>
+            {/* Custom legend row — consistent height for both cards */}
+            <div className="flex items-center gap-4 mt-2 pt-3" style={{ borderTop: `1px solid ${BORDER}` }}>
+              {collateral.map((c, i) => (
+                <div key={c.symbol} className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: PIE_COLORS[i % PIE_COLORS.length] }} />
+                  <span className="font-mono text-[10px]" style={{ color: "hsl(0 0% 42%)" }}>{c.symbol}</span>
+                  <span className="font-mono text-[10px] font-bold" style={{ color: PIE_COLORS[i % PIE_COLORS.length] }}>
+                    {formatCurrency(c.valueUsd)}
+                  </span>
+                </div>
+              ))}
             </div>
           </Panel>
 
           {/* Health factor bar */}
           <Panel className="p-5">
-            <div className="mb-1">
-              <div className="font-mono text-[10px] tracking-widest uppercase mb-1" style={{ color: "hsl(0 0% 28%)" }}>Health Factor</div>
-              <div className="font-bold text-sm" style={{ color: "hsl(0 0% 78%)" }}>Position distribution</div>
-            </div>
-            <div className="h-[220px] mt-3">
+            <div className="font-mono text-[10px] tracking-widest uppercase mb-0.5" style={{ color: "hsl(0 0% 28%)" }}>Health Factor</div>
+            <div className="font-bold text-sm mb-2" style={{ color: "hsl(0 0% 78%)" }}>Position distribution</div>
+            <div style={{ height: 186 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={health} barCategoryGap="30%">
                   <XAxis dataKey="range" stroke="hsl(0 0% 22%)" fontSize={10} tickLine={false} axisLine={false} />
@@ -252,6 +260,19 @@ export default function Dashboard() {
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
+            </div>
+            {/* Matching legend row so both cards are the same height */}
+            <div className="flex items-center gap-4 mt-2 pt-3" style={{ borderTop: `1px solid ${BORDER}` }}>
+              {[
+                { label: "Critical (HF < 1.0)", color: RED     },
+                { label: "Warning  (1.0–1.5)",  color: AMBER   },
+                { label: "Safe     (> 1.5)",     color: EMERALD },
+              ].map((leg) => (
+                <div key={leg.label} className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: leg.color }} />
+                  <span className="font-mono text-[10px]" style={{ color: "hsl(0 0% 42%)" }}>{leg.label}</span>
+                </div>
+              ))}
             </div>
           </Panel>
         </div>
