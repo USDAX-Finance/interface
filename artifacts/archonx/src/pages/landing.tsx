@@ -438,6 +438,55 @@ function Hero() {
           style={{ right: "44%", top: "50%", width: 44, height: 90,
             borderRight: `3px solid ${LIME}`, borderBottom: `3px solid ${LIME}`, opacity: 0.55 }} />
 
+        {/* ── USDAX COIN — centered inside brackets ── */}
+        <div
+          className="pointer-events-none absolute flex flex-col items-center"
+          style={{ left: "50%", top: "32%", transform: "translate(-50%, -50%)", zIndex: 5 }}
+        >
+          {/* Outer glow ring */}
+          <div className="relative flex items-center justify-center">
+            <div style={{
+              position: "absolute",
+              width: 96, height: 96,
+              borderRadius: "50%",
+              background: `radial-gradient(ellipse at 50% 50%, ${LIME}35 0%, transparent 70%)`,
+              filter: "blur(14px)",
+            }} />
+            {/* Coin body */}
+            <div style={{
+              width: 72, height: 72,
+              borderRadius: "50%",
+              background: `conic-gradient(from 135deg, ${LIME} 0%, hsl(79 80% 38%) 40%, ${LIME} 60%, hsl(79 80% 30%) 80%, ${LIME} 100%)`,
+              boxShadow: `0 0 0 2px hsl(0 0% 8%), 0 0 0 3.5px ${LIME}60, 0 0 22px ${LIME}55, 0 4px 16px hsl(0 0% 0% / 0.6)`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              position: "relative",
+              flexShrink: 0,
+            }}>
+              {/* Inner depth ring */}
+              <div style={{
+                position: "absolute", inset: 4, borderRadius: "50%",
+                border: "1px solid hsl(79 100% 30% / 0.5)",
+              }} />
+              {/* Logo */}
+              <img src="/apex-coin-logo.png" alt="APEX"
+                style={{ width: 38, height: 38, objectFit: "contain", borderRadius: "50%", position: "relative", zIndex: 1 }}
+              />
+            </div>
+          </div>
+
+          {/* Token label */}
+          <div className="mt-2.5 text-center" style={{ pointerEvents: "none" }}>
+            <p className="font-black font-mono text-[11px] tracking-[0.22em]"
+              style={{ color: LIME, textShadow: `0 0 10px ${LIME}90`, lineHeight: 1 }}>
+              USDAX
+            </p>
+            <p className="text-[8px] font-mono tracking-widest mt-0.5"
+              style={{ color: "hsl(0 0% 45%)" }}>
+              $1.00 · STABLE
+            </p>
+          </div>
+        </div>
+
         {/* ── HANDS — single composited image ── */}
         <div className="pointer-events-none absolute inset-0" style={{ zIndex: 2 }}>
           <img
