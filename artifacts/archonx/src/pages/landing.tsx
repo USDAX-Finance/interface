@@ -158,56 +158,40 @@ function Nav() {
   );
 }
 
-/* ─────────────────────── MOCK DASHBOARD — DarkPixel style ─────────────────────── */
+/* ─────────────────────── MOCK DASHBOARD ─────────────────────── */
 
-/** SVG connector lines from chip positions to center */
-function NodeLines() {
-  // center of the 340×200 node area is (170, 100)
-  const cx = 170; const cy = 104;
-  const points = [
-    [46, 28], [220, 18], [310, 72], [18, 110],
-    [290, 148], [60, 178], [196, 182],
-  ];
+function Chip({ label }: { label: string }) {
   return (
-    <svg
-      className="absolute inset-0 w-full h-full pointer-events-none"
-      style={{ opacity: 0.18 }}
+    <div
+      className="text-[11px] font-semibold px-3 py-1.5 rounded-md text-center"
+      style={{
+        background: "hsl(0 0% 8%)",
+        border: "1px solid hsl(0 0% 12%)",
+        color: "hsl(0 0% 52%)",
+        letterSpacing: "0.02em",
+      }}
     >
-      {points.map(([x, y], i) => (
-        <line
-          key={i}
-          x1={`${(x / 340) * 100}%`} y1={`${(y / 200) * 100}%`}
-          x2="50%" y2="52%"
-          stroke={LIME} strokeWidth="1"
-          strokeDasharray="3 4"
-        />
-      ))}
-    </svg>
+      {label}
+    </div>
   );
 }
 
-const NODES = [
-  { label: "Minting",     style: { top: "6%",  left: "4%" } },
-  { label: "Staking",     style: { top: "2%",  left: "54%" } },
-  { label: "Governance",  style: { top: "28%", right: "2%" } },
-  { label: "USDAX",       style: { top: "48%", left: "2%" } },
-  { label: "Liquidation", style: { bottom: "22%", right: "3%" } },
-  { label: "Yield",       style: { bottom: "8%", left: "8%" } },
-  { label: "AKX",         style: { bottom: "4%", left: "52%" } },
-] as const;
-
 function MockDashboard() {
+  const leftChips  = ["Minting", "USDAX", "Yield"];
+  const rightChips = ["Staking", "Governance", "AKX"];
+
   return (
-    <div className="relative animate-float w-full max-w-[480px] mx-auto lg:mx-0">
+    <div className="w-full max-w-[460px] mx-auto lg:mx-0">
       <div
         className="rounded-2xl overflow-hidden"
         style={{
           background: "hsl(0 0% 5%)",
-          border: `1px solid hsl(0 0% 11%)`,
-          boxShadow: "0 40px 100px hsl(0 0% 0% / 0.8), 0 0 0 1px hsl(0 0% 9%)",
+          border: "1px solid hsl(0 0% 11%)",
+          boxShadow: "0 32px 72px hsl(0 0% 0% / 0.75)",
         }}
       >
-        {/* ── Header bar ── */}
+
+        {/* ── Header ── */}
         <div
           className="flex items-center justify-between px-5 py-3"
           style={{ borderBottom: "1px solid hsl(0 0% 9%)" }}
@@ -223,157 +207,117 @@ function MockDashboard() {
             style={{
               background: `${EMERALD}12`,
               color: EMERALD,
-              border: `1px solid ${EMERALD}25`,
+              border: `1px solid ${EMERALD}28`,
             }}
           >
-            <span
-              className="w-1.5 h-1.5 rounded-full animate-pulse"
-              style={{ background: EMERALD }}
-            />
+            <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: EMERALD }} />
             LIVE
           </span>
         </div>
 
         {/* ── Title with brackets ── */}
-        <div className="relative px-6 pt-6 pb-3 text-center">
-          {/* Large bracket left */}
-          <span
-            className="absolute select-none pointer-events-none font-black leading-none"
-            style={{
-              left: 10, top: 8,
-              fontSize: 88,
-              color: LIME,
-              opacity: 0.85,
-              lineHeight: 1,
-              fontFamily: "'Inter', sans-serif",
-            }}
+        <div className="px-5 pt-5 pb-4 text-center">
+          <p
+            className="text-[10px] font-semibold tracking-[0.2em] uppercase mb-3"
+            style={{ color: "hsl(0 0% 30%)" }}
           >
-            (
-          </span>
-          {/* Large bracket right */}
-          <span
-            className="absolute select-none pointer-events-none font-black leading-none"
-            style={{
-              right: 10, top: 8,
-              fontSize: 88,
-              color: LIME,
-              opacity: 0.85,
-              lineHeight: 1,
-              fontFamily: "'Inter', sans-serif",
-            }}
-          >
-            )
-          </span>
-
-          <div className="relative z-10 px-10">
-            <p
-              className="text-[10px] font-semibold tracking-[0.22em] uppercase mb-2"
-              style={{ color: "hsl(0 0% 32%)" }}
+            Yield-bearing stablecoin
+          </p>
+          <div className="flex items-center justify-center gap-3">
+            <span
+              className="text-5xl font-black leading-none select-none"
+              style={{ color: LIME, lineHeight: 1 }}
             >
-              Yield-bearing stablecoin
-            </p>
+              (
+            </span>
             <h3
-              className="text-[19px] font-black uppercase leading-[1.15] tracking-wide"
+              className="text-[17px] font-black uppercase leading-[1.2] tracking-wide"
               style={{ color: "hsl(0 0% 92%)" }}
             >
               USDAX{" "}
               <span style={{ color: LIME }}>PROTOCOL</span>
               <br />
-              ON ROBINHOOD CHAIN
+              <span style={{ color: "hsl(0 0% 48%)", fontSize: 13, fontWeight: 600 }}>
+                ON ROBINHOOD CHAIN
+              </span>
             </h3>
-          </div>
-        </div>
-
-        {/* ── Node cluster ── */}
-        <div className="relative mx-5 mb-0 rounded-xl overflow-hidden" style={{ height: 200, background: "hsl(0 0% 4%)", border: "1px solid hsl(0 0% 8%)" }}>
-          <NodeLines />
-
-          {/* Lime radial glow behind center */}
-          <div
-            className="absolute"
-            style={{
-              top: "50%", left: "50%",
-              transform: "translate(-50%,-50%)",
-              width: 90, height: 90,
-              borderRadius: "50%",
-              background: `${LIME}18`,
-              filter: "blur(20px)",
-              pointerEvents: "none",
-            }}
-          />
-
-          {/* Central AX icon */}
-          <div
-            className="absolute flex items-center justify-center font-black text-sm rounded-full"
-            style={{
-              top: "50%", left: "50%",
-              transform: "translate(-50%,-50%)",
-              width: 44, height: 44,
-              background: LIME,
-              color: "hsl(0 0% 4%)",
-              boxShadow: `0 0 0 6px ${LIME}18, 0 0 28px ${LIME}55`,
-              zIndex: 10,
-            }}
-          >
-            AX
-          </div>
-
-          {/* Orbit ring */}
-          <div
-            className="absolute rounded-full pointer-events-none"
-            style={{
-              top: "50%", left: "50%",
-              transform: "translate(-50%,-50%)",
-              width: 90, height: 90,
-              border: `1px dashed ${LIME}22`,
-            }}
-          />
-
-          {/* Floating node chips */}
-          {NODES.map((node) => (
-            <div
-              key={node.label}
-              className="absolute text-[10px] font-semibold tracking-wide rounded-md px-2.5 py-1"
-              style={{
-                ...node.style,
-                background: "hsl(0 0% 9%)",
-                border: "1px solid hsl(0 0% 14%)",
-                color: "hsl(0 0% 55%)",
-                whiteSpace: "nowrap",
-              }}
+            <span
+              className="text-5xl font-black leading-none select-none"
+              style={{ color: LIME, lineHeight: 1 }}
             >
-              {node.label}
-            </div>
-          ))}
+              )
+            </span>
+          </div>
         </div>
 
-        {/* ── Bottom stat boxes ── */}
+        {/* ── Node grid ── */}
+        <div
+          className="mx-5 mb-5 rounded-xl p-4"
+          style={{ background: "hsl(0 0% 4%)", border: "1px solid hsl(0 0% 8%)" }}
+        >
+          <div className="grid grid-cols-[1fr_auto_1fr] gap-3 items-center">
+
+            {/* Left chips */}
+            <div className="flex flex-col gap-2">
+              {leftChips.map((l) => <Chip key={l} label={l} />)}
+            </div>
+
+            {/* Center AX icon */}
+            <div className="flex flex-col items-center gap-2 px-2">
+              <div
+                className="flex items-center justify-center w-12 h-12 rounded-full font-black text-sm"
+                style={{
+                  background: LIME,
+                  color: "hsl(0 0% 4%)",
+                }}
+              >
+                AX
+              </div>
+              {/* Liquidation chip below center icon */}
+              <div
+                className="text-[10px] font-semibold px-2.5 py-1 rounded-md whitespace-nowrap"
+                style={{
+                  background: "hsl(0 0% 8%)",
+                  border: "1px solid hsl(0 0% 12%)",
+                  color: "hsl(0 0% 52%)",
+                }}
+              >
+                Liquidation
+              </div>
+            </div>
+
+            {/* Right chips */}
+            <div className="flex flex-col gap-2">
+              {rightChips.map((r) => <Chip key={r} label={r} />)}
+            </div>
+          </div>
+        </div>
+
+        {/* ── Stats row ── */}
         <div
           className="grid grid-cols-3"
           style={{ borderTop: "1px solid hsl(0 0% 9%)" }}
         >
           {[
-            { plus: true, value: "$1.00",  label: "USDAX Pegged",  color: "hsl(0 0% 88%)" },
-            { plus: true, value: "15%",    label: "Base APY",      color: LIME },
-            { plus: true, value: "150%",   label: "Collateral",    color: EMERALD },
+            { value: "$1.00", label: "USDAX Pegged", color: "hsl(0 0% 88%)" },
+            { value: "15%",   label: "Base APY",     color: LIME },
+            { value: "150%",  label: "Collateral",   color: EMERALD },
           ].map((s, i) => (
             <div
               key={s.label}
-              className="relative py-4 px-3 text-center"
+              className="py-4 text-center"
               style={{
                 borderRight: i < 2 ? "1px solid hsl(0 0% 9%)" : undefined,
-                background: i === 1 ? `${LIME}05` : "transparent",
               }}
             >
-              {/* + symbol top-left */}
-              <span
-                className="absolute top-2 left-2.5 text-[13px] font-black leading-none"
-                style={{ color: i === 1 ? LIME : "hsl(0 0% 18%)" }}
+              <div
+                className="text-[11px] font-semibold mb-1.5"
+                style={{ color: "hsl(0 0% 25%)" }}
               >
                 +
-              </span>
+              </div>
               <div
-                className="text-xl font-black font-mono mt-1"
+                className="text-lg font-black font-mono"
                 style={{ color: s.color }}
               >
                 {s.value}
@@ -387,6 +331,7 @@ function MockDashboard() {
             </div>
           ))}
         </div>
+
       </div>
     </div>
   );
