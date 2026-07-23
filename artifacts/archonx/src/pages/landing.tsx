@@ -133,21 +133,6 @@ function Nav() {
           ))}
         </div>
 
-        {/* CTA */}
-        <Link href="/app">
-          <button
-            className="text-[13px] font-semibold px-4 py-2 rounded transition-all"
-            style={{ background: LIME, color: "hsl(0 0% 4%)" }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.boxShadow = `0 0 20px ${LIME_BORDER}`;
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.boxShadow = "";
-            }}
-          >
-            Launch App →
-          </button>
-        </Link>
       </div>
     </nav>
   );
