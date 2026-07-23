@@ -342,11 +342,14 @@ function MockDashboard() {
 /* ─────────────────────── TICKER ─────────────────────── */
 
 function Ticker() {
-  const items = [
+  const items: React.ReactNode[] = [
     "USDAX pegged at $1.00",
     "APX staking APY: 15%",
     "TVL: $56,333",
-    "Robinhood Chain · ID 46630",
+    <span key="rh" className="inline-flex items-center gap-1.5">
+      <img src="/robinhood-logo.webp" alt="Robinhood" style={{ height: 11, filter: "grayscale(1) brightness(1.8)", opacity: 0.55 }} />
+      Chain · ID 46630
+    </span>,
     "Collateral ratio: 150%",
     "USDAX minted: 26,700",
     "Active vaults: 8",
@@ -397,7 +400,9 @@ function Hero() {
             <div className="flex items-center gap-2 text-[10px] font-mono"
               style={{ color: "hsl(0 0% 32%)" }}>
               <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: EMERALD }} />
-              Live · Robinhood Chain 46630
+              Live ·
+              <img src="/robinhood-logo.webp" alt="Robinhood" className="h-3 opacity-50 inline-block" style={{ filter: "grayscale(1) brightness(2)" }} />
+              Chain 46630
             </div>
           </div>
 
