@@ -376,14 +376,18 @@ export function Navbar() {
             </Link>
 
             <div
-              className="hidden sm:flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-mono"
+              className="hidden sm:flex items-center rounded-lg px-2.5 py-1.5"
               style={{
-                background: "hsl(152 70% 48% / 0.08)",
-                border: "1px solid hsl(152 70% 48% / 0.22)",
+                background: "hsl(0 0% 6%)",
+                border: "1px solid hsl(0 0% 12%)",
               }}
             >
-              <div className="h-1.5 w-1.5 rounded-full animate-pulse" style={{ background: EMERALD }} />
-              <span style={{ color: "hsl(152 70% 52%)" }}>{NETWORK_NAME}</span>
+              <img
+                src="/robinhood-logo.webp"
+                alt="Robinhood Chain"
+                className="h-4 w-auto object-contain"
+                style={{ mixBlendMode: "screen" }}
+              />
             </div>
 
             {/* Wallet (hidden on mobile — shown in drawer instead) */}
