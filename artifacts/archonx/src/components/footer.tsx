@@ -169,13 +169,13 @@ export function Footer() {
             <Link href="/" className="flex items-center gap-3 w-fit cursor-pointer group">
               <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
                 style={{ background: `${LIME}10`, border: `1px solid ${LIME}20` }}>
-                <img src="/favicon.png" alt="USDEX"
+                <img src="/favicon.png" alt="USDAX"
                   className="w-5 h-5 object-contain" />
               </div>
               <div>
                 <div className="font-bold text-[14px] leading-tight"
                   style={{ color: "hsl(0 0% 78%)" }}>
-                  USDEX <span style={{ color: MUTED }}>Finance</span>
+                  USDAX <span style={{ color: MUTED }}>Finance</span>
                 </div>
                 <div className="font-mono text-[9px] tracking-[0.2em] uppercase mt-0.5"
                   style={{ color: "hsl(0 0% 20%)" }}>
@@ -216,7 +216,7 @@ export function Footer() {
 
             {/* Copyright */}
             <div className="font-mono text-[10px]" style={{ color: "hsl(0 0% 16%)" }}>
-              © {new Date().getFullYear()} USDEX Finance · All rights reserved
+              © {new Date().getFullYear()} USDAX Finance · All rights reserved
             </div>
           </div>
 
@@ -248,13 +248,13 @@ export function Footer() {
                   { href: "/docs#guide", label: "User Guide",    icon: Map,      external: false },
                   { href: "/protocol",   label: "Protocol",      icon: Shield,   external: false },
                   {
-                    href:     "https://x.com/usdexfinance",
-                    label:    "X · @usdexfinance",
+                    href:     "https://x.com/usdaxfinance",
+                    label:    "X · @usdaxfinance",
                     icon:     Twitter,
                     external: true,
                   },
                   {
-                    href:     "https://github.com/usdexfinance",
+                    href:     "https://github.com/usdaxfinance",
                     label:    "GitHub",
                     icon:     Github,
                     external: true,

@@ -121,7 +121,7 @@ export default function Liquidations() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <div className="font-mono text-[10px] tracking-[0.2em] uppercase mb-2" style={{ color: "hsl(0 0% 30%)" }}>
-            ◈ USDEX Finance · Liquidation Engine
+            ◈ USDAX Finance · Liquidation Engine
           </div>
           <h1 className="font-black text-2xl md:text-3xl uppercase tracking-tight flex items-center gap-3">
             <div

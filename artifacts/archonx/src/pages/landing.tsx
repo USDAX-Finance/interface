@@ -1208,8 +1208,8 @@ function Footer() {
           {/* Brand */}
           <div>
             <div className="flex items-center gap-2 mb-5">
-              <img src="/favicon.png" alt="USDEX Finance" className="w-7 h-7 object-contain" />
-              <span className="font-bold text-base">USDEX Finance</span>
+              <img src="/favicon.png" alt="USDAX Finance" className="w-7 h-7 object-contain" />
+              <span className="font-bold text-base">USDAX Finance</span>
             </div>
             <p
               className="text-[13px] leading-relaxed max-w-[180px]"

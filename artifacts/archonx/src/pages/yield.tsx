@@ -601,7 +601,7 @@ export default function YieldPage() {
           <div className="flex items-center gap-2 mb-2">
             <span className="w-1.5 h-1.5 rounded-full" style={{ background: LIME }} />
             <span className="font-mono text-[10px] tracking-[0.22em] uppercase" style={{ color: "hsl(0 0% 30%)" }}>
-              USDEX Finance · Yield Engine
+              USDAX Finance · Yield Engine
             </span>
           </div>
           <h1 className="font-black text-3xl md:text-4xl uppercase tracking-tight">

@@ -12,7 +12,7 @@ const POOLS = [
   {
     id:          "usdax-savings",
     name:        "USDAX Savings Rate",
-    protocol:    "USDEX Native",
+    protocol:    "USDAX Native",
     type:        "savings" as const,
     tokens:      ["USDAX"],
     tvlUsd:      2_100_000,
@@ -60,7 +60,7 @@ const POOLS = [
   {
     id:          "usdax-vault",
     name:        "USDAX Auto-Vault",
-    protocol:    "USDEX Native",
+    protocol:    "USDAX Native",
     type:        "vault" as const,
     tokens:      ["USDAX"],
     tvlUsd:      890_000,

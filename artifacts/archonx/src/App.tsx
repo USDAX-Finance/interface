@@ -127,7 +127,7 @@ export default function App() {
             theme: 'dark',
             accentColor: LIME,
             logo: `${import.meta.env.BASE_URL}favicon.png`,
-            landingHeader: 'Connect to USDEX Finance',
+            landingHeader: 'Connect to USDAX Finance',
             loginMessage: 'Robinhood Chain · EVM 46630',
           },
           loginMethods: ['wallet', 'email'],

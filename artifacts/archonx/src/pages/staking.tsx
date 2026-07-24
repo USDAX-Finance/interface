@@ -367,7 +367,7 @@ export default function Staking() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <div className="font-mono text-[10px] tracking-[0.2em] uppercase mb-2" style={{ color: "hsl(0 0% 30%)" }}>
-            ◈ USDEX Finance · APX Staking Module
+            ◈ USDAX Finance · APX Staking Module
           </div>
           <h1 className="font-black text-2xl md:text-3xl uppercase tracking-tight">
             APX <span style={{ color: LIME }}>Staking</span>

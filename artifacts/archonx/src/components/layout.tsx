@@ -329,12 +329,12 @@ export function Navbar() {
             <Link href="/" className="flex items-center gap-2.5 group cursor-pointer">
               <img
                 src="/favicon.png"
-                alt="USDEX"
+                alt="USDAX"
                 className="w-7 h-7 rounded object-cover"
                 style={{ border: `1px solid ${LIME}22` }}
               />
               <span className="font-bold text-sm tracking-tight hidden sm:block" style={{ color: "hsl(0 0% 80%)" }}>
-                USDEX <span style={{ color: "hsl(0 0% 32%)" }}>Finance</span>
+                USDAX <span style={{ color: "hsl(0 0% 32%)" }}>Finance</span>
               </span>
             </Link>
 
