@@ -42,10 +42,11 @@ function Tag({ children, color }: { children: React.ReactNode; color: string }) 
   );
 }
 
-/* ─── Collateral config — no emoji, consistent token badges ─── */
+/* ─── Collateral config ─── */
 type CollCfg = {
-  symbol: string;
+  symbol?: string;
   icon?: LucideIcon;
+  logoUrl?: string;
   ltv: number;
   liqThreshold: number;
   type: "crypto" | "yield" | "rwa" | "stock";
@@ -58,43 +59,57 @@ type CollCfg = {
 
 const COLL: Record<string, CollCfg> = {
   // ── Crypto ──────────────────────────────────────────────────────────────
-  WETH:    { symbol: "Ξ",  ltv: 75, liqThreshold: 80, type: "crypto", color: INDIGO,
+  WETH:    { logoUrl: "https://assets.coingecko.com/coins/images/2518/small/weth.png",
+             ltv: 75, liqThreshold: 80, type: "crypto", color: INDIGO,
              badge: "Core Crypto", desc: "Wrapped Ether — most liquid EVM asset with deep Chainlink + Pyth oracle coverage.", oracle: "Chainlink + Pyth", ceil: "$20M" },
-  WBTC:    { symbol: "₿",  ltv: 65, liqThreshold: 70, type: "crypto", color: AMBER,
+  WBTC:    { logoUrl: "https://assets.coingecko.com/coins/images/7598/small/wrapped_bitcoin_wbtc.png",
+             ltv: 65, liqThreshold: 70, type: "crypto", color: AMBER,
              badge: "Core Crypto", desc: "Wrapped Bitcoin — highest market-cap crypto, accepted at conservative LTV for safety.", oracle: "Chainlink + Pyth", ceil: "$15M" },
-  stETH:   { symbol: "∞",  ltv: 63, liqThreshold: 68, type: "yield",  color: EMERALD,
+  stETH:   { logoUrl: "https://assets.coingecko.com/coins/images/13442/small/steth_logo.png",
+             ltv: 63, liqThreshold: 68, type: "yield", color: EMERALD,
              badge: "Yield-bearing", desc: "Lido staked ETH — yield-bearing collateral, accrued rewards reduce effective borrow cost.", oracle: "Chainlink + Lido", ceil: "$10M" },
   // ── RWA ─────────────────────────────────────────────────────────────────
-  "RWA-TB":{ symbol: "",   icon: Landmark,  ltv: 92, liqThreshold: 95, type: "rwa", color: LIME,
+  "RWA-TB":{ icon: Landmark,  ltv: 92, liqThreshold: 95, type: "rwa", color: LIME,
              badge: "T-Bills",     desc: "Tokenized US Treasury Bills via Ondo Finance. Daily NAV attestation by BigFour auditors.", oracle: "Ondo Daily NAV",    ceil: "$50M" },
-  "RWA-RE":{ symbol: "",   icon: Building2, ltv: 68, liqThreshold: 73, type: "rwa", color: VIOLET,
+  "RWA-RE":{ icon: Building2, ltv: 68, liqThreshold: 73, type: "rwa", color: VIOLET,
              badge: "Real Estate", desc: "Tokenized first-lien commercial real estate senior debt via Centrifuge.", oracle: "Centrifuge Feed",  ceil: "$25M" },
-  "RWA-CB":{ symbol: "",   icon: FileText,  ltv: 78, liqThreshold: 83, type: "rwa", color: BLUE,
+  "RWA-CB":{ icon: FileText,  ltv: 78, liqThreshold: 83, type: "rwa", color: BLUE,
              badge: "Corp. Bonds", desc: "Tokenized investment-grade corporate bonds via Maple Finance. Monthly oracle feeds.", oracle: "Maple Monthly",   ceil: "$30M" },
   // ── Robinhood Chain Stock Tokens ─────────────────────────────────────────
-  TSLA:    { symbol: "",  icon: LineChart, ltv: 60, liqThreshold: 67, type: "stock", color: ROSE,
+  TSLA:    { logoUrl: "https://logo.clearbit.com/tesla.com",
+             ltv: 60, liqThreshold: 67, type: "stock", color: ROSE,
              badge: "Stock Token", desc: "Tesla Inc. tokenized equity on Robinhood Chain. Tracks NASDAQ:TSLA price via Robinhood oracle.", oracle: "Robinhood Oracle", ceil: "$10M" },
-  AMZN:    { symbol: "",  icon: LineChart, ltv: 65, liqThreshold: 72, type: "stock", color: ROSE,
+  AMZN:    { logoUrl: "https://logo.clearbit.com/amazon.com",
+             ltv: 65, liqThreshold: 72, type: "stock", color: ROSE,
              badge: "Stock Token", desc: "Amazon.com Inc. tokenized equity. Large-cap stable growth stock accepted at moderate LTV.", oracle: "Robinhood Oracle", ceil: "$10M" },
-  PLTR:    { symbol: "",  icon: LineChart, ltv: 55, liqThreshold: 63, type: "stock", color: ROSE,
+  PLTR:    { logoUrl: "https://logo.clearbit.com/palantir.com",
+             ltv: 55, liqThreshold: 63, type: "stock", color: ROSE,
              badge: "Stock Token", desc: "Palantir Technologies — high-growth AI analytics. Conservative LTV reflects higher volatility.", oracle: "Robinhood Oracle", ceil: "$5M" },
-  NFLX:    { symbol: "",  icon: LineChart, ltv: 63, liqThreshold: 70, type: "stock", color: ROSE,
+  NFLX:    { logoUrl: "https://logo.clearbit.com/netflix.com",
+             ltv: 63, liqThreshold: 70, type: "stock", color: ROSE,
              badge: "Stock Token", desc: "Netflix Inc. tokenized equity. Streaming leader with strong cash flow and moderate volatility.", oracle: "Robinhood Oracle", ceil: "$8M" },
-  AMD:     { symbol: "",  icon: LineChart, ltv: 62, liqThreshold: 68, type: "stock", color: ROSE,
+  AMD:     { logoUrl: "https://logo.clearbit.com/amd.com",
+             ltv: 62, liqThreshold: 68, type: "stock", color: ROSE,
              badge: "Stock Token", desc: "Advanced Micro Devices — semiconductor leader in CPU & GPU. Cyclical but liquid.", oracle: "Robinhood Oracle", ceil: "$8M" },
-  NVDA:    { symbol: "",  icon: LineChart, ltv: 65, liqThreshold: 72, type: "stock", color: ROSE,
+  NVDA:    { logoUrl: "https://logo.clearbit.com/nvidia.com",
+             ltv: 65, liqThreshold: 72, type: "stock", color: ROSE,
              badge: "Stock Token", desc: "NVIDIA Corp — dominant AI/GPU chipmaker. Large-cap, high liquidity, accepted at standard LTV.", oracle: "Robinhood Oracle", ceil: "$10M" },
-  AAPL:    { symbol: "",  icon: LineChart, ltv: 68, liqThreshold: 75, type: "stock", color: ROSE,
+  AAPL:    { logoUrl: "https://logo.clearbit.com/apple.com",
+             ltv: 68, liqThreshold: 75, type: "stock", color: ROSE,
              badge: "Stock Token", desc: "Apple Inc. — highest market-cap stock. Most stable of the stock tokens, highest LTV allowed.", oracle: "Robinhood Oracle", ceil: "$12M" },
 };
 
 function TokenBadge({ sym, cfg }: { sym: string; cfg: CollCfg }) {
   const Icon = cfg.icon;
   return (
-    <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 font-black text-lg font-mono"
-      style={{ background: `${cfg.color}12`, border: `1.5px solid ${cfg.color}28`, color: cfg.color }}>
-      {Icon ? <Icon className="w-4.5 h-4.5" style={{ color: cfg.color, width: 18, height: 18 }} />
-             : <span style={{ lineHeight: 1 }}>{cfg.symbol}</span>}
+    <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 overflow-hidden"
+      style={{ background: `${cfg.color}12`, border: `1.5px solid ${cfg.color}28` }}>
+      {cfg.logoUrl
+        ? <img src={cfg.logoUrl} alt={sym} className="w-6 h-6 object-contain rounded-full"
+            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }} />
+        : Icon
+          ? <Icon style={{ color: cfg.color, width: 18, height: 18 }} />
+          : <span className="font-black text-lg font-mono" style={{ color: cfg.color, lineHeight: 1 }}>{cfg.symbol}</span>}
     </div>
   );
 }
