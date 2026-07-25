@@ -384,8 +384,7 @@ function PositionCard({
   const color      = meta.color;
   const Icon       = meta.icon;
   const hasFees    = pos.pendingFeesUsdax    > 0.001;
-  const hasRewards = pos.pendingRewardsApx   > 0.001;
-  const hasAny     = hasFees || hasRewards;
+  const hasAny     = hasFees;
   const pnlPos     = pos.pnlPercent >= 0;
 
   return (
@@ -446,21 +445,9 @@ function PositionCard({
         </div>
       </div>
 
-      {/* Pending rewards */}
-      <div className="flex items-center gap-4 px-5 py-3" style={{ borderBottom: `1px solid ${BORDER}` }}>
-        <div className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-lg flex items-center justify-center"
-            style={{ background: `${LIME}10`, border: `1px solid ${LIME}18` }}>
-            <Zap className="w-3 h-3" style={{ color: LIME }} />
-          </div>
-          <div>
-            <div className="text-[10px] font-mono" style={{ color: DIM }}>APX Rewards</div>
-            <div className="font-black font-mono text-[13px]" style={{ color: hasRewards ? LIME : "hsl(0 0% 28%)" }}>
-              +{formatNumber(pos.pendingRewardsApx, 4)} APX
-            </div>
-          </div>
-        </div>
-        {hasFees && (
+      {/* Pending fee earnings */}
+      {hasFees && (
+        <div className="flex items-center gap-4 px-5 py-3" style={{ borderBottom: `1px solid ${BORDER}` }}>
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-lg flex items-center justify-center"
               style={{ background: `${color}10`, border: `1px solid ${color}18` }}>
@@ -473,8 +460,8 @@ function PositionCard({
               </div>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Actions */}
       <div className="flex gap-2 px-5 py-4">
@@ -816,7 +803,7 @@ export default function YieldPage() {
             <HelpButton onClick={() => setShowHelp(true)} />
           </h1>
           <p className="text-[14px] leading-relaxed max-w-xl" style={{ color: MUTED }}>
-            Deploy idle USDAX into curated yield pools. Earn trading fees, APX rewards, and
+            Deploy idle USDAX into the savings pool. Earn protocol fees and
             auto-compounded returns on Robinhood Chain.
           </p>
         </div>
