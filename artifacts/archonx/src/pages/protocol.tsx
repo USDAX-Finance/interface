@@ -49,7 +49,7 @@ function TopBar() {
       style={{ background: "hsl(0 0% 3% / 0.92)", backdropFilter: "blur(16px)", borderBottom: `1px solid ${BORDER}` }}>
       <Link href="/">
         <div className="flex items-center gap-2.5 cursor-pointer">
-          <img src="/favicon.png" alt="APEX" className="w-7 h-7 rounded" />
+          <img src="/favicon.png" alt="USDAX" className="w-7 h-7 rounded" />
           <span className="font-bold text-base tracking-tight" style={{ color: "hsl(0 0% 80%)" }}>
             USDAX <span style={{ color: "hsl(0 0% 35%)" }}>finance</span>
           </span>
@@ -90,7 +90,7 @@ function Hero() {
       {/* Testnet badge */}
       <div className="pointer-events-none absolute top-20 right-10 flex items-center gap-2 text-[10px] font-mono tracking-[0.2em] px-3 py-1.5 rounded-full"
         style={{ border: `1px solid hsl(38 92% 58% / 0.4)`, color: "hsl(38 92% 58%)", background: "hsl(38 92% 58% / 0.06)" }}>
-        <FlaskConical className="w-3 h-3" /> TESTNET — NOT MAINNET
+        <FlaskConical className="w-3 h-3" /> TESTNET / NOT MAINNET
       </div>
 
       {/* Scattered data numbers */}
@@ -108,7 +108,7 @@ function Hero() {
 
       <div className="max-w-7xl mx-auto w-full relative z-10">
         <div className="max-w-3xl">
-          <Tag>APEX Protocol · The Stablecoin Layer</Tag>
+          <Tag>USDAX Finance · The Stablecoin Layer</Tag>
           <h1 className="font-black uppercase leading-none tracking-tight mb-6"
             style={{ fontSize: "clamp(3rem, 7vw, 6.5rem)", color: "hsl(0 0% 97%)" }}>
             THE FUTURE OF<br />
@@ -116,10 +116,10 @@ function Hero() {
             IS PROGRAMMABLE.
           </h1>
           <p className="text-[15px] leading-relaxed mb-8 max-w-xl" style={{ color: "hsl(0 0% 46%)" }}>
-            APEX Protocol is the decentralised stablecoin and yield infrastructure
-            powering USDAX — an overcollateralised, algorithmically-stabilised dollar
-            built natively on Robinhood Chain. We are currently live on testnet and
-            inviting the community to explore, stress-test, and shape the protocol before mainnet.
+            USDAX Finance is the decentralised stablecoin and yield infrastructure
+            powering USDAX, an overcollateralised, on-chain dollar built natively on Robinhood Chain.
+            We are currently live on testnet and inviting the community to explore,
+            stress-test, and shape the protocol before mainnet.
           </p>
           <div className="flex gap-4 flex-wrap">
             <Link href="/app">
@@ -175,22 +175,22 @@ function Vision() {
               Traditional stablecoins are only as trustworthy as the institutions behind them.
               Bank accounts freeze. Regulators intervene. Issuers go bankrupt. USDAX is designed
               from the ground up to be <strong style={{ color: "hsl(0 0% 72%)" }}>censorship-resistant,
-              non-custodial, and transparent</strong> — backed entirely by on-chain collateral
+              non-custodial, and transparent</strong>, backed entirely by on-chain collateral
               that anyone can inspect in real time.
             </p>
             <p className="text-[14px] leading-relaxed" style={{ color: "hsl(0 0% 44%)" }}>
               Our mission is to bring dollar-denominated financial infrastructure to every wallet
-              on Robinhood Chain — without intermediaries, custodians, or trust assumptions.
+              on Robinhood Chain, without intermediaries, custodians, or trust assumptions.
             </p>
           </div>
 
-          {/* Right — pillars */}
+          {/* Right, pillars */}
           <div className="grid grid-cols-2 gap-4">
             {[
               { icon: Shield,      title: "Trustless",       desc: "No team multisig. No admin keys. Smart contracts enforce every rule." },
               { icon: Globe,       title: "Permissionless",  desc: "Any wallet, any geography. USDAX is open infrastructure." },
               { icon: BarChart2,   title: "Transparent",     desc: "Every collateral position is on-chain. Fully auditable, 24/7." },
-              { icon: RefreshCw,   title: "Composable",      desc: "USDAX works natively with DeFi — lending, trading, yield vaults." },
+              { icon: RefreshCw,   title: "Composable",      desc: "USDAX works natively with DeFi, lending, trading, yield vaults." },
             ].map((p) => {
               const Icon = p.icon;
               return (
@@ -213,14 +213,14 @@ function Vision() {
   );
 }
 
-/* ─── HOW USDAX WORKS — step by step ─── */
+/* ─── HOW USDAX WORKS, step by step ─── */
 const STEPS = [
   {
     n: "01",
     icon: Coins,
     title: "Deposit Collateral",
     subtitle: "Lock real assets on-chain",
-    body: "Users deposit supported collateral assets — WETH, WBTC, USDC, RHOOD, or stETH — into a protocol Vault. The collateral is held in a non-custodial smart contract. No third party can touch it; only you can withdraw by repaying your USDAX debt.",
+    body: "Users deposit supported collateral assets, WETH, WBTC, USDC, RHOOD, or stETH, into a protocol Vault. The collateral is held in a non-custodial smart contract. No third party can touch it; only you can withdraw by repaying your USDAX debt.",
     detail: "Minimum collateral ratio: 150% · Collateral oracle: Chainlink + Pyth",
   },
   {
@@ -228,7 +228,7 @@ const STEPS = [
     icon: Zap,
     title: "Mint USDAX",
     subtitle: "Borrow the stablecoin",
-    body: "Once collateral is locked, you mint USDAX — an ERC-20 token pegged to $1.00 — up to your borrowing limit (dictated by collateral ratio). Minting charges a one-time 0.1% mint fee. The USDAX is yours to use freely: trade, lend, pay, or bridge.",
+    body: "Once collateral is locked, you mint USDAX, an ERC-20 token pegged to $1.00, up to your borrowing limit (dictated by collateral ratio). Minting charges a one-time 0.1% mint fee. The USDAX is yours to use freely: trade, lend, pay, or bridge.",
     detail: "Mint fee: 0.10% · Stability fee: 0.5% / yr",
   },
   {
@@ -236,23 +236,23 @@ const STEPS = [
     icon: TrendingUp,
     title: "Earn & Deploy",
     subtitle: "Put your USDAX to work",
-    body: "USDAX integrates with DeFi natively. Deposit into lending protocols to earn interest, provide liquidity in AMM pools, or deposit into the APEX Stability Pool to earn liquidation premiums. Meanwhile your collateral continues to appreciate.",
-    detail: "Stability Pool yield: variable · LP opportunities: native AMMs",
+    body: "USDAX integrates with DeFi natively. Deposit into lending protocols to earn interest, provide liquidity in AMM pools, or deposit into the USDAX Savings Rate module to earn 4.20% APY. Meanwhile your collateral continues to appreciate.",
+    detail: "Savings APY: 4.20% · LP opportunities: native AMMs",
   },
   {
     n: "04",
     icon: Layers,
     title: "Stake APX",
     subtitle: "Capture protocol revenue",
-    body: "Stake APX governance tokens to receive a pro-rata share of all stability fees and mint fees collected across the protocol. Rewards are paid in USDAX — real yield from real protocol activity, not inflationary token emissions.",
-    detail: "Current APY: 40%+ · Unbonding period: 7 days",
+    body: "Stake APX governance tokens to receive a pro-rata share of all stability fees and mint fees collected across the protocol. Rewards are paid in USDAX, real yield from real protocol activity, not inflationary token emissions.",
+    detail: "Projected APY: ~15%+ at APX launch · Unbonding period: 7 days",
   },
   {
     n: "05",
     icon: RefreshCw,
     title: "Repay & Withdraw",
     subtitle: "Reclaim your collateral anytime",
-    body: "Repay your USDAX debt (principal + accrued stability fee) at any time. The protocol burns the repaid USDAX and releases your collateral. There is no lock-up, no maturity date — full liquidity is preserved at all times.",
+    body: "Repay your USDAX debt (principal + accrued stability fee) at any time. The protocol burns the repaid USDAX and releases your collateral. There is no lock-up, no maturity date, full liquidity is preserved at all times.",
     detail: "No lock-up period · Partial repayments supported",
   },
 ];
@@ -268,7 +268,7 @@ function HowItWorks() {
             <span style={{ color: LIME }}>How USDAX Works</span>
           </h2>
           <p className="text-[14px] max-w-xl" style={{ color: "hsl(0 0% 42%)" }}>
-            Five stages — from depositing collateral to earning real yield. Every step
+            Five stages, from depositing collateral to earning real yield. Every step
             is on-chain, non-custodial, and permissionless.
           </p>
         </div>
@@ -359,7 +359,7 @@ function Mechanisms() {
       icon: AlertTriangle,
       title: "Liquidation System",
       color: "hsl(38 92% 58%)",
-      body: `When a Vault CR drops below 130%, anyone can trigger a liquidation. The liquidator repays up to 50% of the outstanding USDAX debt and receives that collateral value plus a 10% bonus — an instant profit incentive. If no liquidator acts within one block, the Stability Pool absorbs the debt using pooled USDAX, distributing the discounted collateral to pool depositors. As a last resort, remaining bad debt is redistributed across all active Vaults proportionally.`,
+      body: `When a Vault CR drops below 130%, anyone can trigger a liquidation. The liquidator repays up to 50% of the outstanding USDAX debt and receives that collateral value plus a 10% bonus, an instant profit incentive. If no liquidator acts within one block, the Stability Pool absorbs the debt using pooled USDAX, distributing the discounted collateral to pool depositors. As a last resort, remaining bad debt is redistributed across all active Vaults proportionally.`,
       stats: [
         { label: "Liquidation CR",   val: "130%" },
         { label: "Liquidator Bonus", val: "10%" },
@@ -370,7 +370,7 @@ function Mechanisms() {
       icon: TrendingUp,
       title: "Revenue Distribution",
       color: LIME,
-      body: `100% of all protocol-generated fees — stability fees, mint fees, and redemption fees — flow directly to APX stakers. There is no protocol treasury cut on user fees. The APX staking contract receives fees in real time, and stakers can claim their share of USDAX rewards at any point. This design ensures APX is a pure yield token, not a governance token that requires secondary markets to monetise.`,
+      body: `100% of all protocol-generated fees, stability fees, mint fees, and redemption fees, flow directly to APX stakers. There is no protocol treasury cut on user fees. The APX staking contract receives fees in real time, and stakers can claim their share of USDAX rewards at any point. This design ensures APX is a pure yield token, not a governance token that requires secondary markets to monetise.`,
       stats: [
         { label: "Fee to Stakers",   val: "100%" },
         { label: "Reward Token",     val: "USDAX" },
@@ -436,7 +436,7 @@ function RWA() {
       <div className="max-w-7xl mx-auto">
         <div className="grid lg:grid-cols-2 gap-20 items-center">
 
-          {/* Left — big visual */}
+          {/* Left, big visual */}
           <div className="relative">
             <div className="relative rounded-2xl overflow-hidden p-10"
               style={{ background: LIME, minHeight: 340 }}>
@@ -469,7 +469,7 @@ function RWA() {
             </div>
           </div>
 
-          {/* Right — copy */}
+          {/* Right, copy */}
           <div>
             <Tag>RWA Integration Roadmap</Tag>
             <h2 className="font-black text-4xl uppercase leading-tight mb-5" style={{ color: "hsl(0 0% 94%)" }}>
@@ -477,26 +477,26 @@ function RWA() {
               as <span style={{ color: LIME }}>Collateral</span>
             </h2>
             <p className="text-[14px] leading-relaxed mb-5" style={{ color: "hsl(0 0% 44%)" }}>
-              Phase one of APEX Protocol uses on-chain crypto assets (ETH, BTC, stablecoins) as
-              collateral — assets that are liquid, auditable, and natively on-chain. This launches
-              on testnet and transitions to mainnet in Q3 2026.
+              Phase one of USDAX Finance uses on-chain crypto assets (ETH, BTC, stablecoins) as
+              collateral: assets that are liquid, auditable, and natively on-chain. This launches
+              on testnet and transitions to mainnet in H2 2026.
             </p>
             <p className="text-[14px] leading-relaxed mb-5" style={{ color: "hsl(0 0% 44%)" }}>
-              Phase two introduces tokenised Real World Assets as collateral. Regulated RWA tokens —
-              representing US Treasury bills, investment-grade corporate bonds, tokenised real estate
-              deeds, and trade finance instruments — will be onboarded after governance approval and
+              Phase two introduces tokenised Real World Assets as collateral. Regulated RWA tokens
+              (representing US Treasury bills, investment-grade corporate bonds, tokenised real estate
+              deeds, and trade finance instruments) will be onboarded after governance approval and
               third-party legal verification of each asset's token structure and redemption rights.
             </p>
             <p className="text-[14px] leading-relaxed mb-6" style={{ color: "hsl(0 0% 44%)" }}>
               RWA collateral carries different risk parameters (lower LTV, longer oracle windows) and
-              benefits from yield passthrough — the yield on the underlying assets flows back to Vault
+              benefits from yield passthrough, the yield on the underlying assets flows back to Vault
               owners, creating <strong style={{ color: "hsl(0 0% 75%)" }}>native yield-bearing collateral</strong> that
               lowers the effective cost of minting USDAX.
             </p>
             <div className="space-y-3">
               {[
                 { phase: "Phase 1 · Now",    text: "Crypto collateral: WETH, WBTC, USDC, stETH, RHOOD" },
-                { phase: "Phase 2 · Q4 2026",text: "T-Bills + IG Bonds via regulated RWA token issuers" },
+                { phase: "Phase 2 · 2027",   text: "T-Bills + IG Bonds via regulated RWA token issuers" },
                 { phase: "Phase 3 · 2027",   text: "Real estate, private credit, trade finance instruments" },
               ].map((r) => (
                 <div key={r.phase} className="flex items-start gap-3">
@@ -533,14 +533,14 @@ function TestnetStatus() {
             <div className="flex-1">
               <div className="font-black text-[11px] tracking-[0.25em] uppercase mb-2"
                 style={{ color: "hsl(38 92% 58%)" }}>
-                Testnet Phase — Not Mainnet
+                Testnet Phase: Not Mainnet
               </div>
               <h3 className="font-black text-xl mb-3" style={{ color: "hsl(0 0% 88%)" }}>
                 We Are Live on Robinhood Chain Testnet
               </h3>
               <p className="text-[13px] leading-relaxed max-w-2xl" style={{ color: "hsl(0 0% 44%)" }}>
-                APEX Protocol is currently deployed on Robinhood Chain testnet (Chain ID 46630).
-                All tokens — USDAX, APX, and testnet collateral assets — are valueless test tokens.
+                USDAX Finance is currently deployed on Robinhood Chain testnet (Chain ID 46630).
+                All tokens, USDAX, APX, and testnet collateral assets, are valueless test tokens.
                 This phase exists to battle-test the contracts, gather community feedback, identify
                 edge cases, and complete third-party security audits before mainnet deployment.
                 <strong style={{ color: "hsl(0 0% 72%)" }}> Do not send real funds to testnet contracts.</strong>
@@ -591,10 +591,10 @@ const ROADMAP = [
     color: EMERALD,
     items: [
       "Core contracts deployed on Robinhood Chain testnet",
-      "Public testnet with faucet — WETH, USDC, RHOOD test tokens",
+      "Public testnet with faucet, WETH, USDC, RHOOD test tokens",
       "Vault creation, USDAX minting, and repayment flows live",
       "Liquidation engine deployed and stress-tested",
-      "Security Audit #1 (Trail of Bits) — complete",
+      "Security Audit #1 (Trail of Bits), complete",
       "SDK v0.1 published, REST API live",
       "Community testnet campaign launched",
     ],
@@ -606,11 +606,11 @@ const ROADMAP = [
     color: LIME,
     items: [
       "Mainnet deployment with WETH + USDC collateral",
-      "Security Audit #2 (OpenZeppelin) — complete",
-      "Formal verification (Certora Prover) — complete",
+      "Security Audit #2 (OpenZeppelin), complete",
+      "Formal verification (Certora Prover), complete",
       "APX Token Generation Event (TGE)",
-      "APX staking module live — real yield distribution begins",
-      "Governance module activated — APX holders vote on parameters",
+      "APX staking module live, real yield distribution begins",
+      "Governance module activated, APX holders vote on parameters",
       "Stability Pool opened to USDAX depositors",
     ],
   },
@@ -622,7 +622,7 @@ const ROADMAP = [
     items: [
       "WBTC and stETH collateral onboarding via governance vote",
       "Cross-chain USDAX bridge: Ethereum + Arbitrum + Base",
-      "Advanced analytics dashboard — real-time protocol health",
+      "Advanced analytics dashboard, real-time protocol health",
       "RWA Phase 1: US Treasury bill tokens as collateral (pilot)",
       "USDAX lending market integration (partner protocol)",
       "Mobile wallet optimisations for Robinhood Chain",
@@ -655,7 +655,7 @@ function Roadmap() {
             <span style={{ color: LIME }}>to Ecosystem</span>
           </h2>
           <p className="text-[14px] max-w-xl" style={{ color: "hsl(0 0% 42%)" }}>
-            A deliberate, security-first rollout — testnet first, audited mainnet, then
+            A deliberate, security-first rollout, testnet first, audited mainnet, then
             progressive decentralisation and RWA expansion.
           </p>
         </div>
@@ -724,8 +724,8 @@ function APXSection() {
               <span style={{ color: LIME }}>Governance.</span>
             </h2>
             <p className="text-[14px] leading-relaxed mb-5" style={{ color: "hsl(0 0% 44%)" }}>
-              APX is the value accrual and coordination layer of APEX Protocol. Unlike governance
-              tokens that exist solely for voting, APX captures real economic value — 100% of all
+              APX is the value accrual and coordination layer of USDAX Finance. Unlike governance
+              tokens that exist solely for voting, APX captures real economic value, 100% of all
               protocol fees are distributed to APX stakers in USDAX.
             </p>
             <p className="text-[14px] leading-relaxed mb-6" style={{ color: "hsl(0 0% 44%)" }}>
@@ -752,7 +752,7 @@ function APXSection() {
             </div>
           </div>
 
-          {/* Distribution chart — bar visual */}
+          {/* Distribution chart, bar visual */}
           <div>
             <div className="rounded-xl p-7 relative overflow-hidden"
               style={{ background: CARD_BG, border: `1px solid ${BORDER}` }}>
@@ -854,7 +854,7 @@ function Footer() {
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
         <Link href="/">
           <div className="flex items-center gap-2 cursor-pointer">
-            <img src="/favicon.png" alt="APEX" className="w-6 h-6 rounded" />
+            <img src="/favicon.png" alt="USDAX" className="w-6 h-6 rounded" />
             <span className="font-bold text-sm" style={{ color: "hsl(0 0% 35%)" }}>USDAX finance</span>
           </div>
         </Link>
@@ -875,7 +875,7 @@ function Footer() {
           ))}
         </div>
         <p className="text-[11px]" style={{ color: "hsl(0 0% 22%)" }}>
-          © 2026 APEX Protocol · usdax.finance
+          © 2026 USDAX Finance · usdax.finance
         </p>
       </div>
     </footer>

@@ -43,7 +43,7 @@ function TopBar() {
       style={{ background: "hsl(0 0% 3% / 0.92)", backdropFilter: "blur(16px)", borderBottom: `1px solid ${BORDER}` }}>
       <Link href="/">
         <div className="flex items-center gap-2.5 cursor-pointer">
-          <img src="/favicon.png" alt="APEX" className="w-7 h-7 rounded" />
+          <img src="/favicon.png" alt="USDAX Finance" className="w-7 h-7 rounded" />
           <span className="font-bold text-base tracking-tight" style={{ color: "hsl(0 0% 80%)" }}>
             USDAX <span style={{ color: "hsl(0 0% 35%)" }}>finance</span>
           </span>
@@ -79,10 +79,10 @@ function TopBar() {
 /* ─── HERO ─── */
 function Hero() {
   const stats = [
-    { label: "Current APY",      val: "15%",   sub: "Base · protocol revenue" },
-    { label: "Total APX Staked", val: "—",     sub: "Live once staking launches" },
-    { label: "Rewards Paid",     val: "—",     sub: "USDAX distributed" },
-    { label: "Stakers",          val: "—",     sub: "Active wallets" },
+    { label: "Projected APY",    val: "~15%",  sub: "Est. at APX launch · protocol revenue" },
+    { label: "Total APX Staked", val: "-",     sub: "Live once staking launches" },
+    { label: "Rewards Paid",     val: "-",     sub: "USDAX distributed" },
+    { label: "Stakers",          val: "-",     sub: "Active wallets" },
   ];
 
   return (
@@ -100,20 +100,33 @@ function Hero() {
       {/* Big decorative APY */}
       <div className="pointer-events-none absolute right-10 top-20 font-black select-none leading-none"
         style={{ fontSize: "clamp(6rem, 18vw, 18rem)", color: LIME, opacity: 0.04, fontVariantNumeric: "tabular-nums" }}>
-        15%
+        ~15%
       </div>
 
       <div className="max-w-7xl mx-auto w-full relative z-10">
-        <Tag>APX Staking · APEX Protocol</Tag>
+        <Tag>APX Staking · USDAX Finance</Tag>
         <h1 className="font-black uppercase leading-none tracking-tight mb-5"
           style={{ fontSize: "clamp(3rem, 7vw, 6rem)", color: "hsl(0 0% 97%)" }}>
           STAKE APX.<br />
           <span style={{ color: LIME }}>EARN REAL YIELD.</span>
         </h1>
-        <p className="text-[15px] leading-relaxed mb-10 max-w-xl" style={{ color: "hsl(0 0% 44%)" }}>
-          Every stability fee and mint fee collected by APEX Protocol flows directly to APX stakers —
-          no emissions, no inflation. Pure revenue-share from real protocol activity.
+        <p className="text-[15px] leading-relaxed mb-8 max-w-xl" style={{ color: "hsl(0 0% 44%)" }}>
+          Every stability fee and mint fee collected by USDAX Finance flows directly to APX stakers.
+          No emissions, no inflation. Pure revenue-share from real protocol activity.
         </p>
+
+        {/* APX Disclaimer */}
+        <div className="mb-10 rounded-xl px-5 py-4 flex items-start gap-3 max-w-xl"
+          style={{ background: "hsl(35 92% 60% / 0.06)", border: "1px solid hsl(35 92% 60% / 0.25)" }}>
+          <Shield className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: "hsl(35 92% 60%)" }} />
+          <div>
+            <p className="font-black text-[13px] mb-1" style={{ color: "hsl(35 92% 60%)" }}>APX Token Not Yet Deployed</p>
+            <p className="text-[12px] leading-relaxed" style={{ color: "hsl(0 0% 48%)" }}>
+              APX staking requires the APX governance token, which has not yet launched on Robinhood Chain.
+              VaultEngine and USDAX are live on testnet. Staking activates at APX token launch.
+            </p>
+          </div>
+        </div>
 
         {/* Stats bar */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
@@ -157,12 +170,12 @@ function HowItWorks() {
     {
       n: "01", icon: Coins,
       title: "Acquire APX",
-      body: "Buy APX tokens on supported Robinhood Chain DEXes or earn them via community programs. APX has a fixed supply of 100 million — no new tokens will ever be minted.",
+      body: "Buy APX tokens on supported Robinhood Chain DEXes or earn them via community programs. APX has a fixed supply of 100 million, no new tokens will ever be minted.",
     },
     {
       n: "02", icon: Lock,
       title: "Stake on App",
-      body: "Connect your wallet to the APEX Protocol app and navigate to Staking. Approve the APX token and deposit any amount — there is no minimum stake and no lock period.",
+      body: "Connect your wallet to the USDAX Finance app and navigate to Staking. Approve the APX token and deposit any amount, there is no minimum stake and no lock period.",
     },
     {
       n: "03", icon: TrendingUp,
@@ -172,7 +185,7 @@ function HowItWorks() {
     {
       n: "04", icon: RefreshCw,
       title: "Claim Anytime",
-      body: "Claim your accrued USDAX rewards at any time — no vesting, no waiting. Unstaking initiates a 7-day unbonding period, after which your APX is fully returned.",
+      body: "Claim your accrued USDAX rewards at any time, no vesting, no waiting. Unstaking initiates a 7-day unbonding period, after which your APX is fully returned.",
     },
   ];
 
@@ -186,8 +199,8 @@ function HowItWorks() {
               Four Steps to<br /><span style={{ color: LIME }}>Passive Income</span>
             </h2>
             <p className="text-[14px] leading-relaxed" style={{ color: "hsl(0 0% 40%)" }}>
-              APX staking is designed to be as simple as possible. No lockups, no complex mechanics —
-              just stake, earn, and claim whenever you want.
+              APX staking is designed to be as simple as possible. No lockups, no complex mechanics.
+              Just stake, earn, and claim whenever you want.
             </p>
           </div>
 
@@ -230,7 +243,7 @@ function RewardMechanics() {
             Real Yield, Not<br /><span style={{ color: LIME }}>Printed Tokens</span>
           </h2>
           <p className="text-[14px] max-w-xl" style={{ color: "hsl(0 0% 40%)" }}>
-            Every dollar of APY comes from real protocol activity — not inflationary APX emissions.
+            Every dollar of APY comes from real protocol activity, not inflationary APX emissions.
             As USDAX supply grows, so does your reward.
           </p>
         </div>
@@ -241,7 +254,7 @@ function RewardMechanics() {
               icon: Percent,
               title: "Stability Fee",
               rate: "0.5% / yr",
-              desc: "Charged continuously on all outstanding USDAX debt. With $42M+ USDAX in circulation, this generates $210,000+ annually — all flowing to APX stakers.",
+              desc: "Charged continuously on all outstanding USDAX debt. With $42M+ USDAX in circulation, this generates $210,000+ annually, all flowing to APX stakers.",
               color: LIME,
             },
             {
@@ -295,15 +308,15 @@ function RewardMechanics() {
               </div>
               <p className="text-[13px] leading-relaxed" style={{ color: "hsl(0 0% 42%)" }}>
                 As protocol revenue grows and APX supply stays fixed, your effective yield increases.
-                There is no ceiling — APY scales directly with USDAX adoption.
+                There is no ceiling, APY scales directly with USDAX adoption.
               </p>
             </div>
             <div className="grid grid-cols-2 gap-4">
               {[
                 { label: "Annual Revenue (est.)", val: "$12.5M+" },
-                { label: "APX in Staking",        val: "31.2M" },
-                { label: "Current APX Price",     val: "$1.00*" },
-                { label: "Effective APY",          val: "40.1%" },
+                { label: "APX in Staking",        val: "TBD" },
+                { label: "APX Price",             val: "TBD" },
+                { label: "Projected APY",         val: "~15%+" },
               ].map((s) => (
                 <div key={s.label} className="rounded-xl p-4 text-center"
                   style={{ background: "hsl(0 0% 5%)", border: `1px solid ${BORDER}` }}>
@@ -314,7 +327,7 @@ function RewardMechanics() {
             </div>
           </div>
           <p className="text-[10px] mt-6" style={{ color: "hsl(0 0% 22%)" }}>
-            * Testnet values for illustration. APY is variable and reflects real protocol revenue. Not financial advice.
+            * Projections based on estimated protocol revenue at launch. APY is variable. Not financial advice.
           </p>
         </div>
       </div>
@@ -403,7 +416,7 @@ function Risk() {
             {
               title: "Variable APY",
               color: LIME,
-              body: "APY is not fixed — it depends on protocol revenue and total APX staked. As more APX is staked or revenue changes, your effective yield adjusts accordingly.",
+              body: "APY is not fixed, it depends on protocol revenue and total APX staked. As more APX is staked or revenue changes, your effective yield adjusts accordingly.",
             },
           ].map((r) => (
             <div key={r.title} className="relative rounded-xl p-6 overflow-hidden"
@@ -424,10 +437,10 @@ function FAQ() {
   const faqs = [
     { q: "Is there a minimum amount to stake?", a: "No. You can stake any amount of APX, from 1 token to the full supply. There is no minimum." },
     { q: "When do rewards start accruing?", a: "Rewards begin accruing from the very next block after you stake. There is no waiting period." },
-    { q: "Can I lose my staked APX?", a: "Your principal APX is not used as collateral or slashed. In the event of a smart contract exploit, staked tokens could theoretically be at risk — which is why we invest heavily in security audits." },
+    { q: "Can I lose my staked APX?", a: "Your principal APX is not used as collateral or slashed. In the event of a smart contract exploit, staked tokens could theoretically be at risk, which is why we invest heavily in security audits." },
     { q: "How long is the unbonding period?", a: "After initiating an unstake, a 7-day unbonding period begins. Your APX is returned to your wallet automatically after the 7 days complete." },
-    { q: "Are rewards compounded automatically?", a: "No — rewards must be claimed manually. Once claimed, you can restake them to compound your position." },
-    { q: "Does staking affect my governance voting power?", a: "APX voting power is based on your total APX balance (staked + unstaked). Staking does not reduce your votes — your staked APX still counts." },
+    { q: "Are rewards compounded automatically?", a: "No, rewards must be claimed manually. Once claimed, you can restake them to compound your position." },
+    { q: "Does staking affect my governance voting power?", a: "APX voting power is based on your total APX balance (staked + unstaked). Staking does not reduce your votes, your staked APX still counts." },
   ];
 
   return (
@@ -506,7 +519,7 @@ function Footer() {
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
         <Link href="/">
           <div className="flex items-center gap-2 cursor-pointer">
-            <img src="/favicon.png" alt="APEX" className="w-6 h-6 rounded" />
+            <img src="/favicon.png" alt="USDAX Finance" className="w-6 h-6 rounded" />
             <span className="font-bold text-sm" style={{ color: "hsl(0 0% 35%)" }}>USDAX finance</span>
           </div>
         </Link>
@@ -519,7 +532,7 @@ function Footer() {
             </Link>
           ))}
         </div>
-        <p className="text-[11px]" style={{ color: "hsl(0 0% 22%)" }}>© 2026 APEX Protocol</p>
+        <p className="text-[11px]" style={{ color: "hsl(0 0% 22%)" }}>© 2026 USDAX Finance</p>
       </div>
     </footer>
   );

@@ -31,7 +31,7 @@ const SECTIONS = [
     items: [
       { id: "connect-wallet",      label: "Connect Wallet" },
       { id: "mint-usdax",          label: "Mint USDAX" },
-      { id: "stake-apx",           label: "Stake APX" },
+      { id: "stake-apx",           label: "APX Staking" },
     ],
   },
   {
@@ -76,7 +76,6 @@ const SECTIONS = [
     icon: AlertTriangle,
     items: [
       { id: "audits",              label: "Audits" },
-      { id: "bug-bounty",         label: "Bug Bounty" },
     ],
   },
   {
@@ -155,6 +154,71 @@ function ParamTable({ rows }: { rows: { param: string; value: string; desc: stri
   );
 }
 
+const EXPLORER = "https://explorer.testnet.chain.robinhood.com";
+
+function ContractTable({ rows }: { rows: { name: string; address: string; desc: string }[] }) {
+  const [copied, setCopied] = useState<string | null>(null);
+  function copy(addr: string) {
+    navigator.clipboard.writeText(addr);
+    setCopied(addr);
+    setTimeout(() => setCopied(null), 1800);
+  }
+  const isDeployed = (a: string) => a.startsWith("0x");
+  return (
+    <div className="my-5 rounded-xl overflow-hidden" style={{ border: `1px solid ${BORDER}` }}>
+      <table className="w-full text-[13px]">
+        <thead>
+          <tr style={{ background: "hsl(0 0% 5%)", borderBottom: `1px solid ${BORDER}` }}>
+            {["Contract", "Address", "Description"].map((h) => (
+              <th key={h} className="text-left px-4 py-2.5 font-semibold text-[11px] tracking-widest uppercase"
+                style={{ color: "hsl(0 0% 35%)" }}>{h}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r, i) => (
+            <tr key={r.name} style={{ borderBottom: i < rows.length - 1 ? `1px solid ${BORDER}` : "none", background: i % 2 === 0 ? CARD_BG : "hsl(0 0% 5%)" }}>
+              <td className="px-4 py-3 font-mono text-[12px]" style={{ color: LIME, whiteSpace: "nowrap" }}>{r.name}</td>
+              <td className="px-4 py-3">
+                {isDeployed(r.address) ? (
+                  <div className="flex items-center gap-2">
+                    <a
+                      href={`${EXPLORER}/address/${r.address}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-mono text-[11px] transition-colors"
+                      style={{ color: "hsl(0 0% 70%)", textDecoration: "none" }}
+                      onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = LIME)}
+                      onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "hsl(0 0% 70%)")}
+                      title={r.address}
+                    >
+                      {r.address.slice(0, 10)}…{r.address.slice(-8)}
+                      <ExternalLink className="inline ml-1 w-2.5 h-2.5" style={{ verticalAlign: "middle" }} />
+                    </a>
+                    <button
+                      onClick={() => copy(r.address)}
+                      title="Copy full address"
+                      className="transition-colors"
+                      style={{ color: copied === r.address ? LIME : "hsl(0 0% 28%)", background: "none", border: "none", cursor: "pointer", padding: 0 }}
+                    >
+                      {copied === r.address ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                    </button>
+                  </div>
+                ) : (
+                  <span className="text-[11px] font-mono px-2 py-0.5 rounded" style={{ color: "hsl(38 92% 58%)", background: "hsl(38 92% 58% / 0.1)", border: "1px solid hsl(38 92% 58% / 0.2)" }}>
+                    Not yet deployed
+                  </span>
+                )}
+              </td>
+              <td className="px-4 py-3 text-[12px]" style={{ color: "hsl(0 0% 42%)" }}>{r.desc}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 function SectionHeading({ id, children }: { id: string; children: React.ReactNode }) {
   return (
     <h2 id={id} className="group flex items-center gap-2 font-black text-2xl mt-14 mb-5 scroll-mt-20"
@@ -204,25 +268,25 @@ function Content() {
       {/* ── INTRODUCTION ── */}
       <section id="introduction">
         <div className="flex items-center gap-2 text-[11px] font-mono tracking-[0.22em] uppercase mb-3" style={{ color: LIME }}>
-          <span className="w-1.5 h-1.5 rounded-full" style={{ background: LIME }} /> APEX PROTOCOL · DOCS v1.0
+          <span className="w-1.5 h-1.5 rounded-full" style={{ background: LIME }} /> USDAX FINANCE · DOCS v1.0
         </div>
         <h1 className="font-black text-4xl leading-tight mb-5" style={{ color: "hsl(0 0% 96%)" }}>
-          APEX Protocol<br />
+          USDAX Finance<br />
           <span style={{ color: LIME }}>Documentation</span>
         </h1>
         <Prose>
-          APEX Protocol is a decentralized stablecoin and yield infrastructure built on{" "}
-          <Highlight>Robinhood Chain (EVM 46630)</Highlight>. It issues <Highlight>USDAX</Highlight> — a
-          USD-pegged stablecoin overcollateralized by on-chain assets — and <Highlight>APX</Highlight>, the
+          USDAX Finance is a decentralized stablecoin and yield infrastructure built on{" "}
+          <Highlight>Robinhood Chain (EVM 46630)</Highlight>. It issues <Highlight>USDAX</Highlight>, a
+          USD-pegged stablecoin overcollateralized by on-chain assets, and <Highlight>APX</Highlight>, the
           governance and staking token that captures protocol revenue and coordinates upgrades.
         </Prose>
         <Prose>
-          The protocol enables any wallet holder to mint USDAX by depositing collateral, stake APX to earn
-          a share of protocol fees, and participate in governance to shape risk parameters and collateral
-          onboarding.
+          The protocol enables any wallet holder to mint USDAX by depositing collateral, earn savings yield
+          via the on-chain savings rate module, and (once APX launches) stake APX to earn protocol fees
+          and participate in on-chain governance.
         </Prose>
         <InfoBox>
-          APEX Protocol is non-custodial. Your assets remain in smart contracts — no team multisig holds
+          USDAX Finance is non-custodial. Your assets remain in smart contracts, no team multisig holds
           user funds. Always verify contract addresses before interacting.
         </InfoBox>
       </section>
@@ -230,7 +294,7 @@ function Content() {
       {/* ── HOW IT WORKS ── */}
       <SectionHeading id="how-it-works">How It Works</SectionHeading>
       <Prose>
-        APEX Protocol operates a two-token system. USDAX is the stable unit of account; APX is the
+        USDAX Finance operates a two-token system. USDAX is the stable unit of account; APX is the
         volatile backstop and governance layer. The protocol collects stability fees on outstanding USDAX
         debt and distributes them to APX stakers.
       </Prose>
@@ -238,7 +302,7 @@ function Content() {
         {[
           { icon: "①", title: "Deposit Collateral", desc: "Deposit ETH, WBTC, USDC or other approved assets as collateral into a Vault." },
           { icon: "②", title: "Mint USDAX",         desc: "Borrow USDAX against your collateral at a minimum 150% collateral ratio." },
-          { icon: "③", title: "Earn & Govern",       desc: "Stake APX to earn protocol fees, vote on parameters, and unlock higher yield tiers." },
+          { icon: "③", title: "Earn & Govern",       desc: "Deposit USDAX into the savings pool (4.20% APY), or stake APX at launch to earn protocol fees and vote on parameters." },
         ].map((s) => (
           <div key={s.title} className="rounded-xl p-5" style={{ background: CARD_BG, border: `1px solid ${BORDER}` }}>
             <div className="text-2xl font-black mb-3" style={{ color: LIME }}>{s.icon}</div>
@@ -265,26 +329,26 @@ function Content() {
       {/* ── CONNECT WALLET ── */}
       <SectionHeading id="connect-wallet">Connect Wallet</SectionHeading>
       <Prose>
-        APEX Protocol supports any EVM-compatible wallet. Add Robinhood Chain to your wallet before
+        USDAX Finance supports any EVM-compatible wallet. Add Robinhood Chain to your wallet before
         interacting with the protocol.
       </Prose>
-      <SubHeading id="add-network">Add Robinhood Chain</SubHeading>
+      <SubHeading id="add-network">Add Robinhood Chain Testnet</SubHeading>
       <ParamTable rows={[
-        { param: "Network Name", value: "Robinhood Chain",                    desc: "Display name in your wallet" },
-        { param: "Chain ID",     value: "46630",                               desc: "EVM chain identifier" },
-        { param: "RPC URL",      value: "https://rpc.robinhoodchain.io",       desc: "Public RPC endpoint" },
-        { param: "Currency",     value: "RHOOD",                               desc: "Native gas token" },
-        { param: "Explorer",     value: "https://scan.robinhoodchain.io",      desc: "Block explorer" },
+        { param: "Network Name", value: "Robinhood Chain Testnet",                      desc: "Display name in your wallet" },
+        { param: "Chain ID",     value: "46630",                                          desc: "EVM chain identifier" },
+        { param: "RPC URL",      value: "https://rpc.testnet.chain.robinhood.com/rpc",   desc: "Public RPC endpoint" },
+        { param: "Currency",     value: "ETH",                                            desc: "Native gas token (Sepolia ETH)" },
+        { param: "Explorer",     value: "https://explorer.testnet.chain.robinhood.com",  desc: "Official testnet block explorer" },
       ]} />
-      <CodeBlock lang="javascript" code={`// Add Robinhood Chain via wagmi / ethers
+      <CodeBlock lang="javascript" code={`// Add Robinhood Chain Testnet via wagmi / ethers
 await window.ethereum.request({
   method: "wallet_addEthereumChain",
   params: [{
     chainId: "0xB666",          // 46630 in hex
-    chainName: "Robinhood Chain",
-    rpcUrls: ["https://rpc.robinhoodchain.io"],
-    nativeCurrency: { name: "RHOOD", symbol: "RHOOD", decimals: 18 },
-    blockExplorerUrls: ["https://scan.robinhoodchain.io"],
+    chainName: "Robinhood Chain Testnet",
+    rpcUrls: ["https://rpc.testnet.chain.robinhood.com/rpc"],
+    nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+    blockExplorerUrls: ["https://explorer.testnet.chain.robinhood.com"],
   }],
 });`} />
 
@@ -297,7 +361,7 @@ await window.ethereum.request({
       <ul className="mb-4">
         <Li>Navigate to <Highlight>app → Vaults</Highlight> and click <strong>Open Vault</strong>.</Li>
         <Li>Select your collateral asset and enter the deposit amount.</Li>
-        <Li>Enter the USDAX amount to mint — the UI shows your live collateral ratio.</Li>
+        <Li>Enter the USDAX amount to mint, the UI shows your live collateral ratio.</Li>
         <Li>Approve the collateral token (one-time ERC-20 approval), then confirm the mint transaction.</Li>
         <Li>USDAX arrives in your wallet immediately after the transaction confirms.</Li>
       </ul>
@@ -307,10 +371,14 @@ await window.ethereum.request({
       </InfoBox>
 
       {/* ── STAKE APX ── */}
-      <SectionHeading id="stake-apx">Stake APX</SectionHeading>
+      <SectionHeading id="stake-apx">APX Staking</SectionHeading>
+      <InfoBox type="warn">
+        APX Token is not yet deployed. Staking will be available at the APX token generation event (TGE),
+        planned for H2 2026 alongside mainnet launch. The steps below describe the intended flow.
+      </InfoBox>
       <Prose>
-        Stake APX tokens to earn a share of all stability fees collected across the protocol. Rewards
-        accrue in real-time and can be claimed at any time with no lock period.
+        Once APX launches, stake APX tokens to earn a share of all stability fees and mint fees collected
+        across the protocol. Rewards accrue in real-time and are paid in USDAX; real protocol revenue, not emissions.
       </Prose>
       <ul className="mb-4">
         <Li>Navigate to <Highlight>app → Staking</Highlight>.</Li>
@@ -320,7 +388,7 @@ await window.ethereum.request({
       </ul>
 
       {/* ── USDAX OVERVIEW ── */}
-      <SectionHeading id="usdax-overview">USDAX — Overview</SectionHeading>
+      <SectionHeading id="usdax-overview">USDAX, Overview</SectionHeading>
       <Prose>
         USDAX is a fully decentralized USD-pegged stablecoin. Every USDAX in circulation is backed by
         at least <Highlight>$1.50 of on-chain collateral</Highlight> at time of mint.
@@ -341,11 +409,11 @@ await window.ethereum.request({
         governance. All collateral is held in non-custodial smart contracts.
       </Prose>
       <ParamTable rows={[
-        { param: "WETH",   value: "LTV 66%",   desc: "Wrapped ETH — primary collateral, highest liquidity." },
-        { param: "WBTC",   value: "LTV 65%",   desc: "Wrapped Bitcoin — blue-chip cross-chain collateral." },
-        { param: "USDC",   value: "LTV 80%",   desc: "Circle USDC — low-risk stable collateral, lower yield." },
-        { param: "RHOOD",  value: "LTV 55%",   desc: "Native Robinhood Chain gas token — higher risk, higher yield." },
-        { param: "stETH",  value: "LTV 63%",   desc: "Liquid staked ETH — accrues staking yield inside vault." },
+        { param: "WETH",   value: "LTV 66%",   desc: "Wrapped ETH, primary collateral, highest liquidity." },
+        { param: "WBTC",   value: "LTV 65%",   desc: "Wrapped Bitcoin, blue-chip cross-chain collateral." },
+        { param: "USDC",   value: "LTV 80%",   desc: "Circle USDC, low-risk stable collateral, lower yield." },
+        { param: "RHOOD",  value: "LTV 55%",   desc: "Native Robinhood Chain gas token, higher risk, higher yield." },
+        { param: "stETH",  value: "LTV 63%",   desc: "Liquid staked ETH, accrues staking yield inside vault." },
       ]} />
       <InfoBox>
         Governance can add or remove collateral types via proposal. Newly proposed collateral has a 7-day
@@ -358,9 +426,9 @@ await window.ethereum.request({
         USDAX maintains its peg through three complementary mechanisms:
       </Prose>
       <ul className="mb-4">
-        <Li><Highlight>Arbitrage</Highlight> — when USDAX trades below $1, users buy it cheaply and redeem collateral at face value, profiting and restoring the peg.</Li>
-        <Li><Highlight>Stability Pool</Highlight> — USDAX depositors absorb liquidated collateral at a discount, creating organic buy pressure.</Li>
-        <Li><Highlight>Stability Fee Adjustment</Highlight> — governance raises or lowers the stability fee to incentivize or disincentivize new minting.</Li>
+        <Li><Highlight>Arbitrage</Highlight>, when USDAX trades below $1, users buy it cheaply and redeem collateral at face value, profiting and restoring the peg.</Li>
+        <Li><Highlight>Stability Pool</Highlight>, USDAX depositors absorb liquidated collateral at a discount, creating organic buy pressure.</Li>
+        <Li><Highlight>Stability Fee Adjustment</Highlight>, governance raises or lowers the stability fee to incentivize or disincentivize new minting.</Li>
       </ul>
 
       {/* ── REDEMPTION ── */}
@@ -372,18 +440,18 @@ await window.ethereum.request({
       </Prose>
       <InfoBox type="warn">
         Redemptions incur a 0.5% redemption fee. Vault owners whose collateral is redeemed have their
-        USDAX debt reduced by an equal amount — they keep any excess collateral.
+        USDAX debt reduced by an equal amount, they keep any excess collateral.
       </InfoBox>
 
       {/* ── APX OVERVIEW ── */}
-      <SectionHeading id="apx-overview">APX Token — Overview</SectionHeading>
+      <SectionHeading id="apx-overview">APX Token, Overview</SectionHeading>
       <Prose>
-        APX is the governance and value-accrual token of APEX Protocol. It captures 100% of protocol
+        APX is the governance and value-accrual token of USDAX Finance. It captures 100% of protocol
         revenue (stability fees + mint fees) and is used to vote on all protocol parameters.
       </Prose>
       <ParamTable rows={[
-        { param: "Total Supply",      value: "100,000,000 APX",  desc: "Fixed maximum supply — no inflation." },
-        { param: "Staking APY",       value: "40%+ (variable)",  desc: "Driven by protocol revenue, not emissions." },
+        { param: "Total Supply",      value: "100,000,000 APX",  desc: "Fixed maximum supply, no inflation." },
+        { param: "Staking APY",       value: "~15%+ (projected)", desc: "Estimate at launch, driven by protocol revenue, not emissions. Variable." },
         { param: "Revenue Share",     value: "100%",             desc: "All protocol fees flow to APX stakers." },
         { param: "Voting",            value: "1 APX = 1 vote",   desc: "Direct on-chain governance." },
         { param: "Unbonding Period",  value: "7 days",           desc: "Cooldown before unstaked APX is returned." },
@@ -392,7 +460,7 @@ await window.ethereum.request({
       {/* ── GOVERNANCE ── */}
       <SectionHeading id="governance">Governance</SectionHeading>
       <Prose>
-        APEX Protocol is governed by APX token holders. Any wallet holding ≥ 10,000 APX (or receiving
+        USDAX Finance is governed by APX token holders. Any wallet holding ≥ 10,000 APX (or receiving
         delegation) can create a governance proposal. Proposals pass with a 4% quorum and &gt;50% approval,
         and are executed after a 48-hour timelock.
       </Prose>
@@ -406,7 +474,7 @@ await window.ethereum.request({
       {/* ── MINTING MECHANICS ── */}
       <SectionHeading id="minting-mechanics">Minting Mechanics</SectionHeading>
       <Prose>
-        Minting USDAX creates a <Highlight>Vault</Highlight> — a collateralised debt position (CDP) on-chain.
+        Minting USDAX creates a <Highlight>Vault</Highlight>, a collateralised debt position (CDP) on-chain.
         Each vault tracks deposited collateral, outstanding USDAX debt, and accrued stability fees.
       </Prose>
       <CodeBlock lang="solidity" code={`// Simplified VaultManager interface
@@ -432,7 +500,7 @@ interface IVaultManager {
       <SectionHeading id="staking-mechanics">Staking & Rewards</SectionHeading>
       <Prose>
         APX stakers receive a pro-rata share of all protocol fees. Rewards are denominated in USDAX and
-        accrue every block. The APY varies with protocol usage — higher USDAX supply means higher fee
+        accrue every block. The APY varies with protocol usage, higher USDAX supply means higher fee
         revenue.
       </Prose>
       <CodeBlock lang="solidity" code={`// Simplified APXStaking interface
@@ -486,33 +554,50 @@ interface IAPXStaking {
 
       {/* ── CONTRACTS ── */}
       <SectionHeading id="contracts">Contract Addresses</SectionHeading>
+
+      {/* Testnet-only warning */}
+      <div className="my-5 px-4 py-4 rounded-xl flex gap-3 items-start"
+        style={{ background: "hsl(38 92% 58% / 0.07)", border: "1px solid hsl(38 92% 58% / 0.25)" }}>
+        <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: "hsl(38 92% 58%)" }} />
+        <div>
+          <p className="font-black text-[11px] tracking-widest uppercase mb-1" style={{ color: "hsl(38 92% 58%)" }}>
+            Testnet Only: Do Not Send Real Funds
+          </p>
+          <p className="text-[13px] leading-relaxed" style={{ color: "hsl(0 0% 55%)" }}>
+            All contracts below are deployed exclusively on <strong style={{ color: "hsl(0 0% 80%)" }}>Robinhood Chain Testnet (Chain ID 46630)</strong>.
+            These are <strong style={{ color: "hsl(0 0% 80%)" }}>not mainnet addresses</strong>. Sending real assets to testnet contracts will result in permanent loss.
+            Mainnet deployment is planned for H2 2026.
+          </p>
+        </div>
+      </div>
+
       <Prose>
-        All contracts are deployed on Robinhood Chain (Chain ID 46630). Verify addresses on the{" "}
-        <a href="https://scan.robinhoodchain.io" target="_blank" rel="noopener noreferrer"
+        Click any address to verify it on the{" "}
+        <a href={EXPLORER} target="_blank" rel="noopener noreferrer"
           className="inline-flex items-center gap-1 transition-colors"
           style={{ color: LIME }}>
-          block explorer <ExternalLink className="w-3 h-3" />
-        </a>{" "}
-        before interacting.
+          Robinhood Chain Testnet explorer <ExternalLink className="w-3 h-3" />
+        </a>.
+        Use the copy button to copy the full address to your clipboard.
       </Prose>
-      <ParamTable rows={[
-        { param: "USDAX Token",        value: "0xA1b2...3c4d",  desc: "ERC-20 stablecoin contract." },
-        { param: "APX Token",          value: "0xB5e6...7f8g",  desc: "ERC-20 governance token." },
-        { param: "VaultManager",       value: "0xC9h0...1i2j",  desc: "CDP minting and management." },
-        { param: "LiquidationEngine",  value: "0xD3k4...5l6m",  desc: "Liquidation logic." },
-        { param: "StabilityPool",      value: "0xE7n8...9o0p",  desc: "USDAX backstop pool." },
-        { param: "APXStaking",         value: "0xF1q2...3r4s",  desc: "Staking and reward distribution." },
-        { param: "Governance",         value: "0xG5t6...7u8v",  desc: "Timelock + voting contract." },
+
+      <ContractTable rows={[
+        { name: "USDAX Token",       address: "0x89F2c042def8719930904A474FF999A0F8fddd64", desc: "ERC-20 stablecoin, mintable by depositing collateral into a vault." },
+        { name: "VaultEngine",       address: "0xB5d971d69728B0C31b19A8f184d31813F29EEA20", desc: "CDP minting, repayment, and collateral management." },
+        { name: "CollateralManager", address: "0x2472DCBA450e0AA2f81e69AaCD33f91528343854", desc: "Collateral risk parameters and ceiling enforcement." },
+        { name: "PriceOracle",       address: "0xe5211fF6a85F51b290600B4807d0ee5F978cEC2D", desc: "On-chain testnet price feed. Mainnet will use a decentralised oracle." },
+        { name: "WETH (testnet)",    address: "0x728a06069E7A7DBafe2a92bc1E3e4d48e8fC49Dc", desc: "Testnet WETH. Claim from the faucet to use as vault collateral; not real ETH." },
+        { name: "WBTC (testnet)",    address: "0xBA4120eA7aA703cA1BBCdD03a1B4Ff15e15F2e34", desc: "Testnet WBTC. Claim from the faucet to use as vault collateral; not real BTC." },
+        { name: "stETH (testnet)",   address: "0xE571b0C36B3EF817950f7Fe3Aa296F2a1fB7479e", desc: "Testnet stETH. Claim from the faucet to use as vault collateral; not real stETH." },
+        { name: "APX Token",         address: "Not yet deployed",                             desc: "Governance token; activates at APX token launch (H2 2026)." },
+        { name: "APXStaking",        address: "Not yet deployed",                             desc: "Staking rewards contract; activates at APX token launch." },
+        { name: "Governance",        address: "Not yet deployed",                             desc: "On-chain voting and timelock; activates at APX token launch." },
       ]} />
-      <InfoBox type="warn">
-        Contract addresses above are illustrative placeholders for testnet. Mainnet addresses will be
-        published at launch after audit completion.
-      </InfoBox>
 
       {/* ── API REFERENCE ── */}
       <SectionHeading id="api-reference">API Reference</SectionHeading>
       <Prose>
-        The APEX Protocol REST API provides read access to protocol state without requiring a Web3
+        The USDAX Finance REST API provides read access to protocol state without requiring a Web3
         connection. Base URL: <code style={{ color: LIME, fontSize: 12 }}>https://api.usdax.finance/v1</code>
       </Prose>
       <SubHeading id="api-protocol">Protocol Stats</SubHeading>
@@ -549,49 +634,58 @@ Response:
       {/* ── SDK ── */}
       <SectionHeading id="sdk">SDK</SectionHeading>
       <Prose>
-        The <code style={{ color: LIME, fontSize: 12 }}>@apex-protocol/sdk</code> package provides a
-        typed TypeScript interface for all protocol interactions.
+        The <code style={{ color: LIME, fontSize: 12 }}>@usdax-finance/sdk</code> package provides a
+        typed TypeScript interface for all protocol interactions. The SDK is currently in early access
+        Reach out via <a href="https://x.com/Usdax_Finance" target="_blank" rel="noopener noreferrer" style={{ color: LIME }}>@Usdax_Finance</a> for access.
       </Prose>
-      <CodeBlock lang="bash" code={`npm install @apex-protocol/sdk
+      <CodeBlock lang="bash" code={`npm install @usdax-finance/sdk
 # or
-pnpm add @apex-protocol/sdk`} />
-      <CodeBlock lang="typescript" code={`import { ApexProtocol } from "@apex-protocol/sdk";
+pnpm add @usdax-finance/sdk`} />
+      <CodeBlock lang="typescript" code={`import { UsdaxProtocol } from "@usdax-finance/sdk";
 import { createWalletClient, custom } from "viem";
-import { robinhoodChain } from "@apex-protocol/sdk/chains";
+
+// Robinhood Chain Testnet (Chain ID 46630)
+const robinhoodTestnet = {
+  id: 46630,
+  name: "Robinhood Chain Testnet",
+  rpcUrls: { default: { http: ["https://rpc.testnet.chain.robinhood.com/rpc"] } },
+  blockExplorers: { default: { url: "https://explorer.testnet.chain.robinhood.com" } },
+  nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+};
 
 const walletClient = createWalletClient({
-  chain: robinhoodChain,   // chainId: 46630
+  chain: robinhoodTestnet,
   transport: custom(window.ethereum),
 });
 
-const apex = new ApexProtocol({ walletClient });
+const usdax = new UsdaxProtocol({ walletClient });
 
 // Open a vault and mint 5,000 USDAX against 3 WETH
-const tx = await apex.vaults.openAndMint({
+const tx = await usdax.vaults.openAndMint({
   collateral: "WETH",
   collateralAmount: 3n * 10n ** 18n,
   usdaxAmount: 5000n * 10n ** 18n,
 });
 
 await tx.wait();
-console.log("Vault opened:", tx.hash);
+// tx confirmed: tx.hash
 
-// Stake APX
-const stakeTx = await apex.staking.stake(1000n * 10n ** 18n);
+// Stake APX (available at APX launch)
+const stakeTx = await usdax.staking.stake(1000n * 10n ** 18n);
 await stakeTx.wait();`} />
 
       {/* ── AUDITS ── */}
       <SectionHeading id="audits">Audits</SectionHeading>
       <Prose>
-        Security is the top priority. APEX Protocol undergoes multiple independent audits before each
+        Security is the top priority. USDAX Finance undergoes multiple independent audits before each
         major release. All audit reports are published in full.
       </Prose>
       <div className="grid sm:grid-cols-2 gap-4 my-5">
         {[
-          { firm: "Trail of Bits",    date: "Q2 2026", status: "Complete", findings: "2 medium, 0 critical" },
-          { firm: "OpenZeppelin",     date: "Q2 2026", status: "Complete", findings: "1 low, 0 critical" },
-          { firm: "Sigma Prime",      date: "Q3 2026", status: "Scheduled",findings: "—" },
-          { firm: "Certora Prover",   date: "Q3 2026", status: "In Progress", findings: "Formal verification" },
+          { firm: "Trail of Bits",    date: "Q2–Q3 2026", status: "In Progress", findings: "Report at completion" },
+          { firm: "OpenZeppelin",     date: "H2 2026", status: "Scheduled", findings: "Pre-mainnet" },
+          { firm: "Sigma Prime",      date: "2027",    status: "Planned",   findings: "-" },
+          { firm: "Certora Prover",   date: "2027",    status: "Planned",   findings: "Formal verification" },
         ].map((a) => (
           <div key={a.firm} className="rounded-xl p-5" style={{ background: CARD_BG, border: `1px solid ${BORDER}` }}>
             <div className="font-bold text-[13px] mb-1" style={{ color: "hsl(0 0% 85%)" }}>{a.firm}</div>
@@ -601,45 +695,28 @@ await stakeTx.wait();`} />
         ))}
       </div>
 
-      {/* ── BUG BOUNTY ── */}
-      <SectionHeading id="bug-bounty">Bug Bounty</SectionHeading>
-      <Prose>
-        APEX Protocol runs a continuous bug bounty program. Responsible disclosure of vulnerabilities
-        is rewarded with USDAX bounties proportional to severity.
-      </Prose>
-      <ParamTable rows={[
-        { param: "Critical",  value: "Up to $500,000",  desc: "Loss of funds, permanent freezing of funds." },
-        { param: "High",      value: "Up to $50,000",   desc: "Theft of unclaimed yield, governance takeover." },
-        { param: "Medium",    value: "Up to $10,000",   desc: "Incorrect calculations, DoS vectors." },
-        { param: "Low",       value: "Up to $1,000",    desc: "Minor issues with limited impact." },
-      ]} />
-      <InfoBox>
-        Submit findings to <strong style={{ color: LIME }}>security@usdax.finance</strong> with a detailed
-        proof-of-concept. Do not disclose publicly until a patch is deployed.
-      </InfoBox>
-
       {/* ── ROADMAP ── */}
       <SectionHeading id="roadmap">Roadmap</SectionHeading>
       {[
         {
-          q: "Q2 2026 — Testnet",
+          q: "Q2 2026: Testnet",
           done: true,
-          items: ["Core contracts deployed on Robinhood Chain testnet", "Audit 1 (Trail of Bits) complete", "SDK v0.1 published", "Public testnet with faucet open"],
+          items: ["Core contracts deployed on Robinhood Chain testnet", "Audit 1 (Trail of Bits) in progress", "SDK v0.1 published", "Public testnet with faucet open"],
         },
         {
-          q: "Q3 2026 — Mainnet Alpha",
+          q: "H2 2026: Mainnet Alpha",
           done: false,
-          items: ["Mainnet launch with WETH + USDC collateral", "Audit 2 (OpenZeppelin) complete", "APX TGE and initial staking rewards", "Governance module activated"],
+          items: ["Mainnet launch on Robinhood Chain with WETH + stETH collateral", "Audit 2 (OpenZeppelin), in progress", "APX token generation event (TGE)", "USDAX Savings Rate fully on-chain (testnet: live)"],
         },
         {
-          q: "Q4 2026 — Expansion",
+          q: "2027: Expansion",
           done: false,
-          items: ["WBTC and stETH collateral onboarding", "Cross-chain USDAX bridges (Ethereum, Arbitrum)", "Stability Pool UI and analytics dashboard", "Formal verification (Certora) complete"],
+          items: ["WBTC and RWA collateral onboarding", "Cross-chain USDAX bridges (Ethereum, Arbitrum)", "APX staking and governance module activated", "Formal verification (Certora) complete"],
         },
         {
-          q: "Q1–Q2 2027 — Ecosystem",
+          q: "2027–2028: Ecosystem",
           done: false,
-          items: ["Real-world asset (RWA) collateral pilot", "USDAX lending markets integration", "Decentralised oracle network transition", "v2 governance with quadratic voting"],
+          items: ["Real-world asset (RWA) collateral expansion", "USDAX lending markets integration", "Decentralised oracle network transition", "v2 governance with quadratic voting"],
         },
       ].map((phase) => (
         <div key={phase.q} className="relative pl-6 mb-8"
@@ -693,7 +770,7 @@ await stakeTx.wait();`} />
       <SectionHeading id="changelog">Changelog</SectionHeading>
       {[
         { v: "v1.0.0", date: "Jul 2026", notes: ["Initial documentation release.", "Testnet contracts documented.", "SDK v0.1 reference added."] },
-        { v: "v0.9.0", date: "Jun 2026", notes: ["Architecture overview added.", "Fee schedule finalised.", "Bug bounty programme launched."] },
+        { v: "v0.9.0", date: "Jun 2026", notes: ["Architecture overview added.", "Fee schedule finalised.", "Responsible disclosure policy published."] },
       ].map((entry) => (
         <div key={entry.v} className="mb-5">
           <div className="flex items-center gap-3 mb-2">
@@ -757,7 +834,7 @@ function TopBar() {
       style={{ background: "hsl(0 0% 3% / 0.92)", backdropFilter: "blur(16px)", borderBottom: `1px solid ${BORDER}` }}>
       <Link href="/">
         <div className="flex items-center gap-2 cursor-pointer mr-4">
-          <img src="/favicon.png" alt="APEX" className="w-6 h-6 rounded" />
+          <img src="/favicon.png" alt="USDAX Finance" className="w-6 h-6 rounded" />
           <span className="font-bold text-sm" style={{ color: "hsl(0 0% 75%)" }}>
             USDAX <span style={{ color: "hsl(0 0% 35%)" }}>finance</span>
           </span>

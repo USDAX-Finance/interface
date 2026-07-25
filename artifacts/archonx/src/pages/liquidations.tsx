@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
+import { HelpButton, HelpModal, HSection, Formula, Badge, RefTable } from "@/components/help-modal";
 import {
   useListLiquidations, useExecuteLiquidation, getListLiquidationsQueryKey,
 } from "@workspace/api-client-react";
@@ -14,7 +15,71 @@ import {
 import { formatCurrency, formatNumber, formatAddress, formatCompact } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/privy-auth";
-import { Crosshair, AlertOctagon, Zap, TrendingDown, Shield } from "lucide-react";
+import { useWallets } from "@privy-io/react-auth";
+import { Crosshair, AlertOctagon, Zap, TrendingDown, Shield, Loader2 } from "lucide-react";
+import {
+  createPublicClient, createWalletClient, custom, http,
+  defineChain, parseUnits,
+} from "viem";
+
+/* ─── Chain config ─── */
+const RPC       = "https://rpc.testnet.chain.robinhood.com/rpc";
+const EXPLORER  = "https://explorer.testnet.chain.robinhood.com";
+const CHAIN_HEX = "0xb626";
+const robinhoodTestnet = defineChain({
+  id: 46630,
+  name: "Robinhood Chain Testnet",
+  nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+  rpcUrls: { default: { http: [RPC] } },
+  blockExplorers: { default: { name: "Robinhood Explorer", url: EXPLORER } },
+});
+
+/* ─── Contract addresses ─── */
+const VAULT_ENGINE = "0xB5d971d69728B0C31b19A8f184d31813F29EEA20" as `0x${string}`;
+const TOKEN_ADDRESSES: Record<string, `0x${string}`> = {
+  WETH:  "0x728a06069E7A7DBafe2a92bc1E3e4d48e8fC49Dc",
+  WBTC:  "0xBA4120eA7aA703cA1BBCdD03a1B4Ff15e15F2e34",
+  stETH: "0xE571b0C36B3EF817950f7Fe3Aa296F2a1fB7479e",
+};
+
+const VAULT_ABI = [
+  {
+    name: "liquidate",
+    type: "function",
+    inputs: [
+      { name: "vaultOwner", type: "address" },
+      { name: "debtToRepay", type: "uint256" },
+      { name: "collToken",   type: "address" },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+] as const;
+
+const pubClient = createPublicClient({
+  chain: robinhoodTestnet,
+  transport: http(RPC, { retryCount: 5, retryDelay: 1_000 }),
+  pollingInterval: 2_000,
+});
+
+async function ensureChain(provider: any) {
+  try {
+    await provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: CHAIN_HEX }] });
+  } catch (err: any) {
+    if (err?.code === 4902 || err?.code === -32603) {
+      await provider.request({
+        method: "wallet_addEthereumChain",
+        params: [{
+          chainId: CHAIN_HEX,
+          chainName: "Robinhood Chain Testnet",
+          nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+          rpcUrls: [RPC],
+          blockExplorerUrls: [EXPLORER],
+        }],
+      });
+    } else throw err;
+  }
+}
 
 /* ─── design tokens ─── */
 const LIME    = "hsl(79 100% 57%)";
@@ -71,20 +136,19 @@ function LoadingPulse() {
   );
 }
 
+type LiqStep = "idle" | "switching" | "liquidating" | "confirming";
+
 export default function Liquidations() {
   const queryClient  = useQueryClient();
   const { toast }    = useToast();
-  const { address }  = useAuth();
+  const { address, authenticated, login } = useAuth();
+  const { wallets }  = useWallets();
   const { data: targets, isLoading } = useListLiquidations();
 
   const liquidateMutation = useExecuteLiquidation({
     mutation: {
-      onSuccess: (data) => {
+      onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: getListLiquidationsQueryKey() });
-        toast({
-          title: "Liquidation executed",
-          description: `Seized ${formatNumber(data.totalCollateralReceived)} collateral + 10% bonus.`,
-        });
         setTargetPosition(null);
       },
     },
@@ -92,14 +156,78 @@ export default function Liquidations() {
 
   const [targetPosition, setTargetPosition] = useState<number | null>(null);
   const [debtToCover,    setDebtToCover]     = useState("");
+  const [liqStep,        setLiqStep]         = useState<LiqStep>("idle");
+  const [showHelp,       setShowHelp]        = useState(false);
 
-  const handleLiquidate = (e: React.FormEvent) => {
+  const handleLiquidate = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     if (!targetPosition) return;
-    liquidateMutation.mutate({
-      data: { positionId: targetPosition, liquidator: address ?? "", debtToCover: Number(debtToCover) },
-    });
-  };
+
+    const selectedTarget = targets?.find((t) => t.positionId === targetPosition);
+    if (!selectedTarget) return;
+
+    if (!authenticated || !address) { login(); return; }
+
+    const wallet = wallets[0];
+    if (!wallet) {
+      toast({ title: "No wallet", description: "Connect a wallet first.", variant: "destructive" });
+      return;
+    }
+
+    const tokenAddress = TOKEN_ADDRESSES[selectedTarget.collateralToken];
+    if (!tokenAddress) {
+      toast({ title: "Unsupported token", description: selectedTarget.collateralToken, variant: "destructive" });
+      return;
+    }
+
+    const debtWei = parseUnits(debtToCover, 18);
+
+    try {
+      /* 1. Switch chain */
+      setLiqStep("switching");
+      const provider = await wallet.getEthereumProvider();
+      await ensureChain(provider);
+
+      const wc = createWalletClient({ chain: robinhoodTestnet, transport: custom(provider) });
+      const [account] = await wc.requestAddresses();
+
+      /* 2. Call VaultEngine.liquidate() — no approval needed (VaultEngine burns USDAX directly) */
+      setLiqStep("liquidating");
+      const txHash = await wc.writeContract({
+        account,
+        address: VAULT_ENGINE,
+        abi: VAULT_ABI,
+        functionName: "liquidate",
+        args: [selectedTarget.owner as `0x${string}`, debtWei, tokenAddress],
+      });
+
+      setLiqStep("confirming");
+      await pubClient.waitForTransactionReceipt({ hash: txHash, timeout: 120_000 });
+
+      /* 3. Update DB via API — pass real on-chain tx hash */
+      await liquidateMutation.mutateAsync({
+        data: { positionId: targetPosition, liquidator: address, debtToCover: Number(debtToCover), txHash },
+      });
+
+      setLiqStep("idle");
+      toast({
+        title: "Liquidation executed ✓",
+        description: (
+          <span>
+            Seized collateral + 10% bonus.{" "}
+            <a href={`${EXPLORER}/tx/${txHash}`} target="_blank" rel="noopener noreferrer" className="underline">
+              View tx
+            </a>
+          </span>
+        ),
+      });
+
+    } catch (e: any) {
+      setLiqStep("idle");
+      const msg = e?.code === 4001 ? "Rejected in wallet." : e?.shortMessage || e?.message?.slice(0, 160) || "Transaction failed.";
+      toast({ title: "Liquidation failed", description: msg, variant: "destructive" });
+    }
+  }, [targetPosition, targets, authenticated, address, login, wallets, debtToCover, liquidateMutation, toast]);
 
   if (isLoading) return <LoadingPulse />;
 
@@ -121,7 +249,7 @@ export default function Liquidations() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <div className="font-mono text-[10px] tracking-[0.2em] uppercase mb-2" style={{ color: "hsl(0 0% 30%)" }}>
-            ◈ USDAX Finance · Liquidation Engine
+            ◈ USDAX Finance · Liquidations
           </div>
           <h1 className="font-black text-2xl md:text-3xl uppercase tracking-tight flex items-center gap-3">
             <div
@@ -134,9 +262,10 @@ export default function Liquidations() {
               Liquidation{" "}
               <span style={{ color: RED }}>Hunter</span>
             </span>
+            <HelpButton onClick={() => setShowHelp(true)} />
           </h1>
           <p className="text-sm mt-1 ml-12" style={{ color: "hsl(0 0% 38%)" }}>
-            Repay underwater debt · earn 10% collateral bonus
+            Repay underwater debt · earn 5% collateral bonus
           </p>
         </div>
 
@@ -155,8 +284,8 @@ export default function Liquidations() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
           { icon: TrendingDown, label: "Liquidation Threshold", value: "HF < 1.0", color: RED     },
-          { icon: Zap,          label: "Bonus for Liquidators",  value: "+10%",     color: EMERALD },
-          { icon: Shield,       label: "Max Per Liquidation",    value: "50% of debt", color: LIME },
+          { icon: Zap,          label: "Bonus for Liquidators",  value: "+5%",      color: EMERALD },
+          { icon: Shield,       label: "Max Per Liquidation",    value: "100% of debt", color: LIME },
         ].map((c) => {
           const Icon = c.icon;
           return (
@@ -175,6 +304,77 @@ export default function Liquidations() {
           );
         })}
       </div>
+
+      {/* ── Liquidation Guide Modal ── */}
+      <HelpModal open={showHelp} onClose={() => setShowHelp(false)} title="Liquidation Guide: How to Hunt Vaults" accent="hsl(0 84% 60%)">
+        <HSection title="What is a Liquidation?">
+          <p className="text-[12px] leading-relaxed" style={{ color: "hsl(0 0% 65%)" }}>
+            When a vault&apos;s Health Factor drops below <strong style={{ color: "hsl(0 84% 60%)" }}>1.0</strong>, it is
+            eligible for liquidation. Anyone can repay part of the borrower&apos;s USDAX debt
+            and receive their collateral at a <strong style={{ color: "hsl(79 100% 57%)" }}>5% discount</strong>.
+            No USDAX approval needed; VaultEngine burns directly from your wallet.
+          </p>
+        </HSection>
+        <HSection title="Health Factor Formula">
+          <Formula>{`Health Factor (HF) =
+  (Collateral Value × Liquidation Threshold)
+  ÷ USDAX Debt
+
+HF ≥ 1.0  →  SAFE, cannot be liquidated
+HF < 1.0  →  UNDERWATER, open for liquidation
+
+Example (WETH, liqThreshold = 85%):
+  Collateral : 1 WETH × $3,250 × 0.85 = $2,762.50
+  Debt       : 3,000 USDAX
+  HF         = $2,762.50 ÷ $3,000 = 0.921 → LIQUIDATABLE`}</Formula>
+        </HSection>
+        <HSection title="Liquidator Profit Formula">
+          <Formula>{`You repay   : X USDAX of the borrower's debt
+You receive : Collateral worth (X × 105%)
+Your profit : 5% of X in collateral value
+
+Example: repay 500 USDAX:
+  You receive collateral worth $525
+  Your profit: ~$25 per tx`}</Formula>
+        </HSection>
+        <HSection title="Rules & Limits">
+          <RefTable
+            headers={["Parameter", "Value"]}
+            rows={[
+              ["Trigger threshold",     "HF < 1.0"],
+              ["Max debt per call",     "100% of total vault debt"],
+              ["Liquidator bonus",      "+5% collateral value"],
+              ["USDAX approval needed", "No; VaultEngine burns directly"],
+              ["Who can liquidate",     "Any connected wallet"],
+            ]}
+          />
+        </HSection>
+        <HSection title="Step-by-Step">
+          <div className="space-y-1.5 text-[12px]" style={{ color: "hsl(0 0% 60%)" }}>
+            {[
+              ["1", "Wait for a vault to appear in this table (HF < 1.0)"],
+              ["2", "Click 'Liquidate' on the target row"],
+              ["3", "Enter USDAX to repay (up to 100% of their debt)"],
+              ["4", "Click 'Execute Liquidation'"],
+              ["5", "1 on-chain tx: VaultEngine.liquidate() then confirm in wallet"],
+              ["6", "Collateral + 5% bonus arrives in your wallet automatically"],
+            ].map(([n, s]) => (
+              <div key={n} className="flex items-start gap-2.5">
+                <span className="font-mono font-black text-[10px] w-4 flex-shrink-0 mt-0.5" style={{ color: "hsl(0 84% 60%)" }}>{n}</span>
+                <span>{s}</span>
+              </div>
+            ))}
+          </div>
+        </HSection>
+        <HSection title="When Will Targets Appear?">
+          <p className="text-[12px] leading-relaxed" style={{ color: "hsl(0 0% 65%)" }}>
+            Prices are set on-chain by the protocol oracle (WETH ~$3,250, WBTC ~$97,000, stETH ~$3,190).
+            A vault becomes liquidatable when its Health Factor falls below 1.0. For example,
+            a WETH vault minting <strong style={{ color: "hsl(0 0% 85%)" }}>2,762 USDAX</strong> against 1 WETH ($3,250)
+            is at HF = 1.0 exactly (liquidation edge).
+          </p>
+        </HSection>
+      </HelpModal>
 
       {/* Targets table */}
       <div className="relative rounded-xl overflow-hidden" style={{ background: CARD_BG, border: `1px solid ${BORDER}` }}>
@@ -252,8 +452,8 @@ export default function Liquidations() {
             })}
             {targets?.length === 0 && (
               <TableRow>
-                <TableCell colSpan={7} className="h-32 text-center font-mono text-sm" style={{ color: "hsl(0 0% 28%)" }}>
-                  No liquidatable targets — all positions are healthy
+                <TableCell colSpan={7} className="h-32 text-center font-mono text-sm" style={{ color: "hsl(0 0% 48%)" }}>
+                  No liquidatable targets. All positions are healthy
                 </TableCell>
               </TableRow>
             )}
@@ -313,18 +513,22 @@ export default function Liquidations() {
                     style={inputStyle}
                   />
                   <p className="text-[10px] font-mono" style={{ color: "hsl(0 0% 30%)" }}>
-                    You will receive collateral + 10% bonus instantly.
+                    You will receive collateral + 5% bonus instantly.
                   </p>
                 </div>
                 <button
                   type="submit"
-                  disabled={liquidateMutation.isPending}
-                  className="w-full font-black py-2.5 rounded-lg text-sm transition-all disabled:opacity-40"
+                  disabled={liqStep !== "idle"}
+                  className="w-full font-black py-2.5 rounded-lg text-sm transition-all disabled:opacity-40 flex items-center justify-center gap-2"
                   style={{ background: RED, color: "white", boxShadow: `0 0 24px ${RED}30` }}
-                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = `0 0 36px ${RED}50`; }}
+                  onMouseEnter={(e) => { if (liqStep === "idle") (e.currentTarget as HTMLElement).style.boxShadow = `0 0 36px ${RED}50`; }}
                   onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = `0 0 24px ${RED}30`; }}
                 >
-                  {liquidateMutation.isPending ? "Broadcasting..." : "Execute Liquidation"}
+                  {liqStep !== "idle" && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {liqStep === "idle"       && "Execute Liquidation"}
+                  {liqStep === "switching"  && "Switching network..."}
+                  {liqStep === "liquidating"&& "Liquidating on-chain..."}
+                  {liqStep === "confirming" && "Confirming..."}
                 </button>
               </form>
             </div>

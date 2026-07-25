@@ -44,7 +44,7 @@ function TopBar() {
       style={{ background: "hsl(0 0% 3% / 0.92)", backdropFilter: "blur(16px)", borderBottom: `1px solid ${BORDER}` }}>
       <Link href="/">
         <div className="flex items-center gap-2.5 cursor-pointer">
-          <img src="/favicon.png" alt="APEX" className="w-7 h-7 rounded" />
+          <img src="/favicon.png" alt="USDAX Finance" className="w-7 h-7 rounded" />
           <span className="font-bold text-base tracking-tight" style={{ color: "hsl(0 0% 80%)" }}>
             USDAX <span style={{ color: "hsl(0 0% 35%)" }}>finance</span>
           </span>
@@ -81,8 +81,8 @@ function TopBar() {
 function Hero() {
   const stats = [
     { label: "Governance Token",    val: "APX",       sub: "1 token = 1 vote" },
-    { label: "Proposals Passed",    val: "14",         sub: "since genesis" },
-    { label: "Avg. Participation",  val: "68%",        sub: "of staked APX votes" },
+    { label: "Proposals Passed",    val: "-",          sub: "live at APX launch" },
+    { label: "Avg. Participation",  val: "-",          sub: "live at APX launch" },
     { label: "Timelock Delay",      val: "48 hrs",     sub: "before execution" },
   ];
 
@@ -103,18 +103,31 @@ function Hero() {
       </div>
 
       <div className="max-w-7xl mx-auto w-full relative z-10">
-        <Tag>On-Chain Governance · APEX Protocol</Tag>
+        <Tag>On-Chain Governance · USDAX Finance</Tag>
         <h1 className="font-black uppercase leading-none tracking-tight mb-5"
           style={{ fontSize: "clamp(3rem, 7vw, 6rem)", color: "hsl(0 0% 97%)" }}>
           THE PROTOCOL<br />
           <span style={{ color: LIME }}>BELONGS TO</span><br />
           ITS HOLDERS.
         </h1>
-        <p className="text-[15px] leading-relaxed mb-10 max-w-xl" style={{ color: "hsl(0 0% 44%)" }}>
-          Every parameter in APEX Protocol — collateral ratios, stability fees, collateral types —
+        <p className="text-[15px] leading-relaxed mb-8 max-w-xl" style={{ color: "hsl(0 0% 44%)" }}>
+          Every parameter in USDAX Finance (collateral ratios, stability fees, collateral types)
           is controlled by APX holders through binding on-chain governance.
           No team multisig. No admin override. Code is law.
         </p>
+
+        {/* APX Disclaimer */}
+        <div className="mb-10 rounded-xl px-5 py-4 flex items-start gap-3 max-w-xl"
+          style={{ background: "hsl(35 92% 60% / 0.06)", border: "1px solid hsl(35 92% 60% / 0.25)" }}>
+          <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: "hsl(35 92% 60%)" }} />
+          <div>
+            <p className="font-black text-[13px] mb-1" style={{ color: "hsl(35 92% 60%)" }}>APX Token Not Yet Deployed</p>
+            <p className="text-[12px] leading-relaxed" style={{ color: "hsl(0 0% 48%)" }}>
+              On-chain governance requires the APX governance token, which has not yet launched on Robinhood Chain.
+              VaultEngine and USDAX are live on testnet. Governance activates at APX token launch.
+            </p>
+          </div>
+        </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
           {stats.map((s) => (
@@ -158,7 +171,7 @@ function HowItWorks() {
       n: "01", icon: FileText, status: "active",
       title: "Discussion",
       duration: "≥ 3 days",
-      body: "Any community member can post a governance discussion on the forum. The community debates the proposal — rationale, risks, parameters — before a formal vote is created.",
+      body: "Any community member can post a governance discussion on the forum. The community debates the proposal, rationale, risks, parameters, before a formal vote is created.",
     },
     {
       n: "02", icon: Users, status: "default",
@@ -188,7 +201,7 @@ function HowItWorks() {
       n: "06", icon: CheckCircle, status: "default",
       title: "Execution",
       duration: "On-chain",
-      body: "After the timelock expires, any wallet can trigger execution. The governance contract calls the target protocol contract(s) directly — changes are atomic and trustless.",
+      body: "After the timelock expires, any wallet can trigger execution. The governance contract calls the target protocol contract(s) directly, changes are atomic and trustless.",
     },
   ];
 
@@ -201,7 +214,7 @@ function HowItWorks() {
             From Idea to<br /><span style={{ color: LIME }}>On-Chain Reality</span>
           </h2>
           <p className="text-[14px] max-w-xl" style={{ color: "hsl(0 0% 40%)" }}>
-            Six transparent stages — every step visible on-chain and auditable by anyone.
+            Six transparent stages, every step visible on-chain and auditable by anyone.
           </p>
         </div>
 
@@ -273,7 +286,7 @@ function Governable() {
             APX Holders Control<br /><span style={{ color: LIME }}>Everything</span>
           </h2>
           <p className="text-[14px] max-w-xl" style={{ color: "hsl(0 0% 40%)" }}>
-            No parameter is off-limits to governance. From tiny fee adjustments to full protocol upgrades —
+            No parameter is off-limits to governance. From tiny fee adjustments to full protocol upgrades,
             APX holders have the final say.
           </p>
         </div>
@@ -322,7 +335,7 @@ function Proposals() {
           </div>
         </div>
 
-        {/* Empty state — no proposals yet */}
+        {/* Empty state, no proposals yet */}
         <div className="relative rounded-2xl overflow-hidden flex flex-col items-center justify-center py-24 px-8 text-center"
           style={{ background: "hsl(0 0% 6%)", border: `1px solid ${BORDER}` }}>
           <LBracket size={18} color={`${LIME}18`} />
@@ -359,15 +372,15 @@ function VotingPower() {
             </h2>
             <p className="text-[14px] leading-relaxed mb-5" style={{ color: "hsl(0 0% 44%)" }}>
               Every APX token grants exactly one vote. There are no vote multipliers, no time-weighted bonuses,
-              and no council veto powers. One token, one vote — always.
+              and no council veto powers. One token, one vote, always.
             </p>
             <p className="text-[14px] leading-relaxed mb-8" style={{ color: "hsl(0 0% 44%)" }}>
-              If you prefer not to vote yourself, you can delegate your voting power to any address — a community
+              If you prefer not to vote yourself, you can delegate your voting power to any address, a community
               member, a DAO delegate, or a trusted entity. Delegation can be revoked at any time.
             </p>
             <div className="space-y-3">
               {[
-                { icon: Check, text: "Vote with staked or unstaked APX — both count equally" },
+                { icon: Check, text: "Vote with staked or unstaked APX, both count equally" },
                 { icon: Check, text: "Delegate to any wallet with a single transaction" },
                 { icon: Check, text: "Revoke delegation instantly at any time" },
                 { icon: Check, text: "Propose with ≥ 10,000 APX or sufficient delegation" },
@@ -424,7 +437,7 @@ function FAQ() {
     { q: "Do I need to hold APX to participate in governance?", a: "Yes. Voting and proposing require APX tokens. However, anyone can participate in discussion and forum debates without holding APX." },
     { q: "Does staking APX reduce my voting power?", a: "No. Your APX voting power includes both staked and unstaked tokens. Staking does not lock your governance rights." },
     { q: "Can the team override a governance decision?", a: "No. The development team has no admin keys or override mechanisms. All upgrades go through the on-chain governance process with the 48-hour timelock." },
-    { q: "What is a delegate?", a: "A delegate is a wallet you trust to vote on your behalf. You retain ownership of your APX — only voting rights are delegated. You can reclaim them instantly." },
+    { q: "What is a delegate?", a: "A delegate is a wallet you trust to vote on your behalf. You retain ownership of your APX, only voting rights are delegated. You can reclaim them instantly." },
     { q: "What happens if a bad proposal somehow passes?", a: "The 48-hour timelock gives the community a window to react. In extreme cases, a 2/3 supermajority emergency shutdown vote can halt the protocol." },
     { q: "When will governance launch on mainnet?", a: "Governance is planned for Q3 2026 alongside the mainnet launch. Testnet governance is operational for community testing." },
   ];
@@ -474,7 +487,7 @@ function CTA() {
                 Get APX. Vote.<br />Shape the Protocol.
               </h2>
               <p className="text-[13px]" style={{ color: "hsl(0 0% 22%)" }}>
-                Every APX holder has a direct voice in APEX Protocol's future.
+                Every APX holder has a direct voice in USDAX Finance's future.
               </p>
             </div>
             <div className="flex gap-4 flex-wrap">
@@ -505,7 +518,7 @@ function Footer() {
       <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
         <Link href="/">
           <div className="flex items-center gap-2 cursor-pointer">
-            <img src="/favicon.png" alt="APEX" className="w-6 h-6 rounded" />
+            <img src="/favicon.png" alt="USDAX Finance" className="w-6 h-6 rounded" />
             <span className="font-bold text-sm" style={{ color: "hsl(0 0% 35%)" }}>USDAX finance</span>
           </div>
         </Link>
@@ -518,7 +531,7 @@ function Footer() {
             </Link>
           ))}
         </div>
-        <p className="text-[11px]" style={{ color: "hsl(0 0% 22%)" }}>© 2026 APEX Protocol</p>
+        <p className="text-[11px]" style={{ color: "hsl(0 0% 22%)" }}>© 2026 USDAX Finance</p>
       </div>
     </footer>
   );

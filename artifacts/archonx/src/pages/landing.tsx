@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "wouter";
 import { useGetProtocolStats } from "@workspace/api-client-react";
 import { formatCompact } from "@/lib/utils";
@@ -7,9 +8,12 @@ import {
   Twitter, Github, MessageSquare, FileText,
   Droplets, HandMetal, Leaf,
   Briefcase, Terminal, Landmark,
+  Menu, X, Copy, Check,
 } from "lucide-react";
 
 /* ─────────────────────── Constants ─────────────────────── */
+
+const APX_CA = "0x42523E3e454B97ff8651926685aFAD61C950Ab2F";
 
 const LIME = "hsl(79 100% 57%)";      // #BAFF29
 const LIME_DIM = "hsl(79 100% 57% / 0.08)";
@@ -98,27 +102,39 @@ function Tag({ children }: { children: React.ReactNode }) {
 /* ─────────────────────── NAV ─────────────────────── */
 
 function Nav() {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const navLinks = [
+    { label: "Product",   href: "#product",   internal: false },
+    { label: "Features",  href: "#features",  internal: false },
+    { label: "Use Cases", href: "#use-cases", internal: false },
+    { label: "Staking",   href: "/staking",   internal: true  },
+    { label: "Governance",href: "/governance",internal: true  },
+    { label: "Docs",      href: "/docs",      internal: true  },
+    { label: "Activity",  href: "/activity",  internal: true  },
+  ];
+
   return (
     <nav
       className="fixed top-0 inset-x-0 z-50"
       style={{
-        background: "hsl(0 0% 3% / 0.9)",
+        background: "hsl(0 0% 3% / 0.95)",
         backdropFilter: "blur(16px)",
         borderBottom: `1px solid ${BORDER}`,
       }}
     >
-      <div className="max-w-7xl mx-auto px-8 flex items-center justify-between h-14">
+      <div className="max-w-7xl mx-auto px-4 sm:px-8 flex items-center justify-between h-14">
         {/* Logo */}
         <Link href="/">
           <div className="flex items-center gap-2.5 cursor-pointer">
-            <img src="/favicon.png" alt="APEX" className="w-7 h-7 rounded" />
+            <img src="/favicon.png" alt="USDAX Finance" className="w-7 h-7 rounded" />
             <span className="text-foreground font-bold text-base tracking-tight">
               USDAX <span style={{ color: "hsl(0 0% 40%)" }}>finance</span>
             </span>
           </div>
         </Link>
 
-        {/* Center links */}
+        {/* Center links — desktop only */}
         <div className="hidden md:flex items-center gap-8 text-[13px] text-muted-foreground">
           {[
             { label: "Product",  href: "#product" },
@@ -132,9 +148,93 @@ function Nav() {
           <Link href="/staking" className="hover:text-foreground transition-colors">Staking</Link>
           <Link href="/governance" className="hover:text-foreground transition-colors">Governance</Link>
           <Link href="/docs" className="hover:text-foreground transition-colors">Docs</Link>
+          <Link href="/activity" className="hover:text-foreground transition-colors">Activity</Link>
+          <Link href="/faucet">
+            <span
+              className="inline-flex items-center gap-1.5 text-[12px] font-semibold px-3 py-1 rounded-full transition-all"
+              style={{
+                background: `${LIME_DIM}`,
+                color: LIME,
+                border: `1px solid ${LIME_BORDER}`,
+              }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "hsl(79 100% 57% / 0.14)"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = LIME_DIM; }}
+            >
+              <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: LIME }} />
+              Faucet
+            </span>
+          </Link>
         </div>
 
+        {/* Hamburger — mobile only */}
+        <button
+          className="md:hidden p-2 rounded-lg transition-colors"
+          style={{ color: "hsl(0 0% 55%)" }}
+          onClick={() => setMobileOpen((o) => !o)}
+          aria-label="Toggle menu"
+        >
+          {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </button>
       </div>
+
+      {/* Mobile drawer */}
+      {mobileOpen && (
+        <div
+          className="md:hidden"
+          style={{ background: "hsl(0 0% 3% / 0.98)", borderTop: `1px solid ${BORDER}` }}
+        >
+          <div className="px-4 py-3 space-y-0.5">
+            {navLinks.map((l) =>
+              l.internal ? (
+                <Link key={l.label} href={l.href}>
+                  <div
+                    className="block px-3 py-2.5 rounded-lg text-[14px] font-medium cursor-pointer transition-colors"
+                    style={{ color: "hsl(0 0% 55%)" }}
+                    onClick={() => setMobileOpen(false)}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "hsl(0 0% 90%)"; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "hsl(0 0% 55%)"; }}
+                  >
+                    {l.label}
+                  </div>
+                </Link>
+              ) : (
+                <a
+                  key={l.label}
+                  href={l.href}
+                  className="block px-3 py-2.5 rounded-lg text-[14px] font-medium transition-colors"
+                  style={{ color: "hsl(0 0% 55%)" }}
+                  onClick={() => setMobileOpen(false)}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "hsl(0 0% 90%)"; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "hsl(0 0% 55%)"; }}
+                >
+                  {l.label}
+                </a>
+              )
+            )}
+            <div className="pt-3 pb-1 flex gap-2 flex-wrap" style={{ borderTop: `1px solid ${BORDER}` }}>
+              <Link href="/faucet">
+                <span
+                  className="inline-flex items-center gap-1.5 text-[13px] font-semibold px-3 py-1.5 rounded-full cursor-pointer"
+                  style={{ background: LIME_DIM, color: LIME, border: `1px solid ${LIME_BORDER}` }}
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: LIME }} />
+                  Faucet
+                </span>
+              </Link>
+              <Link href="/app">
+                <button
+                  className="inline-flex items-center gap-2 font-bold px-4 py-1.5 rounded text-[13px]"
+                  style={{ background: LIME, color: "hsl(0 0% 4%)" }}
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <Zap className="w-3.5 h-3.5" /> Launch App
+                </button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   );
 }
@@ -181,7 +281,7 @@ function MockDashboard() {
             className="text-[11px] font-bold tracking-[0.18em] uppercase"
             style={{ color: LIME }}
           >
-            ◈ APEX
+            ◈ USDAX
           </span>
           <span
             className="inline-flex items-center gap-1.5 text-[10px] font-mono rounded-full px-2.5 py-0.5"
@@ -205,7 +305,7 @@ function MockDashboard() {
             Yield-bearing stablecoin
           </p>
           <div className="flex items-center justify-center">
-            {/* Left brackets — wave travels outer→inner (delay increases inward) */}
+            {/* Left brackets, wave travels outer→inner (delay increases inward) */}
             <div className="flex items-center">
               {[0, 1, 2, 3].map((i) => (
                 <span
@@ -236,7 +336,7 @@ function MockDashboard() {
               </span>
             </h3>
 
-            {/* Right brackets — wave mirrors left: inner→outer (delay decreases outward) */}
+            {/* Right brackets, wave mirrors left: inner→outer (delay decreases outward) */}
             <div className="flex items-center">
               {[3, 2, 1, 0].map((i) => (
                 <span
@@ -272,9 +372,9 @@ function MockDashboard() {
             {/* Center logo icon */}
             <div className="flex flex-col items-center gap-2 px-2">
               <img
-                src="/apex-logo-circle.png"
-                alt="APEX"
-                className="w-12 h-12 rounded-full"
+                src="/usdax-coin.png"
+                alt="USDAX Finance"
+                className="w-12 h-12 rounded-full object-cover"
               />
               {/* Liquidation chip below center icon */}
               <div
@@ -303,7 +403,7 @@ function MockDashboard() {
         >
           {[
             { value: "$1.00", label: "USDAX Pegged", color: "hsl(0 0% 88%)" },
-            { value: "15%",   label: "Base APY",     color: LIME },
+            { value: "~15%",  label: "Projected APY", color: LIME },
             { value: "13",    label: "Collaterals",  color: EMERALD },
           ].map((s, i) => (
             <div
@@ -447,12 +547,12 @@ function Hero() {
           style={{ right: "44%", top: "50%", width: 44, height: 90,
             borderRight: `3px solid ${LIME}`, borderBottom: `3px solid ${LIME}`, opacity: 0.55 }} />
 
-        {/* ── USDAX CIRCLE — centered inside brackets ── */}
+        {/* ── USDAX CIRCLE, centered inside brackets ── */}
         <div
           className="pointer-events-none absolute flex flex-col items-center"
           style={{ left: "50%", top: "32%", transform: "translate(-50%, -50%)", zIndex: 5 }}
         >
-          <img src="/apex-coin-logo.png" alt="APEX"
+          <img src="/usdax-coin.png" alt="USDAX"
             style={{ width: 72, height: 72, borderRadius: "50%", objectFit: "cover" }}
           />
           <div className="mt-2.5 text-center">
@@ -467,7 +567,7 @@ function Hero() {
           </div>
         </div>
 
-        {/* ── HANDS — single composited image ── */}
+        {/* ── HANDS, single composited image ── */}
         <div className="pointer-events-none absolute inset-0" style={{ zIndex: 2 }}>
           <img
             src="/hands.png"
@@ -488,26 +588,26 @@ function Hero() {
           />
         </div>
 
-        {/* ── VIGNETTE OVERLAYS — above image, below UI ── */}
-        {/* Left shadow — keeps headline readable */}
+        {/* ── VIGNETTE OVERLAYS, above image, below UI ── */}
+        {/* Left shadow, keeps headline readable */}
         <div className="pointer-events-none absolute inset-y-0 left-0" style={{
           zIndex: 3,
           width: "45%",
           background: "linear-gradient(to right, hsl(0 0% 2%) 0%, hsl(0 0% 2% / 0.85) 40%, transparent 100%)",
         }} />
-        {/* Bottom shadow — keeps CTAs + tags readable */}
+        {/* Bottom shadow, keeps CTAs + tags readable */}
         <div className="pointer-events-none absolute inset-x-0 bottom-0" style={{
           zIndex: 3,
           height: "50%",
           background: "linear-gradient(to top, hsl(0 0% 2%) 0%, hsl(0 0% 2% / 0.75) 45%, transparent 100%)",
         }} />
-        {/* Top shadow — softens top edge */}
+        {/* Top shadow, softens top edge */}
         <div className="pointer-events-none absolute inset-x-0 top-0" style={{
           zIndex: 3,
           height: "18%",
           background: "linear-gradient(to bottom, hsl(0 0% 2%) 0%, transparent 100%)",
         }} />
-        {/* Right shadow — softens right edge */}
+        {/* Right shadow, softens right edge */}
         <div className="pointer-events-none absolute inset-y-0 right-0" style={{
           zIndex: 3,
           width: "12%",
@@ -515,65 +615,68 @@ function Hero() {
         }} />
 
         {/* ── BOTTOM CONTENT ── */}
-        <div className="absolute inset-x-0 bottom-0 z-10 flex items-end justify-between px-10 pb-10">
+        <div className="absolute inset-x-0 bottom-0 z-10 px-4 sm:px-10 pb-6 sm:pb-10">
+          <div className="flex items-end justify-between gap-4">
 
-          {/* Left: headline + barcode strip + CTAs */}
-          <div>
-            <div className="flex items-center gap-2 mb-4 text-[10px] font-mono tracking-[0.22em] uppercase"
-              style={{ color: "hsl(0 0% 28%)" }}>
-              <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: EMERALD }} />
-              BUILT ON ROBINHOOD CHAIN
-            </div>
-
-            <h1
-              className="font-black uppercase leading-none tracking-tight"
-              style={{ fontSize: "clamp(3rem, 6.5vw, 6rem)", color: "hsl(0 0% 97%)" }}
-            >
-              ENTER THE<br />
-              <span style={{ color: LIME }}>PROTOCOL</span>
-            </h1>
-
-            <p className="mt-4 mb-2 max-w-sm text-[13px] leading-relaxed"
-              style={{ color: "hsl(0 0% 48%)" }}>
-              Mint yield-bearing USDAX, stake APX, and earn passive income on Robinhood Chain —
-              the programmable stablecoin built for DeFi.
-            </p>
-
-            {/* Barcode-style strip */}
-            <div className="flex items-center gap-3 mt-5 mb-6">
-              <div className="flex items-end gap-px">
-                {[3,1.5,2,1,3,1.5,1,2.5,1,2,3,1.5,1,2,1,3].map((w, i) => (
-                  <div key={i} style={{ width: w, height: 18 + (i % 3) * 4,
-                    background: LIME, opacity: 0.35 + (i % 2) * 0.2 }} />
-                ))}
+            {/* Left: headline + barcode strip + CTAs */}
+            <div>
+              <div className="flex items-center gap-2 mb-3 sm:mb-4 text-[10px] font-mono tracking-[0.22em] uppercase"
+                style={{ color: "hsl(0 0% 28%)" }}>
+                <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: EMERALD }} />
+                BUILT ON ROBINHOOD CHAIN
               </div>
-              <span className="font-mono text-[10px]" style={{ color: LIME, opacity: 0.45 }}>⊞</span>
-              <span className="font-mono text-[14px]" style={{ color: LIME, opacity: 0.45 }}>+</span>
+
+              <h1
+                className="font-black uppercase leading-none tracking-tight"
+                style={{ fontSize: "clamp(2.2rem, 6.5vw, 6rem)", color: "hsl(0 0% 97%)" }}
+              >
+                STABLE VALUE.<br />
+                <span style={{ color: LIME }}>REAL YIELD.</span>
+              </h1>
+
+              <p className="mt-3 sm:mt-4 mb-2 max-w-sm text-[13px] leading-relaxed hidden sm:block"
+                style={{ color: "hsl(0 0% 48%)" }}>
+                USDAX is an overcollateralized stablecoin pegged to $1.00.
+                Mint against on-chain collateral, earn 4.20% APY in the savings pool,
+                no intermediaries, fully on-chain.
+              </p>
+
+              {/* Barcode-style strip */}
+              <div className="flex items-center gap-3 mt-4 mb-5 sm:mb-6">
+                <div className="flex items-end gap-px">
+                  {[3,1.5,2,1,3,1.5,1,2.5,1,2,3,1.5,1,2,1,3].map((w, i) => (
+                    <div key={i} style={{ width: w, height: 18 + (i % 3) * 4,
+                      background: LIME, opacity: 0.35 + (i % 2) * 0.2 }} />
+                  ))}
+                </div>
+                <span className="font-mono text-[10px]" style={{ color: LIME, opacity: 0.45 }}>⊞</span>
+                <span className="font-mono text-[14px]" style={{ color: LIME, opacity: 0.45 }}>+</span>
+              </div>
+
+              <div className="flex gap-2 sm:gap-3 flex-wrap">
+                <LimeBtn href="/app"><Zap className="h-3.5 w-3.5" /> Launch App</LimeBtn>
+                <Link href="/protocol">
+                  <button
+                    className="inline-flex items-center gap-2 font-semibold px-4 sm:px-6 py-2.5 rounded text-sm transition-all text-muted-foreground hover:text-foreground"
+                    style={{ border: `1px solid ${BORDER}` }}
+                    onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.borderColor = "hsl(0 0% 20%)")}
+                    onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.borderColor = BORDER)}
+                  >
+                    Protocol <ArrowRight className="h-3.5 w-3.5" />
+                  </button>
+                </Link>
+              </div>
             </div>
 
-            <div className="flex gap-3">
-              <LimeBtn href="/app"><Zap className="h-3.5 w-3.5" /> Launch App</LimeBtn>
-              <Link href="/protocol">
-                <button
-                  className="inline-flex items-center gap-2 font-semibold px-6 py-2.5 rounded text-sm transition-all text-muted-foreground hover:text-foreground"
-                  style={{ border: `1px solid ${BORDER}` }}
-                  onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.borderColor = "hsl(0 0% 20%)")}
-                  onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.borderColor = BORDER)}
-                >
-                  Explore Protocol <ArrowRight className="h-3.5 w-3.5" />
-                </button>
-              </Link>
+            {/* Right: service tags — hidden on mobile */}
+            <div className="hidden sm:block text-right pb-1 flex-shrink-0">
+              <p className="text-[12px] font-mono tracking-[0.2em] font-semibold" style={{ color: LIME }}>
+                // STABLE // YIELD // ON-CHAIN
+              </p>
+              <p className="text-[10px] font-mono mt-1.5" style={{ color: "hsl(0 0% 62%)" }}>
+                USDAX.FINANCE · ROBINHOOD CHAIN 46630
+              </p>
             </div>
-          </div>
-
-          {/* Right: service tags */}
-          <div className="text-right pb-1">
-            <p className="text-[12px] font-mono tracking-[0.2em] font-semibold" style={{ color: LIME }}>
-              // MINT // STAKE // EARN
-            </p>
-            <p className="text-[10px] font-mono mt-1.5" style={{ color: "hsl(0 0% 62%)" }}>
-              USDAX.FINANCE · ROBINHOOD CHAIN 46630
-            </p>
           </div>
         </div>
 
@@ -589,23 +692,24 @@ function Hero() {
 
 /* ─────────────────────── WHAT IS USDAX ─────────────────────── */
 
-function BracketCard({ title, desc, offset = false }: {
+function BracketCard({ title, desc, offset = false, offsetResponsive = false }: {
   title: string;
   desc: string;
   color?: string;
   offset?: boolean;
+  offsetResponsive?: boolean;
 }) {
   const BW = 16;
 
   return (
     <div
-      className="relative overflow-hidden rounded-xl transition-all duration-300 cursor-default"
+      className={`relative overflow-hidden rounded-xl transition-all duration-300 cursor-default ${offsetResponsive ? "sm:ml-10" : ""}`}
       style={{
         marginLeft: offset ? "2.5rem" : "0",
         background: LIME,
       }}
     >
-      {/* Corner L-brackets — black */}
+      {/* Corner L-brackets, black */}
       {[
         { top: 0, left: 0,   borderTop:    `2px solid hsl(0 0% 4%)`, borderLeft:  `2px solid hsl(0 0% 4%)` },
         { top: 0, right: 0,  borderTop:    `2px solid hsl(0 0% 4%)`, borderRight: `2px solid hsl(0 0% 4%)` },
@@ -638,7 +742,7 @@ function WhatIsUSDax() {
   return (
     <section
       id="product"
-      className="py-24 px-8 overflow-hidden"
+      className="py-16 md:py-24 px-4 md:px-8 overflow-hidden"
       style={{ borderTop: `1px solid ${BORDER}` }}
     >
       <div className="max-w-7xl mx-auto">
@@ -650,7 +754,7 @@ function WhatIsUSDax() {
               className="text-[10px] font-bold tracking-[0.28em] uppercase mb-8"
               style={{ color: "hsl(0 0% 28%)" }}
             >
-              ◈ APEX PROTOCOL
+              ◈ USDAX FINANCE
             </p>
 
             <h2
@@ -706,10 +810,10 @@ function WhatIsUSDax() {
 
             <p className="text-[13px] mt-10 max-w-[280px] leading-relaxed"
               style={{ color: "hsl(0 0% 34%)" }}>
-              base APY earned by USDAX holders on Robinhood Chain — compounding automatically, no action required.
+              base APY earned by USDAX holders on Robinhood Chain, compounding automatically, no action required.
             </p>
             <p className="text-[10px] mt-4 font-mono" style={{ color: "hsl(0 0% 20%)" }}>
-              Source: APEX Protocol on-chain data · usdax.finance
+              Source: USDAX Finance on-chain data · usdax.finance
             </p>
           </div>
 
@@ -717,15 +821,15 @@ function WhatIsUSDax() {
           <div className="flex flex-col gap-4">
             <BracketCard
               title="Stable at $1.00"
-              desc="Overcollateralized at 150% minimum — your USDAX is always redeemable at face value, no algorithmic tricks."
+              desc="Overcollateralized at 150% minimum, your USDAX is always redeemable at face value, no algorithmic tricks."
               color={LIME}
               offset={false}
             />
             <BracketCard
               title="Yield-Bearing"
-              desc="USDAX earns 15% base APY automatically. Hold it in your wallet and watch the balance grow."
+              desc="Deposit USDAX into the savings pool and earn 4.20% APY. Fully on-chain, no intermediaries."
               color={EMERALD}
-              offset={true}
+              offsetResponsive={true}
             />
             <BracketCard
               title="Fully On-Chain"
@@ -743,10 +847,10 @@ function WhatIsUSDax() {
           style={{ background: BORDER }}
         >
           {[
-            { value: "150%", label: "Collateral Ratio", color: LIME },
-            { value: "15%",  label: "Base APY",         color: EMERALD },
-            { value: "7d",   label: "Unstake Cooldown", color: WARNING },
-            { value: "100M", label: "APX Max Supply",   color: "hsl(0 0% 55%)" },
+            { value: "150%",  label: "Collateral Ratio", color: LIME },
+            { value: "4.20%", label: "Savings APY",      color: EMERALD },
+            { value: "+10%",  label: "Liquidation Bonus", color: WARNING },
+            { value: "~15%",  label: "Est. Staking APY", color: "hsl(0 0% 55%)" },
           ].map((m) => (
             <div key={m.label} className="py-8 text-center" style={{ background: CARD_BG }}>
               <div className="text-3xl font-extrabold font-mono" style={{ color: m.color }}>
@@ -769,15 +873,15 @@ function Features() {
   const items = [
     {
       title: "Mint USDAX",
-      desc: "deposit collateral, instantly mint dollar-pegged USDAX at up to 66% LTV — no intermediaries",
+      desc: "deposit collateral, instantly mint dollar-pegged USDAX at up to 66% LTV, no intermediaries",
     },
     {
       title: "Earn Yield",
-      desc: "15% base APY compounds automatically into your balance, no manual action required",
+      desc: "deposit USDAX into the on-chain savings pool and earn 4.20% APY, no intermediaries",
     },
     {
-      title: "Stake APX",
-      desc: "lock governance tokens, earn higher APY, and vote on protocol upgrades on-chain",
+      title: "Stake APX (Coming)",
+      desc: "at mainnet, lock APX governance tokens and earn a share of all protocol fees in USDAX. Real yield, no emissions.",
     },
     {
       title: "Stay Protected",
@@ -790,7 +894,7 @@ function Features() {
   return (
     <section
       id="features"
-      className="py-24 px-8"
+      className="py-16 md:py-24 px-4 md:px-8"
       style={{ borderTop: `1px solid ${BORDER}` }}
     >
       <div className="max-w-7xl mx-auto">
@@ -806,7 +910,7 @@ function Features() {
 
         <div className="grid lg:grid-cols-2 gap-20 items-start">
 
-          {/* LEFT — big stat + ascending bar chart */}
+          {/* LEFT, big stat + ascending bar chart */}
           <div>
             {/* Giant stat */}
             <div className="relative inline-block mb-4">
@@ -869,43 +973,41 @@ function Features() {
 
             <div className="mt-10">
               <LimeBtn href="/app">
-                Open Dashboard <ArrowRight className="h-3.5 w-3.5" />
+                Open Monitor <ArrowRight className="h-3.5 w-3.5" />
               </LimeBtn>
             </div>
           </div>
 
-          {/* RIGHT — "+" list, DarkPixel style */}
+          {/* RIGHT, "+" list, DarkPixel style */}
           <div style={{ borderTop: `1px solid ${BORDER}` }}>
             {items.map((item) => (
               <div
                 key={item.title}
-                className="grid gap-6 py-7"
-                style={{
-                  gridTemplateColumns: "auto 1fr 1.6fr",
-                  borderBottom: `1px solid ${BORDER}`,
-                }}
+                className="flex gap-4 py-6"
+                style={{ borderBottom: `1px solid ${BORDER}` }}
               >
                 {/* "+" icon */}
                 <span
-                  className="font-extralight select-none mt-0.5"
+                  className="font-extralight select-none mt-0.5 flex-shrink-0"
                   style={{ fontSize: 22, color: LIME, lineHeight: 1 }}
                 >
                   +
                 </span>
-                {/* Title */}
-                <p
-                  className="font-bold text-[14px] leading-snug"
-                  style={{ color: "hsl(0 0% 88%)" }}
-                >
-                  {item.title}
-                </p>
-                {/* Description */}
-                <p
-                  className="text-[12px] leading-relaxed"
-                  style={{ color: "hsl(0 0% 38%)" }}
-                >
-                  {item.desc}
-                </p>
+                {/* Title + Desc stacked */}
+                <div className="flex flex-col sm:flex-row sm:gap-6 sm:items-start flex-1 min-w-0">
+                  <p
+                    className="font-bold text-[14px] leading-snug flex-shrink-0 sm:w-36 mb-1 sm:mb-0"
+                    style={{ color: "hsl(0 0% 88%)" }}
+                  >
+                    {item.title}
+                  </p>
+                  <p
+                    className="text-[12px] leading-relaxed"
+                    style={{ color: "hsl(0 0% 38%)" }}
+                  >
+                    {item.desc}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
@@ -926,7 +1028,7 @@ function UseCases() {
       label: "01",
       title: "Business",
       headline: "Yield for your platform.",
-      desc: "Integrate USDAX as a yield-bearing product directly on your platform. Offer passive income on idle user capital, boost engagement, and differentiate with native DeFi infrastructure — no custody required.",
+      desc: "Integrate USDAX as a yield-bearing product directly on your platform. Offer passive income on idle user capital, boost engagement, and differentiate with native DeFi infrastructure, no custody required.",
       color: LIME,
       stat: { val: "0.5%", sub: "annual stability fee" },
     },
@@ -944,16 +1046,16 @@ function UseCases() {
       label: "03",
       title: "Treasuries",
       headline: "Stable yield on idle capital.",
-      desc: "Park treasury funds in USDAX and stake APX to earn real protocol revenue. Full dollar parity, on-chain transparency, and no lock-up periods — purpose-built for DAO and corporate treasury management.",
+      desc: "Park treasury funds in USDAX and earn savings yield on idle capital. Full dollar parity, on-chain transparency, and no lock-up periods. Purpose-built for DAO and corporate treasury management.",
       color: EMERALD,
-      stat: { val: "40%+", sub: "APX staking APY" },
+      stat: { val: "4.20%", sub: "Savings APY" },
     },
   ];
 
   return (
     <section
       id="use-cases"
-      className="py-24 px-8"
+      className="py-16 md:py-24 px-4 md:px-8"
       style={{ borderTop: `1px solid ${BORDER}` }}
     >
       <div className="max-w-7xl mx-auto">
@@ -967,7 +1069,7 @@ function UseCases() {
             Participant.
           </h2>
           <p className="text-[14px] max-w-md" style={{ color: "hsl(0 0% 38%)" }}>
-            Whether you're a business, a developer, or a treasury — APEX Protocol has
+            Whether you're a business, a developer, or a treasury, USDAX Finance has
             a purpose-built integration for you.
           </p>
         </div>
@@ -1050,15 +1152,62 @@ function UseCases() {
 
 /* ─────────────────────── STAKING CTA ─────────────────────── */
 
+function APXAddressCopy() {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = () => {
+    navigator.clipboard.writeText(APX_CA).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+  const short = `${APX_CA.slice(0, 6)}...${APX_CA.slice(-4)}`;
+  return (
+    <button
+      onClick={handleCopy}
+      title="Copy contract address"
+      className="flex items-center gap-2 w-full rounded-lg px-3 py-2.5 transition-all text-left group"
+      style={{
+        background: "hsl(0 0% 4% / 0.1)",
+        border: "1px solid hsl(0 0% 4% / 0.18)",
+      }}
+    >
+      <div className="flex-1 min-w-0">
+        <p className="text-[9px] font-mono font-bold tracking-[0.22em] uppercase mb-0.5" style={{ color: "hsl(0 0% 28%)" }}>
+          $APX Contract Address
+        </p>
+        {/* Full address on md+, shortened on mobile */}
+        <p className="hidden sm:block font-mono text-[11px] font-semibold truncate" style={{ color: "hsl(0 0% 10%)" }}>
+          {APX_CA}
+        </p>
+        <p className="block sm:hidden font-mono text-[12px] font-semibold" style={{ color: "hsl(0 0% 10%)" }}>
+          {short}
+        </p>
+      </div>
+      <div
+        className="flex-shrink-0 w-7 h-7 rounded flex items-center justify-center transition-all"
+        style={{
+          background: copied ? "hsl(0 0% 4%)" : "hsl(0 0% 4% / 0.08)",
+          color: copied ? "hsl(79 100% 57%)" : "hsl(0 0% 20%)",
+        }}
+      >
+        {copied
+          ? <Check className="w-3.5 h-3.5" />
+          : <Copy className="w-3.5 h-3.5" />
+        }
+      </div>
+    </button>
+  );
+}
+
 function StakingCTA() {
   return (
-    <section id="staking" className="px-8 py-16" style={{ borderTop: `1px solid ${BORDER}` }}>
+    <section id="staking" className="px-4 md:px-8 py-12 md:py-16" style={{ borderTop: `1px solid ${BORDER}` }}>
       <div className="max-w-7xl mx-auto">
         <div
           className="relative rounded-2xl overflow-hidden"
           style={{ background: LIME }}
         >
-          {/* Corner L-brackets — black, matching hero style */}
+          {/* Corner L-brackets, black, matching hero style */}
           {[
             { top: 0, left: 0, borderTop: "3px solid hsl(0 0% 4%)", borderLeft: "3px solid hsl(0 0% 4%)" },
             { top: 0, right: 0, borderTop: "3px solid hsl(0 0% 4%)", borderRight: "3px solid hsl(0 0% 4%)" },
@@ -1085,12 +1234,12 @@ function StakingCTA() {
 
           <div className="relative z-10 grid lg:grid-cols-2 gap-0">
 
-            {/* LEFT — headline + CTA */}
-            <div className="p-12 md:p-14 flex flex-col justify-between">
+            {/* LEFT, headline + CTA */}
+            <div className="p-6 sm:p-10 md:p-14 flex flex-col justify-between">
               <div>
                 <p className="text-[10px] font-mono font-bold tracking-[0.28em] uppercase mb-6"
                   style={{ color: "hsl(0 0% 20%)" }}>
-                  ◈ STAKING · APEX PROTOCOL
+                  ◈ APX STAKING · COMING AT LAUNCH
                 </p>
                 <h2 className="font-black uppercase leading-[1.0] tracking-tight"
                   style={{ fontSize: "clamp(2.4rem, 5vw, 4.2rem)", color: "hsl(0 0% 4%)" }}>
@@ -1100,8 +1249,8 @@ function StakingCTA() {
                 </h2>
                 <p className="mt-6 text-[14px] leading-relaxed max-w-sm"
                   style={{ color: "hsl(0 0% 22%)" }}>
-                  Lock APX tokens, earn passive rewards, and vote on protocol governance.
-                  7-day unstake cooldown ensures long-term alignment.
+                  APX launches with mainnet. Lock APX tokens, earn a share of all protocol fees in USDAX,
+                  and vote on protocol parameters on-chain.
                 </p>
               </div>
 
@@ -1120,26 +1269,26 @@ function StakingCTA() {
                     className="inline-flex items-center gap-2 font-semibold px-6 py-3 rounded text-[14px] transition-all hover:bg-black/10"
                     style={{ color: "hsl(0 0% 10%)", border: "1.5px solid hsl(0 0% 10% / 0.25)" }}
                   >
-                    View Dashboard <ArrowRight className="h-4 w-4" />
+                    View Monitor <ArrowRight className="h-4 w-4" />
                   </button>
                 </Link>
               </div>
             </div>
 
-            {/* RIGHT — stats grid */}
+            {/* RIGHT, stats grid */}
             <div
-              className="p-12 md:p-14 flex flex-col justify-between"
+              className="p-6 sm:p-10 md:p-14 flex flex-col justify-between"
               style={{ borderLeft: "1px solid hsl(0 0% 4% / 0.12)" }}
             >
               {/* APX coin icon */}
-              <div className="flex items-center gap-3 mb-10">
+              <div className="flex items-center gap-3 mb-4">
                 <div style={{
                   width: 48, height: 48, borderRadius: "50%",
                   background: "hsl(0 0% 4%)",
                   display: "flex", alignItems: "center", justifyContent: "center",
                   boxShadow: "0 0 0 3px hsl(0 0% 4% / 0.15)",
                 }}>
-                  <img src="/apex-coin-logo.png" alt="APX" style={{ width: 28, height: 28, objectFit: "contain" }} />
+                  <img src="/favicon.png" alt="APX Token" style={{ width: 28, height: 28, objectFit: "contain" }} />
                 </div>
                 <div>
                   <p className="font-black text-[15px]" style={{ color: "hsl(0 0% 4%)" }}>APX Token</p>
@@ -1147,12 +1296,17 @@ function StakingCTA() {
                 </div>
               </div>
 
+              {/* Contract address copy */}
+              <div className="mb-8">
+                <APXAddressCopy />
+              </div>
+
               {/* 3 big stats */}
               <div className="space-y-0">
                 {[
-                  { value: "15%", label: "Base Staking APY",    sub: "compounding rewards" },
-                  { value: "7d",  label: "Unstake Cooldown",     sub: "long-term alignment" },
-                  { value: "100M",label: "APX Max Supply",       sub: "fixed, no inflation" },
+                  { value: "~15%", label: "Est. Staking APY",    sub: "projected at APX launch" },
+                  { value: "7d",   label: "Unstake Cooldown",    sub: "long-term alignment" },
+                  { value: "100M", label: "APX Max Supply",      sub: "fixed, no inflation" },
                 ].map((s, i) => (
                   <div key={s.label} className="flex items-center justify-between py-5"
                     style={{ borderBottom: i < 2 ? "1px solid hsl(0 0% 4% / 0.12)" : undefined }}>
@@ -1186,86 +1340,115 @@ function Footer() {
   const cols = [
     {
       title: "Protocol",
-      links: ["USDAX", "APX Token", "Staking", "Governance"],
+      links: [
+        { label: "USDAX",      href: "/docs" },
+        { label: "APX Token",  href: "/docs#apx-token" },
+        { label: "Staking",    href: "/staking" },
+        { label: "Governance", href: "/governance" },
+      ],
     },
     {
       title: "Developers",
-      links: ["Documentation", "GitHub", "Audit Report", "Bug Bounty"],
+      links: [
+        { label: "Documentation", href: "/docs" },
+        { label: "GitHub",        href: "https://github.com/USDAX-Finance" },
+        { label: "Audit Report",  href: "/audit" },
+      ],
+    },
+    {
+      title: "Testnet",
+      links: [
+        { label: "Faucet",       href: "/faucet" },
+        { label: "Live Activity", href: "/activity" },
+        { label: "Block Explorer",   href: "https://explorer.testnet.chain.robinhood.com" },
+        { label: "Get Testnet ETH",  href: "https://thirdweb.com/robinhood-chain-testnet" },
+      ],
+      amber: true,
     },
     {
       title: "Company",
-      links: ["About", "Blog", "Careers", "Contact"],
+      links: [
+        { label: "About",   href: "/about" },
+        { label: "Blog",    href: "/blog" },
+        { label: "Support", href: "mailto:support@usdax.finance" },
+      ],
     },
   ];
 
   return (
     <footer
-      className="py-14 px-8"
+      className="py-14 px-4 md:px-8"
       style={{ borderTop: `1px solid ${BORDER}` }}
     >
       <div className="max-w-7xl mx-auto">
-        <div className="grid md:grid-cols-4 gap-12 mb-12">
-          {/* Brand */}
-          <div>
-            <div className="flex items-center gap-2 mb-5">
-              <img src="/favicon.png" alt="USDAX Finance" className="w-7 h-7 object-contain" />
-              <span className="font-bold text-base">USDAX Finance</span>
-            </div>
-            <p
-              className="text-[13px] leading-relaxed max-w-[180px]"
-              style={{ color: "hsl(0 0% 35%)" }}
-            >
-              Programmable stablecoin infrastructure for the next generation of DeFi.
-            </p>
-            <div className="flex gap-4 mt-6">
-              {[
-                { Icon: Twitter,      href: "https://x.com/Usdax_Finance" },
-                { Icon: Github,       href: "#" },
-                { Icon: MessageSquare,href: "#" },
-                { Icon: FileText,     href: "#" },
-              ].map(({ Icon, href }, i) => (
-                <a
-                  key={i}
-                  href={href}
-                  target={href !== "#" ? "_blank" : undefined}
-                  rel={href !== "#" ? "noopener noreferrer" : undefined}
-                  className="transition-colors"
-                  style={{ color: "hsl(0 0% 22%)" }}
-                  onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "hsl(0 0% 55%)")}
-                  onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "hsl(0 0% 22%)")}
-                >
-                  <Icon className="h-4 w-4" />
-                </a>
-              ))}
-            </div>
-          </div>
 
-          {/* Link columns */}
-          {cols.map((col) => (
-            <div key={col.title}>
-              <h4
-                className="text-[11px] font-semibold uppercase tracking-widest mb-5"
-                style={{ color: "hsl(0 0% 30%)" }}
-              >
-                {col.title}
-              </h4>
-              <ul className="space-y-3">
-                {col.links.map((link) => (
-                  <li key={link}>
-                    <a
-                      href="#"
-                      className="text-[13px] transition-colors"
-                      style={{ color: "hsl(0 0% 35%)" }}
-                      onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "hsl(0 0% 75%)")}
-                      onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "hsl(0 0% 35%)")}
-                    >
-                      {link}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+        {/* Top row — logo + social */}
+        <div className="flex items-center justify-between mb-12 flex-wrap gap-6">
+          <div className="flex items-center gap-2.5">
+            <img src="/favicon.png" alt="USDAX" className="w-7 h-7 rounded" />
+            <span className="font-bold text-sm tracking-tight" style={{ color: "hsl(0 0% 55%)" }}>
+              USDAX <span style={{ color: "hsl(0 0% 28%)" }}>finance</span>
+            </span>
+          </div>
+          <div className="flex gap-5">
+            <a
+              href="https://x.com/usdaxfinance"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[13px] transition-colors"
+              style={{ color: "hsl(0 0% 35%)" }}
+              onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "hsl(0 0% 75%)")}
+              onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "hsl(0 0% 35%)")}
+            >
+              X / Twitter
+            </a>
+            <a
+              href="https://github.com/USDAX-Finance"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[13px] transition-colors"
+              style={{ color: "hsl(0 0% 35%)" }}
+              onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "hsl(0 0% 75%)")}
+              onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "hsl(0 0% 35%)")}
+            >
+              GitHub
+            </a>
+          </div>
+        </div>
+
+        {/* Link columns */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-10 mb-14">
+          {cols.map((col) => {
+            const isAmber = (col as { amber?: boolean }).amber;
+            const titleColor = isAmber ? "hsl(35 92% 60%)" : "hsl(0 0% 28%)";
+            const linkColor  = isAmber ? "hsl(35 92% 55%)" : "hsl(0 0% 38%)";
+            const hoverColor = isAmber ? "hsl(35 92% 75%)" : "hsl(0 0% 72%)";
+            return (
+              <div key={col.title}>
+                <p className="text-[10px] font-mono tracking-[0.18em] uppercase mb-4"
+                  style={{ color: titleColor }}>
+                  {col.title}
+                </p>
+                <ul className="space-y-3">
+                  {col.links.map((l) => (
+                    <li key={l.label}>
+                      <a
+                        href={l.href}
+                        target={l.href.startsWith("http") ? "_blank" : undefined}
+                        rel={l.href.startsWith("http") ? "noopener noreferrer" : undefined}
+                        className="text-[13px] transition-colors"
+                        style={{ color: linkColor }}
+                        onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = hoverColor)}
+                        onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = linkColor)}
+                      >
+                        {l.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
         </div>
 
         {/* Bottom */}
@@ -1276,15 +1459,19 @@ function Footer() {
             color: "hsl(0 0% 25%)",
           }}
         >
-          <span>© 2026 APEX Protocol · <a href="https://usdax.finance" style={{ color: "inherit" }}>usdax.finance</a> · All rights reserved.</span>
+          <span>© 2026 USDAX Finance · <a href="https://usdax.finance" style={{ color: "inherit" }}>usdax.finance</a> · All rights reserved.</span>
           <div className="flex gap-6">
-            {["Privacy Policy", "Terms of Service", "Cookie Policy"].map((l) => (
+            {[
+              { label: "Privacy Policy",  href: "/privacy" },
+              { label: "Terms of Service", href: "/terms" },
+              { label: "Cookie Policy",   href: "/cookies" },
+            ].map((l) => (
               <a
-                key={l}
-                href="#"
+                key={l.label}
+                href={l.href}
                 className="transition-colors hover:text-muted-foreground"
               >
-                {l}
+                {l.label}
               </a>
             ))}
           </div>
