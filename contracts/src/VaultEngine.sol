@@ -10,7 +10,7 @@ import {USDAxToken} from "./USDAxToken.sol";
 import {CollateralManager} from "./CollateralManager.sol";
 import {IUSDAxOracle} from "./interfaces/IUSDAxOracle.sol";
 
-/// @title VaultEngine v1.3 — Stability Fee + Debt Ceiling + Emergency Pause
+/// @title VaultEngine v1.4 — Stability Fee + Debt Ceiling + Emergency Pause + Oracle Staleness Guard
 /// @notice Core CDP engine for USDAX protocol.
 ///
 /// @dev v1.3 additions over v1.2:
@@ -31,6 +31,10 @@ contract VaultEngine is ReentrancyGuard, Pausable, Ownable {
     uint256 public constant MIN_DEBT             = 10e18;  // min 10 USDAX to open a vault
     uint256 public constant MAX_STABILITY_FEE    = 2_000;  // 20% APY hard cap
     uint256 public constant SECONDS_PER_YEAR     = 365 days;
+    /// @notice Maximum acceptable age (seconds) for oracle prices used in protocol operations.
+    ///         VaultEngine independently validates updatedAt as defence-in-depth, even when the
+    ///         oracle contract itself has staleness checks.
+    uint256 public constant MAX_ORACLE_STALENESS = 2 hours;
 
     // ─── Dependencies ─────────────────────────────────────────────────────────
     USDAxToken         public immutable usdax;
@@ -242,7 +246,7 @@ contract VaultEngine is ReentrancyGuard, Pausable, Ownable {
         CollateralManager.CollateralConfig memory cfg = collateralManager.getConfig(collToken);
         require(cfg.enabled, "collateral not whitelisted");
 
-        (uint256 tokenPrice,) = oracle.getPrice(collToken);
+        uint256 tokenPrice    = _safePrice(collToken);
         uint256 collAmount    = (debtToRepay * (10 ** cfg.tokenDecimals)) / tokenPrice;
         uint256 collWithBonus = collAmount + (collAmount * cfg.liquidationBonus / BASIS_POINTS);
 
@@ -250,11 +254,18 @@ contract VaultEngine is ReentrancyGuard, Pausable, Ownable {
         if (collWithBonus > available) {
             uint256 maxDebt = (available * tokenPrice) / (10 ** cfg.tokenDecimals);
             maxDebt         = (maxDebt * BASIS_POINTS) / (BASIS_POINTS + cfg.liquidationBonus);
-            require(maxDebt > 0, "vault fully drained");
-            debtToRepay   = maxDebt;
-            collAmount    = (debtToRepay * (10 ** cfg.tokenDecimals)) / tokenPrice;
-            collWithBonus = collAmount + (collAmount * cfg.liquidationBonus / BASIS_POINTS);
-            if (collWithBonus > available) collWithBonus = available;
+            if (maxDebt == 0) {
+                // Dust vault: collateral value rounds to 0 in fixed-point division.
+                // Seize all remaining collateral for a nominal 1-wei debt repayment so
+                // dust positions can always be cleared and never become permanent bad debt.
+                debtToRepay   = 1;
+                collWithBonus = available;
+            } else {
+                debtToRepay   = maxDebt;
+                collAmount    = (debtToRepay * (10 ** cfg.tokenDecimals)) / tokenPrice;
+                collWithBonus = collAmount + (collAmount * cfg.liquidationBonus / BASIS_POINTS);
+                if (collWithBonus > available) collWithBonus = available;
+            }
         }
 
         debt[vaultOwner]                          -= debtToRepay;
@@ -332,6 +343,18 @@ contract VaultEngine is ReentrancyGuard, Pausable, Ownable {
 
     // ─── Internal ─────────────────────────────────────────────────────────────
 
+    /// @dev Fetch oracle price and revert if it is older than MAX_ORACLE_STALENESS.
+    ///      Defence-in-depth: validates updatedAt independently of whatever the oracle
+    ///      contract itself checks, so a swapped oracle without staleness guards is caught.
+    function _safePrice(address token) internal view returns (uint256 price) {
+        uint256 updatedAt;
+        (price, updatedAt) = oracle.getPrice(token);
+        require(
+            block.timestamp <= updatedAt + MAX_ORACLE_STALENESS,
+            "VaultEngine: oracle stale"
+        );
+    }
+
     function _healthFactor(address user) internal view returns (uint256) {
         uint256 userDebt = currentDebt(user);
         if (userDebt == 0) return type(uint256).max;
@@ -346,7 +369,7 @@ contract VaultEngine is ReentrancyGuard, Pausable, Ownable {
             uint256 amount = collateralDeposits[user][token];
             if (amount == 0) continue;
             CollateralManager.CollateralConfig memory cfg = collateralManager.getConfig(token);
-            (uint256 price,) = oracle.getPrice(token);
+            uint256 price    = _safePrice(token);
             uint256 usdValue = (amount * price) / (10 ** cfg.tokenDecimals);
             total += (usdValue * cfg.liquidationThreshold) / BASIS_POINTS;
         }
@@ -359,7 +382,7 @@ contract VaultEngine is ReentrancyGuard, Pausable, Ownable {
             uint256 amount = collateralDeposits[user][token];
             if (amount == 0) continue;
             CollateralManager.CollateralConfig memory cfg = collateralManager.getConfig(token);
-            (uint256 price,) = oracle.getPrice(token);
+            uint256 price    = _safePrice(token);
             uint256 usdValue = (amount * price) / (10 ** cfg.tokenDecimals);
             total += (usdValue * cfg.maxLTV) / BASIS_POINTS;
         }
@@ -372,7 +395,7 @@ contract VaultEngine is ReentrancyGuard, Pausable, Ownable {
             uint256 amount = collateralDeposits[user][token];
             if (amount == 0) continue;
             CollateralManager.CollateralConfig memory cfg = collateralManager.getConfig(token);
-            (uint256 price,) = oracle.getPrice(token);
+            uint256 price = _safePrice(token);
             total += (amount * price) / (10 ** cfg.tokenDecimals);
         }
     }

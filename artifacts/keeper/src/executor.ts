@@ -56,21 +56,61 @@ export interface LiquidationResult {
   error?:          string;
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// ── Retry helper ─────────────────────────────────────────────────────────────
 
-/** Get keeper's current USDAX balance */
-async function keeperUsdaxBalance(): Promise<bigint> {
-  return publicClient.readContract({
-    address:      CONTRACTS.usdax,
-    abi:          USDAX_ABI,
-    functionName: "balanceOf",
-    args:         [account.address],
-  }) as Promise<bigint>;
+/**
+ * Wrap an async RPC call with exponential-backoff retry.
+ * Only retries on transient network/timeout errors — contract reverts are
+ * rethrown immediately without wasting attempts.
+ */
+async function withRetry<T>(
+  fn: () => Promise<T>,
+  maxAttempts = 3,
+  baseDelayMs = 1_000,
+  label = "rpc",
+): Promise<T> {
+  let lastErr: unknown;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      lastErr = err;
+      const msg = err instanceof Error ? err.message.toLowerCase() : String(err).toLowerCase();
+      const isRetryable =
+        msg.includes("timeout") || msg.includes("etimedout") ||
+        msg.includes("econnreset") || msg.includes("network") ||
+        msg.includes("fetch failed") || msg.includes("connection refused");
+      if (!isRetryable || attempt === maxAttempts) throw err;
+      const delay = baseDelayMs * Math.pow(2, attempt - 1); // 1 s, 2 s
+      console.error(JSON.stringify({
+        time: new Date().toISOString(),
+        msg: `${label}: retry ${attempt}/${maxAttempts} in ${delay}ms`,
+        error: msg,
+      }));
+      await new Promise(r => setTimeout(r, delay));
+    }
+  }
+  throw lastErr;
 }
 
-/** Get keeper's current gas price; returns null if above MAX_GAS_PRICE_GWEI */
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+/** Get keeper's current USDAX balance (with retry) */
+async function keeperUsdaxBalance(): Promise<bigint> {
+  return withRetry(
+    () => publicClient.readContract({
+      address:      CONTRACTS.usdax,
+      abi:          USDAX_ABI,
+      functionName: "balanceOf",
+      args:         [account.address],
+    }) as Promise<bigint>,
+    3, 1_000, "balanceOf",
+  );
+}
+
+/** Get keeper's current gas price; returns null if above MAX_GAS_PRICE_GWEI (with retry) */
 async function safeGasPrice(): Promise<bigint | null> {
-  const gp = await publicClient.getGasPrice();
+  const gp = await withRetry(() => publicClient.getGasPrice(), 3, 1_000, "getGasPrice");
   const maxGp = parseGwei(String(MAX_GAS_PRICE_GWEI));
   if (gp > maxGp) return null;
   return gp;
@@ -227,7 +267,10 @@ export async function executeLiquidations(
         gasPrice,
       });
 
-      const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash, timeout: 90_000 });
+      const receipt = await withRetry(
+        () => publicClient.waitForTransactionReceipt({ hash: txHash, timeout: 90_000 }),
+        3, 2_000, "waitForReceipt",
+      );
 
       // Parse actual Liquidated event from receipt — no more estimates
       let collSeized    = 0;

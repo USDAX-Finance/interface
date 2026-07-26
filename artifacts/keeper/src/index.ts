@@ -17,12 +17,11 @@
  *   DRY_RUN              — "true" to simulate without sending txs
  */
 
-import { SCAN_INTERVAL_MS, DRY_RUN, CONTRACTS } from "./config.js";
+import { SCAN_INTERVAL_MS, DRY_RUN, CONTRACTS, KEEPER_PRIVATE_KEY, RPC_URL, CHAIN_ID } from "./config.js";
 import { scanVaults } from "./scanner.js";
 import { executeLiquidations } from "./executor.js";
 import { startOracleRefresher } from "./oracle-refresher.js";
 import { privateKeyToAccount } from "viem/accounts";
-import { KEEPER_PRIVATE_KEY } from "./config.js";
 
 // ── Structured logger (console.log with JSON lines) ──────────────────────────
 
@@ -143,9 +142,43 @@ async function runCycle(): Promise<void> {
   });
 }
 
+// ── Startup validation ────────────────────────────────────────────────────────
+
+/**
+ * Verify all required config is present before the keeper touches the network.
+ * config.ts already throws on missing env vars at module load, but this adds
+ * an explicit human-readable startup summary so log output confirms health.
+ */
+function validateStartupConfig(): void {
+  const checks: Array<[string, unknown]> = [
+    ["KEEPER_PRIVATE_KEY",      KEEPER_PRIVATE_KEY],
+    ["RPC_URL",                 RPC_URL],
+    ["CHAIN_ID",                CHAIN_ID],
+    ["CONTRACT_VAULT_ENGINE",   CONTRACTS.vaultEngine],
+    ["CONTRACT_USDAX",          CONTRACTS.usdax],
+    ["CONTRACT_WETH",           CONTRACTS.WETH],
+    ["CONTRACT_WBTC",           CONTRACTS.WBTC],
+    ["CONTRACT_STETH",          CONTRACTS.stETH],
+    ["CONTRACT_ORACLE",         CONTRACTS.oracle],
+  ];
+  const missing = checks.filter(([, v]) => !v || v === "0x");
+  if (missing.length > 0) {
+    const keys = missing.map(([k]) => k).join(", ");
+    throw new Error(`Keeper startup failed — missing required config: ${keys}`);
+  }
+  log("keeper: config validated", {
+    rpcUrl:    RPC_URL,
+    chainId:   CHAIN_ID,
+    contracts: Object.keys(CONTRACTS).length,
+  });
+}
+
 // ── Entry point ───────────────────────────────────────────────────────────────
 
 async function main(): Promise<void> {
+  // Validate all required config before touching the network
+  validateStartupConfig();
+
   const account = privateKeyToAccount(KEEPER_PRIVATE_KEY);
 
   log("keeper: starting", {

@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { HelpButton, HelpModal, HSection, Formula, Badge, RefTable } from "@/components/help-modal";
 import {
   useMyPositions, getMyPositionsQueryKey,
@@ -19,13 +19,13 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import { formatCurrency, formatNumber, formatAddress, formatTimeAgoUTC } from "@/lib/utils";
-import { Plus, Layers, Loader2, ExternalLink, Clock } from "lucide-react";
+import { Plus, Layers, Loader2, ExternalLink, Clock, ShieldOff, AlertTriangle } from "lucide-react";
 import { useAuth } from "@/contexts/privy-auth";
 import { useWallets } from "@privy-io/react-auth";
 import { useToast } from "@/hooks/use-toast";
 import {
   createPublicClient, createWalletClient, custom, http,
-  defineChain, parseUnits,
+  defineChain, parseUnits, formatUnits,
 } from "viem";
 
 /* ─── design tokens ─── */
@@ -49,7 +49,7 @@ const robinhoodTestnet = defineChain({
 });
 
 /* ─── Contract addresses ─── */
-const VAULT_ENGINE = "0xb381081264Bc5ec02DEF80888faA03d8D5715Ae4" as `0x${string}`;
+const VAULT_ENGINE = "0xdb994C19707b2fe456c9c2AF8C9be0875eF55415" as `0x${string}`;
 const STABILITY_FEE_APY = 5; // 5% APY — matches VaultEngine stabilityFeePerYear = 500 BPS
 
 /* ─── Token configs ─── */
@@ -165,6 +165,32 @@ const VAULT_ABI = [
     name: "collateralDeposits",
     type: "function",
     inputs: [{ name: "", type: "address" }, { name: "", type: "address" }],
+    outputs: [{ type: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    name: "paused",
+    type: "function",
+    inputs: [],
+    outputs: [{ type: "bool" }],
+    stateMutability: "view",
+  },
+  {
+    name: "debtCeiling",
+    type: "function",
+    inputs: [],
+    outputs: [{ type: "uint256" }],
+    stateMutability: "view",
+  },
+] as const;
+
+/* ─── USDAX token ABI (totalSupply for debt-ceiling display) ─── */
+const USDAX_ADDRESS = "0x913bb47EEcd43657c10558dF10250d2cfbF6a2e6" as `0x${string}`;
+const USDAX_ABI_MIN = [
+  {
+    name: "totalSupply",
+    type: "function",
+    inputs: [],
     outputs: [{ type: "uint256" }],
     stateMutability: "view",
   },
@@ -390,6 +416,35 @@ export default function Positions() {
   const [closeSteps,    setCloseSteps]    = useState<Record<number, CloseStep>>({});
   const [showHelp,      setShowHelp]      = useState(false);
 
+  /* ── Protocol state ── */
+  const [protocolPaused,   setProtocolPaused]   = useState(false);
+  const [debtCeilingInfo,  setDebtCeilingInfo]  = useState<{ ceiling: number; supply: number } | null>(null);
+  /** Pending close-vault confirmation: set when user clicks "Close Vault", cleared on confirm/cancel */
+  const [closeConfirm, setCloseConfirm] = useState<{
+    posId: number; token: string; collateralAmount: number; usdaxMinted: number;
+  } | null>(null);
+
+  /* ── Poll protocol-level state every 30 s ── */
+  useEffect(() => {
+    async function fetchProtocolState() {
+      try {
+        const [paused, ceiling, supply] = await Promise.all([
+          pubClient.readContract({ address: VAULT_ENGINE, abi: VAULT_ABI, functionName: "paused" }),
+          pubClient.readContract({ address: VAULT_ENGINE, abi: VAULT_ABI, functionName: "debtCeiling" }),
+          pubClient.readContract({ address: USDAX_ADDRESS, abi: USDAX_ABI_MIN, functionName: "totalSupply" }),
+        ]);
+        setProtocolPaused(paused as boolean);
+        const ceilingNum = Number(formatUnits(ceiling as bigint, 18));
+        const supplyNum  = Number(formatUnits(supply  as bigint, 18));
+        if (ceilingNum > 0) setDebtCeilingInfo({ ceiling: ceilingNum, supply: supplyNum });
+        else                setDebtCeilingInfo(null);
+      } catch { /* RPC errors are non-fatal for the UI */ }
+    }
+    fetchProtocolState();
+    const id = setInterval(fetchProtocolState, 30_000);
+    return () => clearInterval(id);
+  }, []);
+
   /* ── Price preview (local estimates for health-factor preview only) ── */
   const PREVIEW_PRICES: Record<string, number> = {
     WETH: 3500, WBTC: 97000, stETH: 3480,
@@ -538,8 +593,7 @@ export default function Positions() {
 
   /* ── Close Vault: repayUsdax → withdrawCollateral ── */
   const handleClose = useCallback(async (posId: number, token: string, collateralAmount: number) => {
-    if (!confirm("Close this vault on-chain? This will repay all your USDAX debt and return your collateral.")) return;
-
+    // Called by the confirm dialog — no confirm() prompt here
     if (!authenticated || !address) { login(); return; }
 
     const tokenCfg = TOKEN_CONFIGS[token];
@@ -643,6 +697,61 @@ export default function Positions() {
 
   return (
     <div className="max-w-screen-xl mx-auto p-4 md:p-6 space-y-5">
+
+      {/* ── Emergency pause banner ── */}
+      {protocolPaused && (
+        <div
+          className="flex items-center gap-3 px-4 py-3 rounded-xl"
+          style={{ background: `${RED}12`, border: `1px solid ${RED}40` }}
+        >
+          <ShieldOff className="w-5 h-5 flex-shrink-0" style={{ color: RED }} />
+          <div>
+            <span className="font-black text-sm uppercase tracking-wide" style={{ color: RED }}>
+              Protocol Paused
+            </span>
+            <span className="ml-2 text-sm" style={{ color: "hsl(0 0% 62%)" }}>
+              New minting is suspended. Existing positions and repayments are unaffected.
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* ── Debt ceiling progress ── */}
+      {debtCeilingInfo && (
+        <div
+          className="flex flex-col sm:flex-row sm:items-center gap-3 px-4 py-3 rounded-xl"
+          style={{ background: "hsl(0 0% 6%)", border: `1px solid hsl(0 0% 10%)` }}
+        >
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <AlertTriangle className="w-3.5 h-3.5" style={{ color: AMBER }} />
+            <span className="font-mono text-[10px] tracking-widest uppercase" style={{ color: "hsl(0 0% 35%)" }}>
+              Debt Ceiling
+            </span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "hsl(0 0% 10%)" }}>
+              <div
+                className="h-full rounded-full transition-all"
+                style={{
+                  width: `${Math.min((debtCeilingInfo.supply / debtCeilingInfo.ceiling) * 100, 100).toFixed(1)}%`,
+                  background: debtCeilingInfo.supply / debtCeilingInfo.ceiling > 0.9 ? RED
+                            : debtCeilingInfo.supply / debtCeilingInfo.ceiling > 0.75 ? AMBER
+                            : EMERALD,
+                }}
+              />
+            </div>
+          </div>
+          <span className="font-mono text-[11px] flex-shrink-0" style={{ color: "hsl(0 0% 45%)" }}>
+            {debtCeilingInfo.supply.toLocaleString(undefined, { maximumFractionDigits: 0 })}
+            {" / "}
+            {debtCeilingInfo.ceiling.toLocaleString(undefined, { maximumFractionDigits: 0 })} USDAX
+            {" · "}
+            <span style={{ color: debtCeilingInfo.supply / debtCeilingInfo.ceiling > 0.9 ? RED : "hsl(0 0% 45%)" }}>
+              {((debtCeilingInfo.supply / debtCeilingInfo.ceiling) * 100).toFixed(1)}% used
+            </span>
+          </span>
+        </div>
+      )}
 
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -892,7 +1001,12 @@ export default function Positions() {
                       className="text-xs font-mono px-3 py-1.5 rounded-lg transition-all disabled:opacity-30 flex items-center gap-1.5 ml-auto"
                       style={{ border: `1px solid ${RED}30`, color: isClosing ? AMBER : RED, background: `${RED}08` }}
                       disabled={pos.status !== "active" || isClosing}
-                      onClick={() => handleClose(pos.id, pos.collateralToken, pos.collateralAmount)}
+                      onClick={() => setCloseConfirm({
+                        posId:            pos.id,
+                        token:            pos.collateralToken,
+                        collateralAmount: pos.collateralAmount,
+                        usdaxMinted:      pos.usdaxMinted,
+                      })}
                     >
                       {isClosing && <Loader2 className="w-3 h-3 animate-spin" />}
                       {isClosing ? CLOSE_STEP_LABEL[closeStep] : "Close Vault"}
@@ -1010,6 +1124,86 @@ export default function Positions() {
           )}
         </div>
       )}
+
+      {/* ── Close Vault Confirm Dialog ── */}
+      <Dialog
+        open={closeConfirm !== null}
+        onOpenChange={(open) => { if (!open && closeSteps[closeConfirm?.posId ?? -1] === undefined) setCloseConfirm(null); }}
+      >
+        <DialogContent className="sm:max-w-[400px]" style={{ background: "hsl(0 0% 5%)", border: `1px solid ${RED}25` }}>
+          <DialogHeader>
+            <DialogTitle className="font-black uppercase text-base flex items-center gap-2" style={{ color: RED }}>
+              <ShieldOff className="w-4 h-4" /> Close Vault #{closeConfirm?.posId}
+            </DialogTitle>
+          </DialogHeader>
+          {closeConfirm && (() => {
+            const step     = closeSteps[closeConfirm.posId] ?? "idle";
+            const isActive = step !== "idle";
+            return (
+              <div className="space-y-4 mt-2">
+                {/* Summary */}
+                <div className="rounded-xl p-4 space-y-2" style={{ background: "hsl(0 0% 7%)", border: `1px solid hsl(0 0% 11%)` }}>
+                  <div className="flex justify-between text-[12px] font-mono">
+                    <span style={{ color: "hsl(0 0% 40%)" }}>Collateral returned</span>
+                    <span style={{ color: "hsl(0 0% 85%)" }}>
+                      {closeConfirm.collateralAmount.toFixed(4)} {closeConfirm.token}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-[12px] font-mono">
+                    <span style={{ color: "hsl(0 0% 40%)" }}>USDAX debt repaid</span>
+                    <span style={{ color: AMBER }}>≈{closeConfirm.usdaxMinted.toFixed(2)} USDAX</span>
+                  </div>
+                  <div className="flex justify-between text-[12px] font-mono">
+                    <span style={{ color: "hsl(0 0% 40%)" }}>Transactions</span>
+                    <span style={{ color: "hsl(0 0% 55%)" }}>2 (repay + withdraw)</span>
+                  </div>
+                </div>
+
+                {/* Warning note */}
+                <div className="flex items-start gap-2 text-[11px] font-mono px-3 py-2.5 rounded-lg"
+                  style={{ background: `${AMBER}08`, border: `1px solid ${AMBER}20` }}>
+                  <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" style={{ color: AMBER }} />
+                  <span style={{ color: "hsl(0 0% 62%)" }}>
+                    Make sure your wallet holds enough USDAX to repay the full debt including accrued stability fees.
+                  </span>
+                </div>
+
+                {/* Step indicator */}
+                {isActive && (
+                  <div className="flex items-center gap-2 text-xs font-mono" style={{ color: "hsl(0 0% 45%)" }}>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" style={{ color: AMBER }} />
+                    {CLOSE_STEP_LABEL[step]}
+                  </div>
+                )}
+
+                {/* Buttons */}
+                <div className="flex gap-2 pt-1">
+                  <button
+                    className="flex-1 py-2 text-sm font-mono rounded-lg transition-all"
+                    style={{ background: "hsl(0 0% 8%)", border: "1px solid hsl(0 0% 13%)", color: "hsl(0 0% 45%)" }}
+                    disabled={isActive}
+                    onClick={() => setCloseConfirm(null)}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="flex-1 py-2 text-sm font-black rounded-lg transition-all flex items-center justify-center gap-1.5"
+                    style={{ background: isActive ? `${RED}18` : `${RED}20`, border: `1px solid ${RED}40`, color: RED }}
+                    disabled={isActive}
+                    onClick={async () => {
+                      await handleClose(closeConfirm.posId, closeConfirm.token, closeConfirm.collateralAmount);
+                      setCloseConfirm(null);
+                    }}
+                  >
+                    {isActive && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+                    {isActive ? "Closing..." : "Confirm Close"}
+                  </button>
+                </div>
+              </div>
+            );
+          })()}
+        </DialogContent>
+      </Dialog>
 
       {/* ── Vault Guide Modal ── */}
       <HelpModal open={showHelp} onClose={() => setShowHelp(false)} title="Vault Guide: How to Open a CDP">

@@ -9,11 +9,11 @@ const BG      = "hsl(0 0% 4%)";
 const MUTED   = "hsl(0 0% 28%)";
 
 const testnetContracts = [
-  { name: "USDAX Token",       address: "0x1988D89F5E7339394C20f93e982188c70eC4e5D3", desc: "ERC-20 stablecoin",           explorer: "https://explorer.testnet.chain.robinhood.com" },
-  { name: "VaultEngine",       address: "0xb381081264Bc5ec02DEF80888faA03d8D5715Ae4", desc: "CDP minting & management (v1.3 — stability fee + debt ceiling + emergency pause)",    explorer: "https://explorer.testnet.chain.robinhood.com" },
+  { name: "USDAX Token",       address: "0x913bb47EEcd43657c10558dF10250d2cfbF6a2e6", desc: "ERC-20 stablecoin",           explorer: "https://explorer.testnet.chain.robinhood.com" },
+  { name: "VaultEngine",       address: "0xdb994C19707b2fe456c9c2AF8C9be0875eF55415", desc: "CDP minting & management (v1.4 — oracle staleness guard + dust-vault fix)",    explorer: "https://explorer.testnet.chain.robinhood.com" },
   { name: "CollateralManager", address: "0x2472DCBA450e0AA2f81e69AaCD33f91528343854", desc: "Risk parameter enforcement",  explorer: "https://explorer.testnet.chain.robinhood.com" },
-  { name: "ChainlinkPriceOracle", address: "0xfE07515418B6f7239e9b4ecE21f49a75656Ba1a3", desc: "Chainlink-ready oracle (testnet: fallback prices; mainnet: live feeds)", explorer: "https://explorer.testnet.chain.robinhood.com" },
-  { name: "USDAxSavings",        address: "0xE0381B92571A784Ff632aDc288e6821349F28B0a", desc: "Yield savings module",       explorer: "https://explorer.testnet.chain.robinhood.com" },
+  { name: "ChainlinkPriceOracle", address: "0xe30C1738950977B242AFD821A4cDeEfA1f95ab85", desc: "Chainlink-ready oracle (testnet: fallback prices; mainnet: live feeds)", explorer: "https://explorer.testnet.chain.robinhood.com" },
+  { name: "USDAxSavings",        address: "0xeBcbB803FC90A89ed1edb659528d771cA3B19958", desc: "Yield savings module (v1.4 — non-reverting claimRewards)", explorer: "https://explorer.testnet.chain.robinhood.com" },
   { name: "WETH (Testnet)",    address: "0x728a06069E7A7DBafe2a92bc1E3e4d48e8fC49Dc", desc: "Testnet Wrapped Ether",       explorer: "https://explorer.testnet.chain.robinhood.com" },
   { name: "WBTC (Testnet)",    address: "0xBA4120eA7aA703cA1BBCdD03a1B4Ff15e15F2e34", desc: "Testnet Wrapped Bitcoin",     explorer: "https://explorer.testnet.chain.robinhood.com" },
   { name: "stETH (Testnet)",   address: "0xE571b0C36B3EF817950f7Fe3Aa296F2a1fB7479e", desc: "Testnet Liquid-staked Ether", explorer: "https://explorer.testnet.chain.robinhood.com" },

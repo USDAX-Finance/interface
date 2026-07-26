@@ -19,7 +19,7 @@ contract CollateralManager is Ownable {
     address[] public collateralList;
     mapping(address => CollateralConfig) public collaterals;
 
-    event CollateralAdded(address indexed token, uint256 maxLTV, uint256 liqThreshold, uint256 liqBonus);
+    event CollateralAdded(address indexed token, uint256 maxLTV, uint256 liqThreshold, uint256 liqBonus, uint8 tokenDecimals);
     event CollateralUpdated(address indexed token, uint256 maxLTV, uint256 liqThreshold, uint256 liqBonus);
     event CollateralDisabled(address indexed token);
 
@@ -46,7 +46,7 @@ contract CollateralManager is Ownable {
             tokenDecimals: tokenDecimals
         });
         collateralList.push(token);
-        emit CollateralAdded(token, maxLTV, liquidationThreshold, liquidationBonus);
+        emit CollateralAdded(token, maxLTV, liquidationThreshold, liquidationBonus, tokenDecimals);
     }
 
     /// @notice Update risk params for existing collateral

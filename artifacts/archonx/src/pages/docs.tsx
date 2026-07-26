@@ -599,11 +599,11 @@ interface IAPXStaking {
         </a>.
       </Prose>
       <ContractTable rows={[
-        { name: "USDAX Token",       address: "0x1988D89F5E7339394C20f93e982188c70eC4e5D3", desc: "ERC-20 stablecoin, mintable by depositing collateral into a vault." },
-        { name: "VaultEngine",       address: "0xb381081264Bc5ec02DEF80888faA03d8D5715Ae4", desc: "CDP minting, repayment, and collateral management. v1.3 — stability fee + debt ceiling + emergency pause." },
+        { name: "USDAX Token",       address: "0x913bb47EEcd43657c10558dF10250d2cfbF6a2e6", desc: "ERC-20 stablecoin, mintable by depositing collateral into a vault." },
+        { name: "VaultEngine",       address: "0xdb994C19707b2fe456c9c2AF8C9be0875eF55415", desc: "CDP minting, repayment, and collateral management. v1.4 — oracle staleness guard + dust-vault fix." },
         { name: "CollateralManager", address: "0x2472DCBA450e0AA2f81e69AaCD33f91528343854", desc: "Collateral risk parameters and ceiling enforcement." },
-        { name: "ChainlinkPriceOracle", address: "0xfE07515418B6f7239e9b4ecE21f49a75656Ba1a3", desc: "Chainlink AggregatorV3 oracle. Testnet uses fallback prices; mainnet uses live ETH/USD, WBTC/USD, WSTETH/USD feeds." },
-        { name: "USDAxSavings",         address: "0xE0381B92571A784Ff632aDc288e6821349F28B0a", desc: "Yield savings module. Deposit USDAX to earn savings yield." },
+        { name: "ChainlinkPriceOracle", address: "0xe30C1738950977B242AFD821A4cDeEfA1f95ab85", desc: "Chainlink AggregatorV3 oracle. Testnet uses fallback prices; mainnet uses live ETH/USD, WBTC/USD, WSTETH/USD feeds." },
+        { name: "USDAxSavings",         address: "0xeBcbB803FC90A89ed1edb659528d771cA3B19958", desc: "Yield savings module. Deposit USDAX to earn savings yield. v1.4 — non-reverting claimRewards." },
         { name: "WETH (testnet)",    address: "0x728a06069E7A7DBafe2a92bc1E3e4d48e8fC49Dc", desc: "Testnet WETH. Claim from the faucet; not real ETH." },
         { name: "WBTC (testnet)",    address: "0xBA4120eA7aA703cA1BBCdD03a1B4Ff15e15F2e34", desc: "Testnet WBTC. Claim from the faucet; not real BTC." },
         { name: "stETH (testnet)",   address: "0xE571b0C36B3EF817950f7Fe3Aa296F2a1fB7479e", desc: "Testnet stETH. Claim from the faucet; not real stETH." },
@@ -827,8 +827,8 @@ await stakeTx.wait();`} />
               items: [
                 "VaultEngine, USDAX, CollateralManager, PriceOracle, and LiquidationEngine redeployed on Testnet (46630) — v1.1.0 release with updated addresses.",
                 "USDAxSavings yield module deployed on Testnet (46630) at 0x1Ad884C7d1C638f82F36c081b38f3e129c717A3C. USDAX holders can now deposit and earn savings yield.",
-                "VaultEngine v1.3 deployed at 0xb381081264Bc5ec02DEF80888faA03d8D5715Ae4. Adds debt ceiling (configurable cap on total USDAX mintable) and emergency pause (owner can halt deposits, mints, and liquidations while repay/withdraw stay open).",
-                "USDAxSavings redeployed at 0xE0381B92571A784Ff632aDc288e6821349F28B0a to reference new VaultEngine v1.3.",
+                "VaultEngine v1.4 deployed at 0xdb994C19707b2fe456c9c2AF8C9be0875eF55415. Adds oracle staleness guard (MAX_ORACLE_STALENESS = 2 hours) with _safePrice() helper, dust-vault liquidation fix (positions too small for fixed-point math can now be cleared), and collateral-seized amounts now read from on-chain Liquidated event.",
+                "USDAxSavings v2 redeployed at 0xeBcbB803FC90A89ed1edb659528d771cA3B19958. claimRewards() no longer reverts when pool is empty or underfunded — pays what's available and preserves the shortfall.",
                 "APX Token (ERC-20, 100M fixed supply) confirmed live on Robinhood Chain Mainnet (4663).",
                 "APXStaking contract confirmed live on Mainnet (4663) at 0x00b6792ac02caf607d0b6ea4a6f572a83472412f. Synthetix reward model: 1M APX/yr pool, rewards paid in APX.",
                 "Governance contract remains undeployed. All parameter changes made directly by deployer wallet (current admin).",

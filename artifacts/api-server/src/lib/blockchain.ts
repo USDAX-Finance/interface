@@ -185,6 +185,34 @@ export async function getVaultSnapshot(user: `0x${string}`): Promise<VaultSnapsh
   return { owner: user, debt, currentDebt: curDebt, collateralUsd, healthFactor: hf, maxMintable: maxMint };
 }
 
+/** Whether VaultEngine is currently paused (emergency shutdown active) */
+export async function getPausedStatus(): Promise<boolean> {
+  try {
+    const paused = await publicClient.readContract({
+      address: CONTRACTS.vaultEngine,
+      abi: vaultAbi,
+      functionName: "paused",
+    }) as boolean;
+    return paused;
+  } catch {
+    return false;
+  }
+}
+
+/** Debt ceiling in USDAX (0 = uncapped). Returns 0 on error. */
+export async function getDebtCeiling(): Promise<number> {
+  try {
+    const raw = await publicClient.readContract({
+      address: CONTRACTS.vaultEngine,
+      abi: vaultAbi,
+      functionName: "debtCeiling",
+    }) as bigint;
+    return Number(formatUnits(raw, 18));
+  } catch {
+    return 0;
+  }
+}
+
 /** All active on-chain vaults with debt > 0 */
 export async function getAllVaults(): Promise<VaultSnapshot[]> {
   const owners = await getVaultOwners();

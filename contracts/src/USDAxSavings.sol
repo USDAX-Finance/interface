@@ -48,6 +48,9 @@ contract USDAxSavings is ReentrancyGuard, Ownable {
     event RewardsClaimed(address indexed user, uint256 rewardUsdax);
     event RewardsAdded(address indexed by, uint256 amount);
     event ApyUpdated(uint256 oldBps, uint256 newBps);
+    /// @notice Emitted when a user's pending rewards exceed the available reward pool.
+    ///         The user receives up to `paid` USDAX; `shortfall` remains accrued for later.
+    event RewardPoolInsufficient(address indexed user, uint256 shortfall, uint256 paid);
 
     // ─── Constructor ──────────────────────────────────────────────────────────
     constructor(address _usdax, uint256 _apyBps, address _owner) Ownable(_owner) {
@@ -112,19 +115,33 @@ contract USDAxSavings is ReentrancyGuard, Ownable {
         emit Withdrawn(msg.sender, amount);
     }
 
-    /// @notice Claim all pending USDAX rewards.
+    /// @notice Claim pending USDAX rewards.
+    ///         Never reverts due to empty pool — pays what's available and records the shortfall.
+    ///         If the pool is completely empty, accrued rewards are preserved for when it's refunded.
     function claimRewards() external nonReentrant {
         _settle(msg.sender);
 
         uint256 reward = positions[msg.sender].accrued;
-        require(reward > 0, "no rewards");
-        require(rewardPool >= reward, "reward pool empty");
+        if (reward == 0) return; // nothing accrued — silent no-op
 
-        positions[msg.sender].accrued = 0;
-        rewardPool -= reward;
+        uint256 toPay = reward > rewardPool ? rewardPool : reward;
 
-        usdax.safeTransfer(msg.sender, reward);
-        emit RewardsClaimed(msg.sender, reward);
+        if (toPay == 0) {
+            // Pool empty — rewards remain accrued, emit warning so protocol can refund pool
+            emit RewardPoolInsufficient(msg.sender, reward, 0);
+            return;
+        }
+
+        positions[msg.sender].accrued -= toPay;
+        rewardPool -= toPay;
+
+        usdax.safeTransfer(msg.sender, toPay);
+        emit RewardsClaimed(msg.sender, toPay);
+
+        if (toPay < reward) {
+            // Partial payment — remaining shortfall preserved in accrued
+            emit RewardPoolInsufficient(msg.sender, reward - toPay, toPay);
+        }
     }
 
     // ─── Owner actions ────────────────────────────────────────────────────────

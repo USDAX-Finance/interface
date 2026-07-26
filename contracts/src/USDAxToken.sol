@@ -11,6 +11,8 @@ contract USDAxToken is ERC20, ERC20Permit, Ownable {
     address public vaultEngine;
 
     event VaultEngineSet(address indexed engine);
+    /// @notice Emitted when the vault engine is migrated. Includes old address for audit trail.
+    event VaultEngineUpdated(address indexed oldEngine, address indexed newEngine);
 
     modifier onlyVaultEngine() {
         require(msg.sender == vaultEngine, "USDax: not vault engine");
@@ -32,8 +34,9 @@ contract USDAxToken is ERC20, ERC20Permit, Ownable {
     function updateVaultEngine(address newEngine) external onlyOwner {
         require(newEngine != address(0), "zero address");
         require(newEngine != vaultEngine, "same engine");
+        address old = vaultEngine;
         vaultEngine = newEngine;
-        emit VaultEngineSet(newEngine);
+        emit VaultEngineUpdated(old, newEngine);
     }
 
     /// @notice Mint USDAX — only VaultEngine
