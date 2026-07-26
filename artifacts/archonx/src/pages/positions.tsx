@@ -49,7 +49,7 @@ const robinhoodTestnet = defineChain({
 });
 
 /* ─── Contract addresses ─── */
-const VAULT_ENGINE = "0x30E3A7dcF5f5773B605c25B4abbc3DbbFaB9DC8F" as `0x${string}`;
+const VAULT_ENGINE = "0xb381081264Bc5ec02DEF80888faA03d8D5715Ae4" as `0x${string}`;
 const STABILITY_FEE_APY = 5; // 5% APY — matches VaultEngine stabilityFeePerYear = 500 BPS
 
 /* ─── Token configs ─── */

@@ -13,7 +13,7 @@
 
 import {
   createWalletClient,
-  http, formatUnits, parseGwei,
+  http, formatUnits, parseUnits, parseGwei, parseEventLogs,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import type { Hash } from "viem";
@@ -128,11 +128,26 @@ export async function executeLiquidations(
     safeGasPrice(),
   ]);
 
+  const LOW_BALANCE_THRESHOLD = parseUnits("50", 18); // 50 USDAX warning threshold
+
   log("executor: keeper state", {
     keeperAddress: account.address,
     usdaxBalance:  Number(formatUnits(usdaxBalance, 18)).toFixed(2),
     gasPrice:      gasPrice ? Number(formatUnits(gasPrice, 9)).toFixed(2) + " gwei" : "ABOVE MAX",
   });
+
+  // ── Balance warnings ────────────────────────────────────────────────────
+  if (usdaxBalance === 0n) {
+    log("executor: CRITICAL — keeper USDAX balance is zero, all liquidations will be skipped. Fund wallet immediately.", {
+      keeperAddress: account.address,
+    });
+  } else if (usdaxBalance < LOW_BALANCE_THRESHOLD) {
+    log("executor: WARNING — keeper USDAX balance low, missed liquidations possible if not topped up soon", {
+      keeperAddress: account.address,
+      balance:       Number(formatUnits(usdaxBalance, 18)).toFixed(2),
+      threshold:     "50.00",
+    });
+  }
 
   if (gasPrice === null) {
     log("executor: gas price exceeds MAX_GAS_PRICE_GWEI — skipping all liquidations", { MAX_GAS_PRICE_GWEI });
@@ -214,22 +229,41 @@ export async function executeLiquidations(
 
       const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash, timeout: 90_000 });
 
-      // Parse Liquidated event to get actual collSeized
-      let collSeized   = 0;
+      // Parse actual Liquidated event from receipt — no more estimates
+      let collSeized    = 0;
       let collSeizedUsd = 0;
       if (receipt.status === "success") {
-        // Look for Liquidated event in logs
-        for (const log_ of receipt.logs) {
-          // topic0 = keccak256("Liquidated(address,address,address,uint256,uint256)")
-          if (log_.topics[0] === "0x7c0e6fd1e18c9c9f4b3b7e7fa9d3a8e2c5f4a6d7e8b2c3d4e5f6a7b8c9d0e1f2") {
-            // This is approximate — real parsing handled below via data field
+        try {
+          const events = parseEventLogs({
+            abi:       VAULT_ENGINE_ABI,
+            logs:      receipt.logs,
+            eventName: "Liquidated",
+          });
+          if (events.length > 0) {
+            const args = events[0].args as {
+              liquidator: string;
+              vaultOwner: string;
+              collateralToken: string;
+              debtRepaid: bigint;
+              collateralSeized: bigint;
+            };
+            collSeized    = Number(formatUnits(args.collateralSeized, bestColl.decimals));
+            collSeizedUsd = collSeized * bestColl.priceUsd;
+            log("executor: actual on-chain amounts from Liquidated event", {
+              debtRepaid:       Number(formatUnits(args.debtRepaid, 18)).toFixed(4),
+              collateralSeized: collSeized.toFixed(6),
+              collateralSymbol: bestColl.symbol,
+              collSeizedUsd:    `$${collSeizedUsd.toFixed(2)}`,
+            });
           }
+        } catch {
+          // Fallback to estimate if event parsing fails
+          const collAmountRaw = (debtToRepay * BigInt(10 ** bestColl.decimals)) / BigInt(Math.floor(bestColl.priceUsd * 1e18));
+          const collWithBonus = collAmountRaw + (collAmountRaw * 5n / 100n);
+          collSeized    = Number(formatUnits(collWithBonus, bestColl.decimals));
+          collSeizedUsd = collSeized * bestColl.priceUsd;
+          log("executor: WARNING — could not parse Liquidated event, using estimate", {});
         }
-        // Simplified: use the debtToRepay amount and estimated collateral
-        const collAmountRaw  = (debtToRepay * BigInt(10 ** bestColl.decimals)) / BigInt(Math.floor(bestColl.priceUsd * 1e18));
-        const collWithBonus  = collAmountRaw + (collAmountRaw * 5n / 100n);
-        collSeized    = Number(formatUnits(collWithBonus, bestColl.decimals));
-        collSeizedUsd = collSeized * bestColl.priceUsd;
       }
 
       results.push({
