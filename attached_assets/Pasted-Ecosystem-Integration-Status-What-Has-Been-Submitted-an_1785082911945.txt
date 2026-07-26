@@ -1,0 +1,54 @@
+Ecosystem Integration Status: What Has Been Submitted and What Is Live
+
+USDAX Finance is not building in isolation. The Nexus — the protocol's integration registry — tracks every asset, protocol, and oracle connection by status. Here is the honest state as of July 2026.
+
+Currently Live (Testnet + Mainnet architecture ready)
+
+Asset	Oracle Sources	Debt Ceiling
+WETH	Chainlink + Pyth	$20M
+WBTC	Chainlink + Pyth	$15M
+stETH	Chainlink + Lido	$10M
+These three collaterals are active in the deployed VaultEngine, fully functional with live oracle price feeds (admin fallback on testnet, Chainlink on mainnet).
+
+Submitted / Pending
+
+Integration proposals have been submitted to:
+
+Ondo Finance — OUSG (tokenized T-Bills), $50M debt ceiling target, Ondo Daily NAV oracle
+Centrifuge — Real estate senior debt pool, $25M ceiling, Centrifuge oracle feed
+Maple Finance — Corporate bond pool, $30M ceiling, Maple monthly reporting oracle
+These are awaiting counterparty confirmation and final risk parameter ratification through APX governance before they can go live. The CollateralManager contract can add any new collateral type via addCollateral() without a protocol upgrade — the infrastructure is ready, the legal and oracle agreements are not yet finalized.
+
+Coming Soon — Robinhood Stock Tokens
+
+Seven equity-backed tokens are listed in the integration roadmap, all using the Robinhood Oracle (native to Robinhood Chain):
+
+TSLA ($12M ceiling) · AMZN ($10M) · AAPL ($12M) · NVDA ($12M) · AMD ($8M) · NFLX ($8M) · PLTR ($5M)
+
+These reflect Robinhood Chain's unique position as a chain with native access to equity price data. No other general-purpose CDP protocol has proposed equity-backed stablecoin minting through a verified equity oracle at this scope.
+
+Governance APX governance is not yet deployed. Collateral parameters are currently managed by the deployer multisig. Once APX governance is live, all new collateral additions and parameter changes require an on-chain vote with a 48-hour timelock.
+
+All integration statuses sourced from the Nexus registry in the live frontend.
+
+POST 5
+
+USDAX Supply: No Cap, No Fiat Backing, and What Happens When Nobody Borrows
+
+This one is worth understanding clearly, because it is different from every fiat-backed stablecoin.
+
+USDAX does not follow the dollar supply. It is not backed by dollars in a bank. It is not pegged to the dollar by a custodian holding reserves. There is no company holding $1 for every USDAX.
+
+How supply is created: USDAX only comes into existence when a user deposits collateral into a vault and borrows against it. No collateral deposit = no USDAX. The smart contract enforces this — only the VaultEngine address can call mint() on the USDAX token contract, and VaultEngine only calls it when collateral has been verified and locked.
+
+Every USDAX in circulation has collateral backing it worth more than $1 at the time of minting. This is true by construction, not by trust.
+
+Is there a supply cap? There is no hard cap in the token contract. Instead, VaultEngine has a configurable debtCeiling per collateral type that APX governance can set. At zero, the ceiling is uncapped. This lets the protocol scale supply to real demand without a fixed limit, while allowing governance to throttle individual collateral types for risk management.
+
+What if nobody deposits? If all vault positions are closed — all USDAX repaid and collateral withdrawn — the total supply goes to zero. Every borrower who repays burns their USDAX and gets their collateral back. This is not a failure state; it is the correct exit path.
+
+Does USDAX go to $0 if supply is zero? No. The peg is maintained by the collateral backing the supply that exists, not by the quantity of supply. A USDAX with one vault behind it is just as collateralized as a USDAX with ten thousand vaults behind it. If supply is zero, there is simply nothing in circulation — the price concept is not meaningful when there are no tokens to trade.
+
+What actually threatens the peg: Not low supply, but under-collateralization — collateral value falling faster than the liquidation mechanism can respond. This is why the oracle staleness check (2-hour max), the keeper bot, and the liquidation bonus exist. If collateral is seized and sold before the vault becomes undercollateralized, the peg holds. If it is not — if a collateral crashes faster than the system can liquidate — the remaining USDAX holders bear the shortfall. This is a known risk in all CDP protocols. USDAX Finance mitigates it through conservative LTV ratios, per-collateral debt ceilings, and a mandatory emergency pause capability controlled by governance.
+
+All numbers and mechanics are sourced directly from VaultEngine v1.4 deployed on Robinhood Chain Testnet.
