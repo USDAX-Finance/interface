@@ -66,7 +66,8 @@ contract DeployChainlinkOracle is Script {
             COLL_MGR,
             address(oracle),
             deployer,   // feeRecipient
-            deployer
+            deployer,
+            500         // 5% APY stability fee
         );
 
         // Wire: USDAxToken → VaultEngine (mint/burn rights)

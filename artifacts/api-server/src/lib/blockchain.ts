@@ -132,23 +132,57 @@ export async function getOnChainPrices(): Promise<Record<string, number>> {
   return { WETH: weth, WBTC: wbtc, stETH: steth };
 }
 
+/** Current debt including accrued stability fee (view, no state change) */
+export async function getCurrentDebt(user: `0x${string}`): Promise<number> {
+  const raw = await publicClient.readContract({
+    address: CONTRACTS.vaultEngine,
+    abi: vaultAbi,
+    functionName: "currentDebt",
+    args: [user],
+  }) as bigint;
+  return Number(formatUnits(raw, 18));
+}
+
+/** Pending (undripped) stability fee for a user */
+export async function getPendingFee(user: `0x${string}`): Promise<number> {
+  const raw = await publicClient.readContract({
+    address: CONTRACTS.vaultEngine,
+    abi: vaultAbi,
+    functionName: "pendingFee",
+    args: [user],
+  }) as bigint;
+  return Number(formatUnits(raw, 18));
+}
+
+/** Protocol stability fee in basis points (e.g. 500 = 5% APY) */
+export async function getStabilityFee(): Promise<number> {
+  const raw = await publicClient.readContract({
+    address: CONTRACTS.vaultEngine,
+    abi: vaultAbi,
+    functionName: "stabilityFeePerYear",
+  }) as bigint;
+  return Number(raw);
+}
+
 /** Full snapshot of a user's on-chain vault */
 export interface VaultSnapshot {
   owner:          string;
-  debt:           number;
+  debt:           number;   // stored principal (pre-drip)
+  currentDebt:    number;   // debt + accrued interest (real-time)
   collateralUsd:  number;
   healthFactor:   number;
   maxMintable:    number;
 }
 
 export async function getVaultSnapshot(user: `0x${string}`): Promise<VaultSnapshot> {
-  const [debt, collateralUsd, hf, maxMint] = await Promise.all([
+  const [debt, curDebt, collateralUsd, hf, maxMint] = await Promise.all([
     getUserDebt(user),
+    getCurrentDebt(user),
     getRawCollateralValue(user),
     getHealthFactor(user),
     getMaxMintable(user),
   ]);
-  return { owner: user, debt, collateralUsd, healthFactor: hf, maxMintable: maxMint };
+  return { owner: user, debt, currentDebt: curDebt, collateralUsd, healthFactor: hf, maxMintable: maxMint };
 }
 
 /** All active on-chain vaults with debt > 0 */

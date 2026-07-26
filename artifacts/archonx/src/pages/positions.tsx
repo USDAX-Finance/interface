@@ -49,7 +49,8 @@ const robinhoodTestnet = defineChain({
 });
 
 /* ─── Contract addresses ─── */
-const VAULT_ENGINE = "0xB5d971d69728B0C31b19A8f184d31813F29EEA20" as `0x${string}`;
+const VAULT_ENGINE = "0x30E3A7dcF5f5773B605c25B4abbc3DbbFaB9DC8F" as `0x${string}`;
+const STABILITY_FEE_APY = 5; // 5% APY — matches VaultEngine stabilityFeePerYear = 500 BPS
 
 /* ─── Token configs ─── */
 const TOKEN_CONFIGS: Record<string, { address: `0x${string}`; decimals: number }> = {
@@ -143,6 +144,20 @@ const VAULT_ABI = [
     name: "debt",
     type: "function",
     inputs: [{ name: "", type: "address" }],
+    outputs: [{ type: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    name: "currentDebt",
+    type: "function",
+    inputs: [{ name: "user", type: "address" }],
+    outputs: [{ type: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    name: "pendingFee",
+    type: "function",
+    inputs: [{ name: "user", type: "address" }],
     outputs: [{ type: "uint256" }],
     stateMutability: "view",
   },
@@ -547,11 +562,13 @@ export default function Positions() {
       const wc        = createWalletClient({ chain: robinhoodTestnet, transport: custom(provider) });
       const [account] = await wc.requestAddresses();
 
-      /* 2. Read on-chain state (source of truth) */
+      /* 2. Read on-chain state (source of truth).
+            Use currentDebt (includes accrued stability fee) so repayment covers
+            the full amount owed — not just the stored principal. */
       const [onChainDebt, onChainCollateral] = await Promise.all([
         pubClient.readContract({
           address: VAULT_ENGINE, abi: VAULT_ABI,
-          functionName: "debt", args: [account],
+          functionName: "currentDebt", args: [account],
         }),
         pubClient.readContract({
           address: VAULT_ENGINE, abi: VAULT_ABI,
@@ -808,6 +825,7 @@ export default function Positions() {
         </div>
         <div className="mt-3 pt-3 flex flex-wrap gap-x-6 gap-y-1 text-[11px] font-mono" style={{ borderTop: `1px solid ${BORDER}`, color: "hsl(0 0% 32%)" }}>
           <span>Mint fee: <span style={{ color: "hsl(0 0% 55%)" }}>0.5%</span> on each vault</span>
+          <span>Stability fee: <span style={{ color: AMBER }}>{STABILITY_FEE_APY}% APY</span> accrues on debt</span>
           <span>This fee funds the <span style={{ color: LIME }}>4.20% APY</span> in the Yield savings pool</span>
           <span>To close a vault: repay USDAX debt first, then collateral is returned</span>
         </div>

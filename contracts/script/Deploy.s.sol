@@ -75,7 +75,8 @@ contract Deploy is Script {
             address(cm),
             address(oracle),
             deployer,   // feeRecipient = deployer for now
-            deployer
+            deployer,
+            500         // 5% APY stability fee
         );
 
         console.log("VaultEngine:", address(vault));
