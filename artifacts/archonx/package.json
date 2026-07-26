@@ -75,6 +75,7 @@
     "zod": "catalog:"
   },
   "dependencies": {
-    "@privy-io/react-auth": "^3.35.1"
+    "@privy-io/react-auth": "^3.35.1",
+    "viem": "^2.55.8"
   }
 }

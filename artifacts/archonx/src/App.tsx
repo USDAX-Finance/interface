@@ -1,25 +1,34 @@
-import { useState, useEffect } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useState, useEffect, useRef } from 'react';
+import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
 import { Route, Switch, Router as WouterRouter } from 'wouter';
 import { PrivyProvider } from '@privy-io/react-auth';
 import { PrivyAuthProvider, FallbackAuthProvider } from '@/contexts/privy-auth';
+import { useAuth } from '@/contexts/privy-auth';
 
 import Landing from '@/pages/landing';
 import Docs from '@/pages/docs';
 import Protocol from '@/pages/protocol';
 import StakingPage from '@/pages/staking-page';
 import GovernancePage from '@/pages/governance-page';
-import { Navbar } from '@/components/layout';
-import { Footer } from '@/components/footer';
+import About from '@/pages/about';
+import Blog from '@/pages/blog';
+import AuditReport from '@/pages/audit';
+import PrivacyPolicy from '@/pages/privacy';
+import TermsOfService from '@/pages/terms';
+import CookiePolicy from '@/pages/cookies';
+import { Navbar, AppFooter } from '@/components/layout';
 import Dashboard from '@/pages/dashboard';
 import Positions from '@/pages/positions';
 import Staking from '@/pages/staking';
+import StakingActivity from '@/pages/staking-activity';
 import Liquidations from '@/pages/liquidations';
 import Nexus from '@/pages/nexus';
 import Yield from '@/pages/yield';
+import Faucet from '@/pages/faucet';
+import ActivityPage from '@/pages/activity';
 
 const queryClient = new QueryClient();
 
@@ -36,11 +45,12 @@ function AppLayout() {
           <Route path="/app/yield" component={Yield} />
           <Route path="/app/positions" component={Positions} />
           <Route path="/app/staking" component={Staking} />
+          <Route path="/app/staking-activity" component={StakingActivity} />
           <Route path="/app/liquidations" component={Liquidations} />
           <Route component={NotFound} />
         </Switch>
       </main>
-      <Footer />
+      <AppFooter />
     </div>
   );
 }
@@ -53,9 +63,37 @@ function Router() {
       <Route path="/protocol" component={Protocol} />
       <Route path="/staking" component={StakingPage} />
       <Route path="/governance" component={GovernancePage} />
+      <Route path="/about" component={About} />
+      <Route path="/faucet" component={Faucet} />
+      <Route path="/activity" component={ActivityPage} />
+      <Route path="/blog" component={Blog} />
+      <Route path="/audit" component={AuditReport} />
+      <Route path="/privacy" component={PrivacyPolicy} />
+      <Route path="/terms" component={TermsOfService} />
+      <Route path="/cookies" component={CookiePolicy} />
       <Route component={AppLayout} />
     </Switch>
   );
+}
+
+/**
+ * Watches for wallet address changes and clears wallet-scoped query cache.
+ * This prevents one wallet's positions from leaking into another wallet's view.
+ */
+function WalletChangeWatcher() {
+  const { address } = useAuth();
+  const qc = useQueryClient();
+  const prevAddress = useRef<string>("");
+
+  useEffect(() => {
+    if (prevAddress.current && prevAddress.current !== address) {
+      // Remove all position queries so new wallet gets a fresh fetch
+      qc.removeQueries({ queryKey: ["positions"] });
+    }
+    prevAddress.current = address;
+  }, [address, qc]);
+
+  return null;
 }
 
 /** The inner app tree — same whether or not Privy is configured. */
@@ -63,6 +101,7 @@ function AppInner() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
+        <WalletChangeWatcher />
         <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, '')}>
           <Router />
         </WouterRouter>
@@ -132,7 +171,9 @@ export default function App() {
           },
           loginMethods: ['wallet', 'email'],
           embeddedWallets: {
-            createOnLogin: 'users-without-wallets',
+            ethereum: {
+              createOnLogin: 'users-without-wallets',
+            },
           },
         }}
       >

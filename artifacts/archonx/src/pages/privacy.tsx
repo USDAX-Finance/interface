@@ -94,7 +94,7 @@ export default function PrivacyPolicy() {
               "Public wallet addresses that interact with the USDAX Finance smart contracts; these are inherently public on-chain data.",
               "Browser and device information (user-agent, viewport size, language) collected automatically when you load our interface.",
               "Aggregated, anonymised usage statistics (pages visited, features used) via privacy-respecting analytics with no cross-site tracking.",
-              "Information you voluntarily submit when contacting us via email (e.g. security@usdax.finance).",
+              "Information you voluntarily submit when contacting us via email (e.g. support@usdax.finance).",
             ]} />
           </Section>
 
@@ -169,7 +169,7 @@ export default function PrivacyPolicy() {
             <P>
               Because we collect minimal identifying data, most requests will be satisfied simply by clarifying that
               we do not hold personal data linked to you. To make a request, email{" "}
-              <a href="mailto:privacy@usdax.finance" style={{ color: LIME, textDecoration: "none" }}>privacy@usdax.finance</a>.
+              <a href="mailto:support@usdax.finance" style={{ color: LIME, textDecoration: "none" }}>support@usdax.finance</a>.
             </P>
           </Section>
 
@@ -194,7 +194,7 @@ export default function PrivacyPolicy() {
           <Section title="10. Contact">
             <P>
               For privacy-related questions or requests, contact us at:{" "}
-              <a href="mailto:privacy@usdax.finance" style={{ color: LIME, textDecoration: "none" }}>privacy@usdax.finance</a>
+              <a href="mailto:support@usdax.finance" style={{ color: LIME, textDecoration: "none" }}>support@usdax.finance</a>
             </P>
           </Section>
 

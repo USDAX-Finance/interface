@@ -35,6 +35,8 @@ export const ActivityEventType = {
   UNSTAKE: 'UNSTAKE',
   CLAIM: 'CLAIM',
   LIQUIDATE: 'LIQUIDATE',
+  EMERGENCY: 'EMERGENCY',
+  COOLDOWN: 'COOLDOWN',
 } as const;
 
 export interface ActivityEvent {
@@ -44,7 +46,7 @@ export interface ActivityEvent {
   amount: number;
   token: string;
   timestamp: string;
-  txHash: string;
+  txHash: string | null;
 }
 
 export interface CollateralBreakdown {
@@ -101,6 +103,7 @@ export type PositionInputCollateralToken = typeof PositionInputCollateralToken[k
 export const PositionInputCollateralToken = {
   WETH: 'WETH',
   WBTC: 'WBTC',
+  stETH: 'stETH',
 } as const;
 
 export interface PositionInput {
@@ -108,6 +111,8 @@ export interface PositionInput {
   collateralToken: PositionInputCollateralToken;
   collateralAmount: number;
   usdaxToMint: number;
+  depositTxHash?: string;
+  mintTxHash?: string;
 }
 
 export interface PositionUpdate {
@@ -125,6 +130,8 @@ export interface StakingStats {
   totalRewardsDistributed: number;
   activeStakers: number;
   rewardRatePerDay: number;
+  rewardsPool?: number;
+  paused?: boolean;
 }
 
 export type StakingPositionStatus = typeof StakingPositionStatus[keyof typeof StakingPositionStatus];
@@ -183,6 +190,7 @@ export interface LiquidationInput {
   positionId: number;
   liquidator: string;
   debtToCover: number;
+  txHash?: string;
 }
 
 export interface LiquidationResult {

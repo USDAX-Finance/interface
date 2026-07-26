@@ -40,12 +40,12 @@ export const GetProtocolStatsResponse = zod.object({
  */
 export const ListProtocolActivityResponseItem = zod.object({
   "id": zod.number(),
-  "type": zod.enum(['MINT', 'BURN', 'DEPOSIT', 'REDEEM', 'STAKE', 'UNSTAKE', 'CLAIM', 'LIQUIDATE']),
+  "type": zod.enum(['MINT', 'BURN', 'DEPOSIT', 'REDEEM', 'STAKE', 'UNSTAKE', 'CLAIM', 'LIQUIDATE', 'EMERGENCY', 'COOLDOWN']),
   "user": zod.string(),
   "amount": zod.number(),
   "token": zod.string(),
   "timestamp": zod.string(),
-  "txHash": zod.string()
+  "txHash": zod.string().nullable()
 })
 export const ListProtocolActivityResponse = zod.array(ListProtocolActivityResponseItem)
 
@@ -99,9 +99,11 @@ export const ListPositionsResponse = zod.array(ListPositionsResponseItem)
  */
 export const CreatePositionBody = zod.object({
   "owner": zod.string(),
-  "collateralToken": zod.enum(['WETH', 'WBTC']),
+  "collateralToken": zod.enum(['WETH', 'WBTC', 'stETH']),
   "collateralAmount": zod.number(),
-  "usdaxToMint": zod.number()
+  "usdaxToMint": zod.number(),
+  "depositTxHash": zod.string().optional(),
+  "mintTxHash": zod.string().optional()
 })
 
 export const CreatePositionResponse = zod.object({
@@ -200,7 +202,9 @@ export const GetStakingStatsResponse = zod.object({
   "effectiveApy": zod.number(),
   "totalRewardsDistributed": zod.number(),
   "activeStakers": zod.number(),
-  "rewardRatePerDay": zod.number()
+  "rewardRatePerDay": zod.number(),
+  "rewardsPool": zod.number().optional(),
+  "paused": zod.boolean().optional()
 })
 
 
@@ -310,7 +314,8 @@ export const ListLiquidationsResponse = zod.array(ListLiquidationsResponseItem)
 export const ExecuteLiquidationBody = zod.object({
   "positionId": zod.number(),
   "liquidator": zod.string(),
-  "debtToCover": zod.number()
+  "debtToCover": zod.number(),
+  "txHash": zod.string().optional()
 })
 
 export const ExecuteLiquidationResponse = zod.object({

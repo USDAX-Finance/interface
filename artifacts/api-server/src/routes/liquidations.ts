@@ -7,9 +7,9 @@ import {
 } from "@workspace/api-zod";
 import { eq, lt, and, asc } from "drizzle-orm";
 import { TOKEN_PRICES } from "../lib/prices.js";
-import { generateTxHash } from "../lib/txHash.js";
+import { LIQ_THRESH } from "../lib/seed.js";
 
-const LIQUIDATION_BONUS = 10; // 10%
+const LIQUIDATION_BONUS = 5;  // 5% — matches VaultEngine on-chain (liqBonus=500 bps)
 const MIN_HEALTH_FACTOR = 1.0;
 
 const router: IRouter = Router();
@@ -90,8 +90,9 @@ router.post("/liquidations", async (req, res): Promise<void> => {
   const newUsdaxMinted = usdaxDebt - debtToCover;
   const newCollateralAmount = Number(position.collateralAmount) - totalCollateralReceived;
   const newCollateralValueUsd = newCollateralAmount * price;
+  const liqThresh = LIQ_THRESH[position.collateralToken] ?? 0.80;
   const newHealthFactor =
-    newUsdaxMinted > 0 ? (newCollateralValueUsd * 0.8) / newUsdaxMinted : 999;
+    newUsdaxMinted > 0 ? (newCollateralValueUsd * liqThresh) / newUsdaxMinted : 999;
   const newCollateralRatio = newUsdaxMinted > 0 ? (newCollateralValueUsd / newUsdaxMinted) * 100 : 999;
   const newStatus = newUsdaxMinted <= 0 ? "liquidated" : "active";
 
@@ -107,12 +108,14 @@ router.post("/liquidations", async (req, res): Promise<void> => {
     })
     .where(eq(positionsTable.id, positionId));
 
+  const liquidateTxHash = typeof req.body.txHash === "string" ? req.body.txHash : null;
+
   await db.insert(activityEventsTable).values({
     type: "LIQUIDATE",
     user: liquidator,
     amount: String(debtToCover),
     token: "USDAX",
-    txHash: generateTxHash(),
+    txHash: liquidateTxHash,
   });
 
   const result = {

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "wouter";
-import { useGetProtocolStats } from "@workspace/api-client-react";
+import { useGetProtocolStats, useGetStakingStats } from "@workspace/api-client-react";
 import { formatCompact } from "@/lib/utils";
 import {
   ArrowRight, Lock, BarChart2, Zap,
@@ -258,6 +258,18 @@ function Chip({ label }: { label: string }) {
 }
 
 function MockDashboard() {
+  const { data: staking } = useGetStakingStats();
+  const APY_CAP = 9_999;
+  const rawApy  = staking ? (staking.rewardsPerYear / Math.max(Number((staking as any).totalStaked ?? staking.totalStakers), 1)) : 0;
+  const apyVal  = staking
+    ? (() => {
+        const totalStaked = Number((staking as any).totalStakedAmount ?? 0);
+        const rewardsYear = Number((staking as any).rewardsPerYear ?? 1_000_000);
+        const apy = totalStaked > 0 ? (rewardsYear / totalStaked) * 100 : 0;
+        return apy > APY_CAP ? `>${APY_CAP.toLocaleString()}%` : apy > 0 ? `${apy.toFixed(1)}%` : "~15%";
+      })()
+    : "~15%";
+
   const leftChips  = ["Minting", "USDAX", "Yield"];
   const rightChips = ["Staking", "Governance", "APX"];
 
@@ -444,12 +456,12 @@ function MockDashboard() {
 
 function Ticker() {
   const { data: proto } = useGetProtocolStats();
-  const tvl       = proto ? `TVL: $${formatCompact(proto.tvlUsd)}` : "TVL: —";
-  const minted    = proto ? `USDAX minted: ${formatCompact(proto.usdaxSupply)}` : "USDAX minted: —";
-  const vaults    = proto ? `Active vaults: ${proto.totalPositions}` : "Active vaults: —";
+  const tvl       = proto ? `TVL: $${formatCompact(proto.tvlUsd)}` : "TVL: loading";
+  const minted    = proto ? `USDAX minted: ${formatCompact(proto.usdaxSupply)}` : "USDAX minted: loading";
+  const vaults    = proto ? `Active vaults: ${proto.totalPositions}` : "Active vaults: loading";
   const cratio    = proto && proto.usdaxSupply > 0
     ? `C-Ratio: ${(proto.tvlUsd / proto.usdaxSupply * 100).toFixed(0)}%`
-    : "C-Ratio: —";
+    : "C-Ratio: loading";
 
   const items: React.ReactNode[] = [
     "USDAX pegged at $1.00",

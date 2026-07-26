@@ -102,6 +102,20 @@ const pubClient = createPublicClient({
   pollingInterval: 2_000,
 });
 
+/* ─── Cooldown config ─── */
+const COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 hours
+const getCooldownKey = (address: string, tokenId: string) =>
+  `usdax_faucet_cd_${address.toLowerCase()}_${tokenId}`;
+
+function formatCountdown(ms: number): string {
+  if (ms <= 0) return "00:00:00";
+  const s = Math.floor(ms / 1000);
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = s % 60;
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
+}
+
 /* ─── Per-token state ─── */
 type TxStatus = "idle" | "switching" | "signing" | "pending" | "success" | "error";
 interface TokenState {
@@ -154,22 +168,25 @@ function Step({ n, title, desc, active }: { n: string; title: string; desc: stri
 
 /* ─── Token card ─── */
 function TokenCard({
-  token, state, onClaim, onRefresh, walletReady,
+  token, state, onClaim, onRefresh, walletReady, cooldownUntil, now,
 }: {
   token: typeof TOKENS[number];
   state: TokenState;
   onClaim: () => void;
   onRefresh: () => void;
   walletReady: boolean;
+  cooldownUntil: number;
+  now: number;
 }) {
   const { status, txHash, errorMsg, balance } = state;
   const busy = status === "switching" || status === "signing" || status === "pending";
+  const remaining = Math.max(0, cooldownUntil - now);
+  const inCooldown = remaining > 0;
 
   const btnLabel =
-    status === "switching" ? "Switching network…" :
-    status === "signing"   ? "Confirm in wallet…" :
-    status === "pending"   ? "Broadcasting…"      :
-    status === "success"   ? "Claim again"         :
+    busy          ? (status === "switching" ? "Switching network…" : status === "signing" ? "Confirm in wallet…" : "Broadcasting…") :
+    inCooldown    ? `Next claim in ${formatCountdown(remaining)}` :
+    status === "success" ? "Claim again" :
     `Claim ${token.claimLabel}`;
 
   return (
@@ -224,7 +241,7 @@ function TokenCard({
           <span className="flex items-center gap-1.5 font-mono" style={{ color: "hsl(0 0% 65%)" }}>
             {balance !== undefined
               ? `${parseFloat(balance).toLocaleString(undefined, { maximumFractionDigits: 4 })} ${token.symbol}`
-              : <span style={{ color: DIM }}>—</span>
+              : <span style={{ color: DIM }}>...</span>
             }
             <button onClick={onRefresh} className="transition-opacity hover:opacity-60" style={{ color: DIM }}>
               <RefreshCw className="w-3 h-3" />
@@ -266,19 +283,34 @@ function TokenCard({
         </div>
       )}
 
+      {/* Cooldown bar */}
+      {inCooldown && (
+        <div className="rounded-xl px-4 py-3 flex items-center gap-2.5"
+          style={{ background: `${AMBER}08`, border: `1px solid ${AMBER}20` }}>
+          <Clock className="w-4 h-4 flex-shrink-0" style={{ color: AMBER }} />
+          <div className="flex-1">
+            <p className="text-[11px] font-semibold" style={{ color: AMBER }}>Cooldown active</p>
+            <p className="text-[11px] font-mono mt-0.5" style={{ color: DIM }}>
+              Next claim available in <span className="font-black" style={{ color: AMBER }}>{formatCountdown(remaining)}</span>
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Claim button */}
       <button
         onClick={onClaim}
-        disabled={!walletReady || busy}
+        disabled={!walletReady || busy || inCooldown}
         className="w-full py-3 rounded-xl text-[13px] font-bold flex items-center justify-center gap-2 transition-all"
         style={{
-          background: walletReady && !busy ? token.color : "hsl(0 0% 10%)",
-          color: walletReady && !busy ? "hsl(0 0% 4%)" : "hsl(0 0% 35%)",
-          cursor: !walletReady || busy ? "not-allowed" : "pointer",
-          boxShadow: walletReady && !busy ? `0 0 20px ${token.color}22` : "none",
+          background: walletReady && !busy && !inCooldown ? token.color : "hsl(0 0% 10%)",
+          color: walletReady && !busy && !inCooldown ? "hsl(0 0% 4%)" : "hsl(0 0% 35%)",
+          cursor: !walletReady || busy || inCooldown ? "not-allowed" : "pointer",
+          boxShadow: walletReady && !busy && !inCooldown ? `0 0 20px ${token.color}22` : "none",
         }}
       >
         {busy && <Loader2 className="w-4 h-4 animate-spin" />}
+        {inCooldown && <Clock className="w-4 h-4" />}
         {btnLabel}
       </button>
     </div>
@@ -293,6 +325,27 @@ export default function Faucet() {
   const [states, setStates] = useState<Record<string, TokenState>>(
     () => Object.fromEntries(TOKENS.map((t) => [t.id, { status: "idle" }]))
   );
+
+  /* ── Cooldown: localStorage per address+token ── */
+  const [cooldowns, setCooldowns] = useState<Record<string, number>>({});
+  const [now, setNow] = useState(() => Date.now());
+
+  /* Tick every second to update countdowns */
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  /* Load cooldowns from localStorage when address changes */
+  useEffect(() => {
+    if (!address) return;
+    const loaded: Record<string, number> = {};
+    TOKENS.forEach((t) => {
+      const raw = localStorage.getItem(getCooldownKey(address, t.id));
+      if (raw) loaded[t.id] = parseInt(raw, 10) + COOLDOWN_MS;
+    });
+    setCooldowns(loaded);
+  }, [address]);
 
   /* ── Balance fetch ── */
   const fetchBalance = useCallback(async (tokenId: string) => {
@@ -378,6 +431,11 @@ export default function Faucet() {
 
       set({ status: "success", txHash: hash });
       fetchBalance(tokenId);
+      /* Save cooldown timestamp */
+      if (address) {
+        localStorage.setItem(getCooldownKey(address, tokenId), String(Date.now()));
+        setCooldowns((prev) => ({ ...prev, [tokenId]: Date.now() + COOLDOWN_MS }));
+      }
 
     } catch (e: unknown) {
       const err = e as { message?: string; shortMessage?: string; code?: number };
@@ -558,6 +616,8 @@ export default function Faucet() {
               walletReady={walletReady}
               onClaim={() => handleClaim(token.id)}
               onRefresh={() => fetchBalance(token.id)}
+              cooldownUntil={cooldowns[token.id] ?? 0}
+              now={now}
             />
           ))}
         </div>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 import { formatCompact, formatCompactNum } from "@/lib/utils";
@@ -6,7 +6,8 @@ import { useGetNetworkStats } from "@workspace/api-client-react";
 import { useAuth } from "@/contexts/privy-auth";
 import {
   Activity, Layers, TrendingUp, Crosshair, Network, ArrowLeft, Sprout,
-  BarChart2, ArrowUpDown, Users, Menu, X, Wallet, LogOut,
+  BarChart2, ArrowUpDown, Users, Menu, X, Wallet, LogOut, ScrollText,
+  ChevronDown,
 } from "lucide-react";
 import { formatAddress } from "@/lib/utils";
 
@@ -17,14 +18,107 @@ const MUTED   = "hsl(0 0% 26%)";
 const CARD_BG = "hsl(0 0% 6%)";
 const NETWORK_NAME = "Robinhood Chain";
 
-const navLinks = [
-  { href: "/app",              label: "Pulse",    icon: Activity,    tip: "Protocol overview"  },
-  { href: "/app/nexus",        label: "Nexus",    icon: Network,     tip: "USDAX flow & RWA"   },
-  { href: "/app/positions",    label: "Vaults",   icon: Layers,      tip: "Debt positions"     },
-  { href: "/app/yield",        label: "Harvest",  icon: Sprout,      tip: "Yield pools"        },
-  { href: "/app/staking",      label: "Earn",     icon: TrendingUp,  tip: "APX staking"        },
-  { href: "/app/liquidations", label: "Hunt",     icon: Crosshair,   tip: "Liquidation hunter" },
+type SubLink  = { href: string; label: string; icon: React.ElementType; tip: string };
+type NavEntry =
+  | { href: string; label: string; icon: React.ElementType; tip: string; children?: undefined }
+  | { href: string; label: string; icon: React.ElementType; tip: string; children: SubLink[] };
+
+const navLinks: NavEntry[] = [
+  { href: "/app",             label: "Monitor",      icon: Activity,   tip: "Protocol overview"        },
+  { href: "/app/nexus",       label: "Protocol",     icon: Network,    tip: "How USDAX works"          },
+  { href: "/app/positions",   label: "Vaults",       icon: Layers,     tip: "Borrow USDAX"             },
+  { href: "/app/yield",       label: "Yield",        icon: Sprout,     tip: "Earn yield on USDAX"      },
+  {
+    href: "/app/staking", label: "Staking", icon: TrendingUp, tip: "Stake APX, earn rewards",
+    children: [
+      { href: "/app/staking",          label: "Staking",  icon: TrendingUp, tip: "Stake APX, earn rewards"   },
+      { href: "/app/staking-activity", label: "Activity", icon: ScrollText, tip: "Live transaction feed"     },
+    ],
+  },
+  { href: "/app/liquidations", label: "Liquidations", icon: Crosshair, tip: "Liquidate at-risk vaults"  },
 ];
+
+/* ── Desktop dropdown for nav groups ── */
+function NavDropdown({ entry, location }: { entry: NavEntry & { children: SubLink[] }; location: string }) {
+  const [open, setOpen] = useState(false);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isGroupActive = entry.children.some((c) => location === c.href);
+  const Icon = entry.icon;
+
+  const handleMouseEnter = () => {
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+    setOpen(true);
+  };
+  const handleMouseLeave = () => {
+    closeTimer.current = setTimeout(() => setOpen(false), 120);
+  };
+
+  return (
+    <div className="relative" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+      {/* Trigger button */}
+      <button
+        className={cn(
+          "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-bold transition-all tracking-wide select-none",
+          isGroupActive
+            ? ""
+            : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+        )}
+        style={isGroupActive ? { background: `${LIME}12`, color: LIME, border: `1px solid ${LIME}20` } : {}}
+      >
+        <Icon className="h-3.5 w-3.5" />
+        {entry.label}
+        <ChevronDown
+          className="h-2.5 w-2.5 transition-transform"
+          style={{ transform: open ? "rotate(180deg)" : "rotate(0deg)" }}
+        />
+      </button>
+
+      {/* Dropdown panel */}
+      <div
+        className="absolute left-0 top-full mt-1 rounded-xl overflow-hidden z-50 min-w-[168px]"
+        style={{
+          background: "hsl(0 0% 7%)",
+          border: `1px solid ${BORDER}`,
+          boxShadow: "0 8px 24px hsl(0 0% 0% / 0.5)",
+          opacity: open ? 1 : 0,
+          transform: open ? "translateY(0) scale(1)" : "translateY(-6px) scale(0.97)",
+          pointerEvents: open ? "auto" : "none",
+          transition: "opacity 0.15s, transform 0.15s",
+        }}
+      >
+        {entry.children.map((child) => {
+          const CIcon = child.icon;
+          const active = location === child.href;
+          return (
+            <Link
+              key={child.href}
+              href={child.href}
+              onClick={() => setOpen(false)}
+              className={cn(
+                "flex items-center gap-2.5 px-4 py-2.5 text-[12px] font-bold transition-all",
+                active ? "" : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+              )}
+              style={active ? { color: LIME, background: `${LIME}10` } : {}}
+            >
+              <CIcon className="h-3.5 w-3.5 flex-shrink-0" />
+              <div>
+                <div>{child.label}</div>
+                <div className="text-[9px] font-normal font-mono mt-0.5" style={{ color: "hsl(0 0% 32%)" }}>
+                  {child.tip}
+                </div>
+              </div>
+            </Link>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+/* ── USDAX coin icon (used as React.ElementType in stat pills) ── */
+function USDAxCoin({ className, style }: { className?: string; style?: React.CSSProperties }) {
+  return <img src="/usdax-coin.png" alt="USDAX" className={className} style={{ ...style, borderRadius: "50%", objectFit: "cover" as const, filter: "opacity(0.6)" }} />;
+}
 
 /* ── Stat pill for the ticker strip ── */
 function StatPill({
@@ -50,50 +144,59 @@ function StatPill({
   );
 }
 
-/* ── Stats ticker (sub-bar above main nav row) ── */
-function StatsTicker() {
+/* ── App footer with live protocol stats ── */
+export function AppFooter() {
   const { data, isLoading } = useGetNetworkStats();
 
-  const pills = [
-    { icon: BarChart2,   label: "TVL",     value: data ? formatCompact(data.tvlUsd) : "···",                   color: LIME    },
-    { icon: ArrowUpDown, label: "Vol 24h", value: data ? formatCompact(data.volume24hUsd) : "···",              color: LIME    },
-    { icon: Activity,    label: "Txs",     value: data ? formatCompactNum(data.totalTransactions) : "···",      color: EMERALD },
-    { icon: Users,       label: "Users",   value: data ? formatCompactNum(data.uniqueUsers) : "···",            color: EMERALD },
-    { icon: Layers,      label: "USDAX",   value: data ? `${formatCompactNum(data.usdaxSupply)} USDAX` : "···", color: LIME    },
+  const stats = [
+    { icon: BarChart2,   label: "Total Value Locked",  value: data ? `$${formatCompact(data.tvlUsd)}` : "···",               color: LIME    },
+    { icon: ArrowUpDown, label: data && data.volume24hUsd > 0 ? "Volume 24h" : "Volume Total", value: data ? `$${formatCompact(data.volume24hUsd > 0 ? data.volume24hUsd : data.totalVolumeUsd)}` : "···", color: LIME },
+    { icon: Activity,    label: "Transactions",         value: data ? formatCompactNum(data.totalTransactions) : "···",        color: EMERALD },
+    { icon: Users,       label: "Users",                value: data ? formatCompactNum(data.uniqueUsers) : "···",              color: EMERALD },
+    { icon: USDAxCoin,   label: "USDAX Supply",         value: data ? `${formatCompactNum(data.usdaxSupply)} USDAX` : "···",   color: LIME    },
   ];
 
   return (
-    <div
-      className="w-full hidden sm:flex items-center justify-between px-6"
+    <footer
+      className="w-full mt-auto"
       style={{
-        height: 28,
         background: "hsl(0 0% 2.5%)",
-        borderBottom: `1px solid ${BORDER}`,
+        borderTop: `1px solid ${BORDER}`,
       }}
     >
-      {/* Left: live stats */}
-      <div className="flex items-center gap-4 overflow-x-auto">
-        {pills.map((p, i) => (
-          <StatPill key={i} {...p} loading={isLoading} />
-        ))}
-      </div>
+      <div className="max-w-screen-xl mx-auto px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
 
-      {/* Right: network badge */}
-      <div className="flex items-center gap-3 flex-shrink-0">
-        <span
-          className="font-mono text-[9px] font-black px-1.5 py-0.5 rounded uppercase tracking-widest"
-          style={{ background: "hsl(35 92% 60% / 0.10)", color: "hsl(35 92% 60%)", border: "1px solid hsl(35 92% 60% / 0.22)" }}
-        >
-          TESTNET
-        </span>
-        <span className="font-mono text-[10px]" style={{ color: MUTED }}>EVM&nbsp;46630</span>
-        {data && (
-          <span className="font-mono text-[10px]" style={{ color: "hsl(0 0% 17%)" }}>
-            Updated {new Date(data.lastUpdated).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false, timeZone: "UTC" })} UTC
+        {/* Left: live stats grid */}
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+          {stats.map((s, i) => {
+            const Icon = s.icon;
+            return (
+              <div key={i} className="flex items-center gap-2">
+                <Icon className="w-3.5 h-3.5 flex-shrink-0" style={{ color: MUTED }} />
+                <span className="text-xs" style={{ color: MUTED }}>{s.label}</span>
+                <span
+                  className={cn("text-xs font-bold font-mono", isLoading && "animate-pulse")}
+                  style={{ color: isLoading ? MUTED : s.color }}
+                >
+                  {isLoading ? "···" : s.value}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Right: network info */}
+        <div className="flex items-center gap-3 flex-shrink-0">
+          <span
+            className="text-[11px] font-bold font-mono px-2 py-0.5 rounded uppercase tracking-widest"
+            style={{ background: "hsl(35 92% 60% / 0.10)", color: "hsl(35 92% 60%)", border: "1px solid hsl(35 92% 60% / 0.22)" }}
+          >
+            Testnet
           </span>
-        )}
+          <span className="text-xs font-mono" style={{ color: MUTED }}>Robinhood Chain · EVM 46630</span>
+        </div>
       </div>
-    </div>
+    </footer>
   );
 }
 
@@ -226,6 +329,48 @@ function MobileDrawer({
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-auto">
           {navLinks.map((link) => {
             const Icon = link.icon;
+
+            if (link.children) {
+              const isGroupActive = link.children.some((c) => location === c.href);
+              return (
+                <div key={link.href}>
+                  {/* Group header — not clickable, just label */}
+                  <div
+                    className="flex items-center gap-3 px-4 py-2 rounded-xl text-sm font-bold"
+                    style={{ color: isGroupActive ? LIME : "hsl(0 0% 32%)" }}
+                  >
+                    <Icon className="h-4 w-4 flex-shrink-0" />
+                    {link.label}
+                  </div>
+                  {/* Sub-items indented */}
+                  <div className="ml-4 pl-3 space-y-0.5" style={{ borderLeft: `1px solid ${BORDER}` }}>
+                    {link.children.map((child) => {
+                      const CIcon = child.icon;
+                      const active = location === child.href;
+                      return (
+                        <Link
+                          key={child.href}
+                          href={child.href}
+                          onClick={onClose}
+                          className={cn(
+                            "flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-bold transition-all w-full",
+                            active ? "" : "text-muted-foreground hover:text-foreground hover:bg-white/5"
+                          )}
+                          style={active ? { background: `${LIME}12`, color: LIME, border: `1px solid ${LIME}22` } : {}}
+                        >
+                          <CIcon className="h-3.5 w-3.5 flex-shrink-0" />
+                          {child.label}
+                          <span className="ml-auto text-[10px] font-mono font-normal" style={{ color: "hsl(0 0% 28%)" }}>
+                            {child.tip}
+                          </span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            }
+
             const active = location === link.href;
             return (
               <Link
@@ -318,9 +463,6 @@ export function Navbar() {
           borderBottom: `1px solid ${BORDER}`,
         }}
       >
-        {/* ── Stats ticker ── */}
-        <StatsTicker />
-
         {/* ── Main nav row ── */}
         <div className="max-w-screen-xl mx-auto flex h-14 items-center justify-between px-6">
 
@@ -342,6 +484,9 @@ export function Navbar() {
 
             <nav className="hidden md:flex items-center gap-0.5">
               {navLinks.map((link) => {
+                if (link.children) {
+                  return <NavDropdown key={link.href} entry={link} location={location} />;
+                }
                 const Icon = link.icon;
                 const active = location === link.href;
                 return (

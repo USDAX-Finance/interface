@@ -1,0 +1,26 @@
+Partner yang Relevan untuk USDAX — Berdasarkan Apa yang Protokol Ini Lakukan
+🔑 Robinhood (Perusahaan)
+Bukan hanya chain-nya — perusahaannya. Robinhood membangun chain ini untuk suatu alasan. USDAX adalah stablecoin pertama yang serius di atas chain mereka. Ini bukan sekadar dApp biasa — ini bisa jadi showcase utama Robinhood Chain ke publik retail mereka yang sudah puluhan juta akun. Jalur kontak: tim ekosistem Robinhood Chain, bukan support biasa.
+
+💧 Lido Finance
+USDAX menerima stETH sebagai collateral. Lido adalah penerbit stETH. Ini koneksi teknis langsung — mereka punya kepentingan agar stETH dipakai di lebih banyak protokol. Approach: minta co-announcement, atau minta masuk ke daftar ekosistem stETH di dokumentasi Lido.
+
+🏦 Ondo Finance / Backed Finance / Centrifuge
+USDAX menerima RWA sebagai collateral (treasury bond, real estate, corporate bond). Ketiga proyek ini adalah penerbit RWA on-chain terbesar. Integrasi dengan salah satu dari mereka berarti collateral RWA di USDAX bisa on-chain dan terverifikasi — bukan hanya simbol. Ini yang membedakan USDAX dari protokol stablecoin generik.
+
+📈 Pendle Finance
+USDAX punya USDAxSavings — yield-bearing stablecoin. Pendle mengizinkan user untuk memisahkan dan memperdagangkan yield dari principal. USDAX Savings bisa jadi underlying asset di Pendle — user Pendle bisa beli yield USDAX tanpa hold USDAX. Ini menciptakan demand dari ekosistem Pendle yang sudah besar.
+
+🔁 Curve Finance
+Stablecoin tanpa pool di Curve bukan stablecoin yang serius di mata DeFi. Curve adalah standar de facto untuk likuiditas stablecoin. Pool USDAX/USDC atau USDAX/FRAX di Curve memberikan: peg stabilitas nyata, volume trading, dan legitimasi instan di mata protokol lain.
+
+🌉 LayerZero / Axelar
+USDAX saat ini hanya ada di Robinhood Chain. Supaya USDAX bisa dipakai di Arbitrum, Base, atau Ethereum — butuh bridge. LayerZero dan Axelar adalah infrastruktur cross-chain yang sudah dipakai protokol besar. Ini membuka USDAX ke user yang tidak mau pindah chain hanya untuk mint stablecoin.
+
+🏛️ Sky (MakerDAO) / Liquity / Frax
+Ini bukan kompetitor langsung — ini adalah protokol yang sudah terbukti dengan model yang mirip. Koneksi ke komunitas mereka (Discord, forum governance) bisa membuka jalur ke developer dan researcher DeFi yang bisa bantu audit konsep, review mekanisme, atau bahkan migrasi sebagian likuiditas mereka ke USDAX sebagai diversifikasi.
+
+📊 Chaos Labs / Gauntlet
+Dua perusahaan ini adalah risk management untuk DeFi protokol besar — mereka yang set parameter risiko di Aave, Compound, Spark. Kalau USDAX mau expand collateral atau naikkan debt ceiling, bekerjasama dengan salah satu dari mereka memberikan credibility teknis yang tidak bisa dibeli dengan marketing.
+
+Mana yang mau dikejar pertama? Saya bisa bantu tulis outreach yang spesifik per target.

@@ -11,17 +11,20 @@ export const getListYieldPoolsQueryKey    = () => ["yield", "pools"]     as cons
 export const getListYieldPositionsQueryKey= () => ["yield", "positions"] as const;
 
 /* ─── fetchers ─── */
-const fetchYieldStats      = () => customFetch<YieldStats>    ("/api/yield/stats");
+const fetchYieldStats     = (owner?: string) =>
+  customFetch<YieldStats>    (owner ? `/api/yield/stats?owner=${encodeURIComponent(owner)}` : "/api/yield/stats");
 const fetchYieldPools      = () => customFetch<YieldPool[]>   ("/api/yield/pools");
-const fetchYieldPositions  = () => customFetch<YieldPosition[]>("/api/yield/positions");
+const fetchYieldPositions  = (owner?: string) =>
+  customFetch<YieldPosition[]>(owner ? `/api/yield/positions?owner=${encodeURIComponent(owner)}` : "/api/yield/positions");
 
 /* ─── hooks ─── */
 export function useGetYieldStats(
+  owner?: string,
   options?: { query?: UseQueryOptions<YieldStats> },
 ) {
   return useQuery({
-    queryKey: getGetYieldStatsQueryKey(),
-    queryFn:  fetchYieldStats,
+    queryKey: [...getGetYieldStatsQueryKey(), owner ?? ""],
+    queryFn:  () => fetchYieldStats(owner),
     ...options?.query,
   });
 }
@@ -37,11 +40,12 @@ export function useListYieldPools(
 }
 
 export function useListYieldPositions(
+  owner?: string,
   options?: { query?: UseQueryOptions<YieldPosition[]> },
 ) {
   return useQuery({
-    queryKey: getListYieldPositionsQueryKey(),
-    queryFn:  fetchYieldPositions,
+    queryKey: [...getListYieldPositionsQueryKey(), owner ?? ""],
+    queryFn:  () => fetchYieldPositions(owner),
     ...options?.query,
   });
 }

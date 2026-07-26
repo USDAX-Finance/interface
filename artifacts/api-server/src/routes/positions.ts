@@ -12,7 +12,7 @@ import {
   UpdatePositionResponse,
   ClosePositionResponse,
 } from "@workspace/api-zod";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, sql } from "drizzle-orm";
 import { TOKEN_PRICES } from "../lib/prices.js";
 
 // Per-token liquidation thresholds (match seed.ts)
@@ -43,8 +43,6 @@ function calcCollateralRatio(collateralValueUsd: number, usdaxMinted: number): n
   return (collateralValueUsd / usdaxMinted) * 100;
 }
 
-import { generateTxHash } from "../lib/txHash.js";
-
 function mapPosition(p: any) {
   return {
     id: p.id,
@@ -64,7 +62,34 @@ function mapPosition(p: any) {
 const router: IRouter = Router();
 
 router.get("/positions", async (req, res): Promise<void> => {
-  const positions = await db.select().from(positionsTable).orderBy(desc(positionsTable.createdAt));
+  const { owner, status } = req.query as { owner?: string; status?: string };
+
+  let positions;
+  if (owner && status) {
+    positions = await db
+      .select()
+      .from(positionsTable)
+      .where(sql`lower(${positionsTable.owner}) = lower(${owner}) AND ${positionsTable.status} = ${status}`)
+      .orderBy(desc(positionsTable.createdAt));
+  } else if (owner) {
+    positions = await db
+      .select()
+      .from(positionsTable)
+      .where(sql`lower(${positionsTable.owner}) = lower(${owner})`)
+      .orderBy(desc(positionsTable.createdAt));
+  } else if (status) {
+    positions = await db
+      .select()
+      .from(positionsTable)
+      .where(eq(positionsTable.status, status))
+      .orderBy(desc(positionsTable.createdAt));
+  } else {
+    positions = await db
+      .select()
+      .from(positionsTable)
+      .orderBy(desc(positionsTable.createdAt));
+  }
+
   res.json(ListPositionsResponse.parse(positions.map(mapPosition)));
 });
 
@@ -75,21 +100,16 @@ router.post("/positions", async (req, res): Promise<void> => {
     return;
   }
 
-  const { owner, collateralToken, collateralAmount, usdaxToMint } = parsed.data;
+  const { owner, collateralToken, collateralAmount, usdaxToMint, depositTxHash, mintTxHash } = parsed.data;
   const price = TOKEN_PRICES[collateralToken] ?? 0;
   const collateralValueUsd = collateralAmount * price;
   const healthFactor = calcHealthFactor(collateralValueUsd, usdaxToMint, collateralToken);
   const collateralRatio = calcCollateralRatio(collateralValueUsd, usdaxToMint);
 
-  if (healthFactor < 1.0) {
-    res.status(400).json({ error: "Health factor would be below 1.0. Add more collateral or mint less USDAX." });
-    return;
-  }
-
   const [position] = await db
     .insert(positionsTable)
     .values({
-      owner,
+      owner: owner.toLowerCase(),
       collateralToken,
       collateralAmount: String(collateralAmount),
       collateralValueUsd: String(collateralValueUsd),
@@ -100,21 +120,21 @@ router.post("/positions", async (req, res): Promise<void> => {
     })
     .returning();
 
-  // Record activity
+  // Only store real on-chain tx hashes — null when not provided (never fake)
   await db.insert(activityEventsTable).values([
     {
       type: "DEPOSIT",
-      user: owner,
+      user: owner.toLowerCase(),
       amount: String(collateralAmount),
       token: collateralToken,
-      txHash: generateTxHash(),
+      txHash: depositTxHash ?? null,
     },
     {
       type: "MINT",
-      user: owner,
+      user: owner.toLowerCase(),
       amount: String(usdaxToMint),
       token: "USDAX",
-      txHash: generateTxHash(),
+      txHash: mintTxHash ?? null,
     },
   ]);
 
@@ -162,7 +182,7 @@ router.patch("/positions/:id", async (req, res): Promise<void> => {
   const newUsdaxMinted = parsed.data.usdaxMinted ?? Number(existing.usdaxMinted);
   const price = TOKEN_PRICES[existing.collateralToken] ?? 0;
   const collateralValueUsd = newCollateralAmount * price;
-  const healthFactor = calcHealthFactor(collateralValueUsd, newUsdaxMinted);
+  const healthFactor = calcHealthFactor(collateralValueUsd, newUsdaxMinted, existing.collateralToken);
   const collateralRatio = calcCollateralRatio(collateralValueUsd, newUsdaxMinted);
 
   if (healthFactor < 1.0) {
@@ -199,6 +219,10 @@ router.delete("/positions/:id", async (req, res): Promise<void> => {
     return;
   }
 
+  // Accept real on-chain tx hashes from query params — null if not provided (never fake)
+  const burnTxHash   = typeof req.query.burnTxHash   === "string" ? req.query.burnTxHash   : null;
+  const redeemTxHash = typeof req.query.redeemTxHash === "string" ? req.query.redeemTxHash : null;
+
   const [closed] = await db
     .update(positionsTable)
     .set({ status: "closed" })
@@ -211,14 +235,14 @@ router.delete("/positions/:id", async (req, res): Promise<void> => {
       user: existing.owner,
       amount: existing.usdaxMinted,
       token: "USDAX",
-      txHash: generateTxHash(),
+      txHash: burnTxHash,
     },
     {
       type: "REDEEM",
       user: existing.owner,
       amount: existing.collateralAmount,
       token: existing.collateralToken,
-      txHash: generateTxHash(),
+      txHash: redeemTxHash,
     },
   ]);
 

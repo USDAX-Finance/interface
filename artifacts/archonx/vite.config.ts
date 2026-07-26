@@ -56,6 +56,11 @@ export default defineConfig({
         '..',
         'attached_assets',
       ),
+      // Force all packages (privy, tanstack-query, etc.) to resolve to the
+      // same single React instance — prevents "Invalid hook call" errors that
+      // occur when a shared library bundles a separate React copy.
+      'react': path.resolve(import.meta.dirname, 'node_modules', 'react'),
+      'react-dom': path.resolve(import.meta.dirname, 'node_modules', 'react-dom'),
     },
     dedupe: ['react', 'react-dom'],
   },

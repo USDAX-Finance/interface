@@ -67,6 +67,9 @@ const SECTIONS = [
     icon: Code2,
     items: [
       { id: "contracts",           label: "Contract Addresses" },
+      { id: "contracts-testnet",   label: "↳ Testnet (46630)" },
+      { id: "contracts-mainnet",   label: "↳ Mainnet (4663)" },
+      { id: "contracts-pending",   label: "↳ Pending" },
       { id: "api-reference",       label: "API Reference" },
       { id: "sdk",                 label: "SDK" },
     ],
@@ -156,7 +159,7 @@ function ParamTable({ rows }: { rows: { param: string; value: string; desc: stri
 
 const EXPLORER = "https://explorer.testnet.chain.robinhood.com";
 
-function ContractTable({ rows }: { rows: { name: string; address: string; desc: string }[] }) {
+function ContractTable({ rows, explorer = EXPLORER }: { rows: { name: string; address: string; desc: string }[]; explorer?: string }) {
   const [copied, setCopied] = useState<string | null>(null);
   function copy(addr: string) {
     navigator.clipboard.writeText(addr);
@@ -183,7 +186,7 @@ function ContractTable({ rows }: { rows: { name: string; address: string; desc: 
                 {isDeployed(r.address) ? (
                   <div className="flex items-center gap-2">
                     <a
-                      href={`${EXPLORER}/address/${r.address}`}
+                      href={`${explorer}/address/${r.address}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="font-mono text-[11px] transition-colors"
@@ -278,12 +281,12 @@ function Content() {
           USDAX Finance is a decentralized stablecoin and yield infrastructure built on{" "}
           <Highlight>Robinhood Chain (EVM 46630)</Highlight>. It issues <Highlight>USDAX</Highlight>, a
           USD-pegged stablecoin overcollateralized by on-chain assets, and <Highlight>APX</Highlight>, the
-          governance and staking token that captures protocol revenue and coordinates upgrades.
+          protocol token, live on Robinhood Chain Mainnet (4663) for staking. Governance is a planned future feature.
         </Prose>
         <Prose>
           The protocol enables any wallet holder to mint USDAX by depositing collateral, earn savings yield
-          via the on-chain savings rate module, and (once APX launches) stake APX to earn protocol fees
-          and participate in on-chain governance.
+          via the <Highlight>USDAxSavings</Highlight> module (live on testnet), and stake APX on Robinhood
+          Chain Mainnet to earn APX rewards. On-chain governance activates once the governance contract is deployed.
         </Prose>
         <InfoBox>
           USDAX Finance is non-custodial. Your assets remain in smart contracts, no team multisig holds
@@ -295,14 +298,14 @@ function Content() {
       <SectionHeading id="how-it-works">How It Works</SectionHeading>
       <Prose>
         USDAX Finance operates a two-token system. USDAX is the stable unit of account; APX is the
-        volatile backstop and governance layer. The protocol collects stability fees on outstanding USDAX
-        debt and distributes them to APX stakers.
+        staking and (future) governance token. APX staking is live on Mainnet (4663). Rewards come from
+        APX emissions (~7.7% APY), not from protocol fee revenue. Stability fees are currently unallocated.
       </Prose>
       <div className="grid sm:grid-cols-3 gap-4 my-6">
         {[
           { icon: "①", title: "Deposit Collateral", desc: "Deposit ETH, WBTC, USDC or other approved assets as collateral into a Vault." },
           { icon: "②", title: "Mint USDAX",         desc: "Borrow USDAX against your collateral at a minimum 150% collateral ratio." },
-          { icon: "③", title: "Earn & Govern",       desc: "Deposit USDAX into the savings pool (4.20% APY), or stake APX at launch to earn protocol fees and vote on parameters." },
+          { icon: "③", title: "Earn & Stake",       desc: "Deposit USDAX into USDAxSavings (testnet live), or stake APX on Robinhood Chain Mainnet (~7.7% APY in APX rewards). Governance voting activates once the governance contract is deployed." },
         ].map((s) => (
           <div key={s.title} className="rounded-xl p-5" style={{ background: CARD_BG, border: `1px solid ${BORDER}` }}>
             <div className="text-2xl font-black mb-3" style={{ color: LIME }}>{s.icon}</div>
@@ -315,15 +318,16 @@ function Content() {
       {/* ── ARCHITECTURE ── */}
       <SectionHeading id="architecture">Architecture</SectionHeading>
       <Prose>
-        The protocol consists of five core smart-contract modules, all deployed on Robinhood Chain. Each
-        module is upgradeable via governance timelock (48-hour delay).
+        The protocol spans two chains. <Highlight>Testnet (46630)</Highlight> hosts VaultEngine, USDAX,
+        collateral management, price oracle, and USDAxSavings. <Highlight>Mainnet (4663)</Highlight> hosts APX
+        Token and APXStaking. The governance timelock contract is not yet deployed on either chain.
       </Prose>
       <ParamTable rows={[
-        { param: "VaultManager",      value: "Core",        desc: "Handles collateral deposits, USDAX minting, and repayment." },
-        { param: "LiquidationEngine", value: "Risk",        desc: "Monitors CR ratios and executes liquidations at threshold breach." },
-        { param: "StabilityPool",     value: "Backstop",    desc: "Absorbs bad debt using USDAX deposited by stability providers." },
-        { param: "APXStaking",        value: "Revenue",     desc: "Distributes fee revenue to APX stakers pro-rata." },
-        { param: "Governance",        value: "Control",     desc: "Timelock + APX voting for parameter changes and upgrades." },
+        { param: "VaultEngine",       value: "Testnet",     desc: "Collateral deposits, USDAX minting, repayment. Deployed on chainId 46630." },
+        { param: "CollateralManager", value: "Testnet",     desc: "Collateral risk parameters and ceiling enforcement. Deployed on chainId 46630." },
+        { param: "USDAxSavings",      value: "Testnet",     desc: "USDAX yield savings module. Deployed on chainId 46630." },
+        { param: "APXStaking",        value: "Mainnet",     desc: "APX staking rewards: APX emissions (Synthetix model, not fee revenue). Deployed on chainId 4663." },
+        { param: "Governance",        value: "Pending",     desc: "On-chain voting + 48-hr timelock. NOT deployed on either chain. Requires audit first." },
       ]} />
 
       {/* ── CONNECT WALLET ── */}
@@ -372,19 +376,30 @@ await window.ethereum.request({
 
       {/* ── STAKE APX ── */}
       <SectionHeading id="stake-apx">APX Staking</SectionHeading>
-      <InfoBox type="warn">
-        APX Token is not yet deployed. Staking will be available at the APX token generation event (TGE),
-        planned for H2 2026 alongside mainnet launch. The steps below describe the intended flow.
+      <InfoBox>
+        APX staking is <Highlight>live on Robinhood Chain Mainnet (Chain ID 4663)</Highlight>. Switch your
+        wallet to Mainnet 4663 to stake. The vault/USDAX system runs separately on Testnet (46630).
       </InfoBox>
       <Prose>
-        Once APX launches, stake APX tokens to earn a share of all stability fees and mint fees collected
-        across the protocol. Rewards accrue in real-time and are paid in USDAX; real protocol revenue, not emissions.
+        Stake APX tokens on Robinhood Chain Mainnet to earn APX rewards. The staking pool holds{" "}
+        <Highlight>10,000,000 APX</Highlight> and emits <Highlight>1,000,000 APX per year</Highlight> using
+        a Synthetix reward model. Rewards are paid in <Highlight>APX</Highlight>, not USDAX.
+        Current APY is approximately <Highlight>~7.7%</Highlight> and varies with total APX staked.
       </Prose>
+      <SubHeading id="add-mainnet">Add Robinhood Chain Mainnet</SubHeading>
+      <ParamTable rows={[
+        { param: "Network Name", value: "Robinhood Chain",                           desc: "Display name in your wallet" },
+        { param: "Chain ID",     value: "4663",                                       desc: "EVM chain identifier (hex: 0x1237)" },
+        { param: "Currency",     value: "ETH",                                        desc: "Native gas token" },
+        { param: "Explorer",     value: "https://robinhoodchain.blockscout.com",      desc: "Blockscout block explorer" },
+      ]} />
       <ul className="mb-4">
-        <Li>Navigate to <Highlight>app → Staking</Highlight>.</Li>
-        <Li>Enter the APX amount and click <strong>Stake</strong>. Approve if prompted.</Li>
-        <Li>Your staking position is immediately active and begins accruing rewards.</Li>
-        <Li>Claim rewards at any time; unstake with a 7-day unbonding delay.</Li>
+        <Li>Switch your wallet to <Highlight>Robinhood Chain Mainnet (4663)</Highlight>.</Li>
+        <Li>Navigate to <Highlight>app → Staking</Highlight> and connect your wallet.</Li>
+        <Li>Enter the APX amount and click <strong>Stake</strong>. Approve the ERC-20 spend if prompted.</Li>
+        <Li>Your position is immediately active and accrues APX rewards every block.</Li>
+        <Li>Claim rewards anytime. Unstaking starts a cooldown period before tokens are returned.</Li>
+        <Li>Emergency withdraw exits immediately but forfeits all pending unclaimed rewards.</Li>
       </ul>
 
       {/* ── USDAX OVERVIEW ── */}
@@ -450,19 +465,25 @@ await window.ethereum.request({
         revenue (stability fees + mint fees) and is used to vote on all protocol parameters.
       </Prose>
       <ParamTable rows={[
-        { param: "Total Supply",      value: "100,000,000 APX",  desc: "Fixed maximum supply, no inflation." },
-        { param: "Staking APY",       value: "~15%+ (projected)", desc: "Estimate at launch, driven by protocol revenue, not emissions. Variable." },
-        { param: "Revenue Share",     value: "100%",             desc: "All protocol fees flow to APX stakers." },
-        { param: "Voting",            value: "1 APX = 1 vote",   desc: "Direct on-chain governance." },
-        { param: "Unbonding Period",  value: "7 days",           desc: "Cooldown before unstaked APX is returned." },
+        { param: "Total Supply",      value: "100,000,000 APX",  desc: "Fixed maximum supply." },
+        { param: "Staking Pool",      value: "10,000,000 APX",   desc: "Pool funded for staking rewards." },
+        { param: "Emission Rate",     value: "1,000,000 APX/yr", desc: "APX rewards emitted per year to stakers (Synthetix model)." },
+        { param: "Current APY",       value: "~7.7%",            desc: "Approximate yield; varies with total APX staked." },
+        { param: "Reward Token",      value: "APX",              desc: "Rewards paid in APX, not USDAX, not protocol fees." },
+        { param: "Deployed On",       value: "Mainnet (4663)",   desc: "APXStaking and APX Token are on Robinhood Chain Mainnet, not testnet." },
+        { param: "Voting",            value: "1 APX = 1 vote",   desc: "Intended governance model (governance contract not yet deployed)." },
       ]} />
 
       {/* ── GOVERNANCE ── */}
       <SectionHeading id="governance">Governance</SectionHeading>
+      <InfoBox type="warn">
+        The on-chain governance contract is not yet deployed. This section describes the intended design.
+        No proposals can be submitted or voted on until the contract is live and audited.
+      </InfoBox>
       <Prose>
-        USDAX Finance is governed by APX token holders. Any wallet holding ≥ 10,000 APX (or receiving
-        delegation) can create a governance proposal. Proposals pass with a 4% quorum and &gt;50% approval,
-        and are executed after a 48-hour timelock.
+        When live, USDAX Finance will be governed by APX token holders. Any wallet holding ≥ 10,000 APX
+        (or receiving delegation) can create a governance proposal. Proposals pass with a 4% quorum and
+        &gt;50% approval, and are executed after a 48-hour timelock.
       </Prose>
       <ul className="mb-4">
         <Li>Governance can adjust collateral ratios, stability fees, and liquidation thresholds.</Li>
@@ -499,23 +520,31 @@ interface IVaultManager {
       {/* ── STAKING MECHANICS ── */}
       <SectionHeading id="staking-mechanics">Staking & Rewards</SectionHeading>
       <Prose>
-        APX stakers receive a pro-rata share of all protocol fees. Rewards are denominated in USDAX and
-        accrue every block. The APY varies with protocol usage, higher USDAX supply means higher fee
-        revenue.
+        APX stakers receive a pro-rata share of the APX emission pool. Rewards are denominated in{" "}
+        <Highlight>APX</Highlight> and accrue every block. The APY varies with total APX staked: more stakers
+        means lower APY per staker. The pool emits 1,000,000 APX per year regardless of protocol usage.
       </Prose>
-      <CodeBlock lang="solidity" code={`// Simplified APXStaking interface
+      <CodeBlock lang="solidity" code={`// APXStaking: Robinhood Chain Mainnet (4663)
+// 0x00b6792ac02caf607d0b6ea4a6f572a83472412f
+// Synthetix reward model: rewards paid in APX, not USDAX
 interface IAPXStaking {
-    /// @notice Stake APX tokens
+    /// @notice Stake APX tokens to earn APX rewards
     function stake(uint256 amount) external;
 
-    /// @notice Begin unbonding (7-day cooldown)
-    function initiateUnstake(uint256 amount) external;
+    /// @notice Withdraw staked APX (cooldown applies)
+    function withdraw(uint256 amount) external;
 
-    /// @notice Claim accrued USDAX rewards
-    function claimRewards() external returns (uint256 rewardAmount);
+    /// @notice Emergency exit — forfeits all pending rewards
+    function emergencyWithdraw() external;
 
-    /// @notice View pending rewards
-    function pendingRewards(address staker) external view returns (uint256);
+    /// @notice Claim accrued APX rewards
+    function getReward() external;
+
+    /// @notice View pending APX rewards
+    function earned(address account) external view returns (uint256);
+
+    /// @notice View staked balance
+    function balanceOf(address account) external view returns (uint256);
 }`} />
 
       {/* ── LIQUIDATIONS ── */}
@@ -555,81 +584,83 @@ interface IAPXStaking {
       {/* ── CONTRACTS ── */}
       <SectionHeading id="contracts">Contract Addresses</SectionHeading>
 
-      {/* Testnet-only warning */}
-      <div className="my-5 px-4 py-4 rounded-xl flex gap-3 items-start"
-        style={{ background: "hsl(38 92% 58% / 0.07)", border: "1px solid hsl(38 92% 58% / 0.25)" }}>
-        <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: "hsl(38 92% 58%)" }} />
-        <div>
-          <p className="font-black text-[11px] tracking-widest uppercase mb-1" style={{ color: "hsl(38 92% 58%)" }}>
-            Testnet Only: Do Not Send Real Funds
-          </p>
-          <p className="text-[13px] leading-relaxed" style={{ color: "hsl(0 0% 55%)" }}>
-            All contracts below are deployed exclusively on <strong style={{ color: "hsl(0 0% 80%)" }}>Robinhood Chain Testnet (Chain ID 46630)</strong>.
-            These are <strong style={{ color: "hsl(0 0% 80%)" }}>not mainnet addresses</strong>. Sending real assets to testnet contracts will result in permanent loss.
-            Mainnet deployment is planned for H2 2026.
-          </p>
-        </div>
-      </div>
+      {/* Testnet warning */}
+      <InfoBox type="warn">
+        Vault / USDAX contracts are on <Highlight>Testnet (46630)</Highlight>. Do not send real funds.
+        APX staking contracts are on <Highlight>Mainnet (4663)</Highlight>. Never mix the two chains.
+      </InfoBox>
 
+      <SubHeading id="contracts-testnet">Testnet Contracts (Chain ID 46630)</SubHeading>
       <Prose>
-        Click any address to verify it on the{" "}
+        Verify on the{" "}
         <a href={EXPLORER} target="_blank" rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 transition-colors"
-          style={{ color: LIME }}>
+          className="inline-flex items-center gap-1 transition-colors" style={{ color: LIME }}>
           Robinhood Chain Testnet explorer <ExternalLink className="w-3 h-3" />
         </a>.
-        Use the copy button to copy the full address to your clipboard.
       </Prose>
-
       <ContractTable rows={[
-        { name: "USDAX Token",       address: "0x89F2c042def8719930904A474FF999A0F8fddd64", desc: "ERC-20 stablecoin, mintable by depositing collateral into a vault." },
-        { name: "VaultEngine",       address: "0xB5d971d69728B0C31b19A8f184d31813F29EEA20", desc: "CDP minting, repayment, and collateral management." },
+        { name: "USDAX Token",       address: "0x1988D89F5E7339394C20f93e982188c70eC4e5D3", desc: "ERC-20 stablecoin, mintable by depositing collateral into a vault." },
+        { name: "VaultEngine",       address: "0xC45F02DE20928198B3a4A24c5822474755D3d4FF", desc: "CDP minting, repayment, and collateral management." },
         { name: "CollateralManager", address: "0x2472DCBA450e0AA2f81e69AaCD33f91528343854", desc: "Collateral risk parameters and ceiling enforcement." },
-        { name: "PriceOracle",       address: "0xe5211fF6a85F51b290600B4807d0ee5F978cEC2D", desc: "On-chain testnet price feed. Mainnet will use a decentralised oracle." },
-        { name: "WETH (testnet)",    address: "0x728a06069E7A7DBafe2a92bc1E3e4d48e8fC49Dc", desc: "Testnet WETH. Claim from the faucet to use as vault collateral; not real ETH." },
-        { name: "WBTC (testnet)",    address: "0xBA4120eA7aA703cA1BBCdD03a1B4Ff15e15F2e34", desc: "Testnet WBTC. Claim from the faucet to use as vault collateral; not real BTC." },
-        { name: "stETH (testnet)",   address: "0xE571b0C36B3EF817950f7Fe3Aa296F2a1fB7479e", desc: "Testnet stETH. Claim from the faucet to use as vault collateral; not real stETH." },
-        { name: "APX Token",         address: "Not yet deployed",                             desc: "Governance token; activates at APX token launch (H2 2026)." },
-        { name: "APXStaking",        address: "Not yet deployed",                             desc: "Staking rewards contract; activates at APX token launch." },
-        { name: "Governance",        address: "Not yet deployed",                             desc: "On-chain voting and timelock; activates at APX token launch." },
+        { name: "ChainlinkPriceOracle", address: "0xfE07515418B6f7239e9b4ecE21f49a75656Ba1a3", desc: "Chainlink AggregatorV3 oracle. Testnet uses fallback prices; mainnet uses live ETH/USD, WBTC/USD, WSTETH/USD feeds." },
+        { name: "USDAxSavings",         address: "0x24121228c54916CCa8651D6B4770e7A23030c476", desc: "Yield savings module. Deposit USDAX to earn savings rate." },
+        { name: "WETH (testnet)",    address: "0x728a06069E7A7DBafe2a92bc1E3e4d48e8fC49Dc", desc: "Testnet WETH. Claim from the faucet; not real ETH." },
+        { name: "WBTC (testnet)",    address: "0xBA4120eA7aA703cA1BBCdD03a1B4Ff15e15F2e34", desc: "Testnet WBTC. Claim from the faucet; not real BTC." },
+        { name: "stETH (testnet)",   address: "0xE571b0C36B3EF817950f7Fe3Aa296F2a1fB7479e", desc: "Testnet stETH. Claim from the faucet; not real stETH." },
+      ]} />
+
+      <SubHeading id="contracts-mainnet">Mainnet Contracts (Chain ID 4663)</SubHeading>
+      <Prose>
+        Verify on{" "}
+        <a href="https://robinhoodchain.blockscout.com" target="_blank" rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 transition-colors" style={{ color: LIME }}>
+          Robinhood Chain Blockscout <ExternalLink className="w-3 h-3" />
+        </a>.
+      </Prose>
+      <ContractTable explorer="https://robinhoodchain.blockscout.com" rows={[
+        { name: "APX Token",   address: "0x42523E3e454B97ff8651926685aFAD61C950Ab2F", desc: "Protocol native token. Used for staking and (future) governance." },
+        { name: "APXStaking",  address: "0x00b6792ac02caf607d0b6ea4a6f572a83472412f", desc: "Staking rewards contract. Stake APX, earn APX (~7.7% APY)." },
+      ]} />
+
+      <SubHeading id="contracts-pending">Pending Deployment</SubHeading>
+      <ContractTable rows={[
+        { name: "Governance", address: "Not yet deployed", desc: "On-chain voting and 48-hour timelock. Requires audit completion before deployment." },
       ]} />
 
       {/* ── API REFERENCE ── */}
       <SectionHeading id="api-reference">API Reference</SectionHeading>
       <Prose>
-        The USDAX Finance REST API provides read access to protocol state without requiring a Web3
-        connection. Base URL: <code style={{ color: LIME, fontSize: 12 }}>https://api.usdax.finance/v1</code>
+        The USDAX Finance backend API provides read access to protocol state without requiring a Web3
+        connection. It is an internal API that powers the app. No public versioned endpoint exists yet.
+        Example endpoints are shown below for reference.
       </Prose>
       <SubHeading id="api-protocol">Protocol Stats</SubHeading>
-      <CodeBlock lang="http" code={`GET /v1/protocol/stats
+      <CodeBlock lang="http" code={`GET /api/protocol/stats
 
 Response:
 {
-  "totalUsdaxSupply": "42300000.00",
-  "totalCollateralUsd": "87540000.00",
-  "globalCollateralRatio": "2.07",
-  "apxStaked": "31200000",
-  "stakingApy": "0.41",
-  "stabilityPoolBalance": "4200000.00"
+  "totalSupply": "1240000.00",
+  "totalCollateralUsd": "2800000.00",
+  "globalCollateralRatio": "2.26",
+  "activeVaults": 12,
+  "stabilityFee": "0.005"
 }`} />
       <SubHeading id="api-vaults">Vaults</SubHeading>
-      <CodeBlock lang="http" code={`GET /v1/vaults/:address
+      <CodeBlock lang="http" code={`GET /api/positions?owner=0x...
 
 Response:
-{
-  "vaults": [
-    {
-      "id": "1042",
-      "collateral": "WETH",
-      "collateralAmount": "10.5",
-      "collateralUsd": "38115.00",
-      "debt": "22000.00",
-      "collateralRatio": "1.732",
-      "status": "safe",
-      "stabilityFeeAccrued": "12.43"
-    }
-  ]
-}`} />
+[
+  {
+    "id": "1",
+    "collateralToken": "0x728a...49Dc",
+    "collateralSymbol": "WETH",
+    "collateralAmount": "2.5",
+    "collateralUsd": "6250.00",
+    "debtAmount": "3000.00",
+    "collateralRatio": "2.08",
+    "status": "safe"
+  }
+]`} />
 
       {/* ── SDK ── */}
       <SectionHeading id="sdk">SDK</SectionHeading>
@@ -680,17 +711,19 @@ await stakeTx.wait();`} />
         Security is the top priority. USDAX Finance undergoes multiple independent audits before each
         major release. All audit reports are published in full.
       </Prose>
+      <InfoBox type="warn">
+        No audit has been commissioned or completed. No firm has been engaged. The protocol is in active
+        testnet development. A full independent audit is a hard requirement before any mainnet deployment.
+      </InfoBox>
       <div className="grid sm:grid-cols-2 gap-4 my-5">
         {[
-          { firm: "Trail of Bits",    date: "Q2–Q3 2026", status: "In Progress", findings: "Report at completion" },
-          { firm: "OpenZeppelin",     date: "H2 2026", status: "Scheduled", findings: "Pre-mainnet" },
-          { firm: "Sigma Prime",      date: "2027",    status: "Planned",   findings: "-" },
-          { firm: "Certora Prover",   date: "2027",    status: "Planned",   findings: "Formal verification" },
+          { firm: "Audit Firm TBD",  date: "TBD",  status: "Not Yet Engaged", findings: "First full audit, pre-mainnet requirement" },
+          { firm: "Audit Firm TBD",  date: "TBD",  status: "Planned",          findings: "Second audit or formal verification, TBD" },
         ].map((a) => (
-          <div key={a.firm} className="rounded-xl p-5" style={{ background: CARD_BG, border: `1px solid ${BORDER}` }}>
-            <div className="font-bold text-[13px] mb-1" style={{ color: "hsl(0 0% 85%)" }}>{a.firm}</div>
-            <div className="text-[12px] mb-3" style={{ color: "hsl(0 0% 35%)" }}>{a.date} · {a.status}</div>
-            <div className="text-[12px]" style={{ color: "hsl(0 0% 48%)" }}>{a.findings}</div>
+          <div key={a.findings} className="rounded-xl p-5" style={{ background: CARD_BG, border: `1px solid ${BORDER}` }}>
+            <div className="font-bold text-[13px] mb-1" style={{ color: "hsl(0 0% 60%)" }}>{a.firm}</div>
+            <div className="text-[12px] mb-3" style={{ color: "hsl(38 92% 60%)" }}>{a.date} · {a.status}</div>
+            <div className="text-[12px]" style={{ color: "hsl(0 0% 40%)" }}>{a.findings}</div>
           </div>
         ))}
       </div>
@@ -699,24 +732,35 @@ await stakeTx.wait();`} />
       <SectionHeading id="roadmap">Roadmap</SectionHeading>
       {[
         {
-          q: "Q2 2026: Testnet",
+          q: "Q2–Q3 2026: Testnet & Staking Live",
           done: true,
-          items: ["Core contracts deployed on Robinhood Chain testnet", "Audit 1 (Trail of Bits) in progress", "SDK v0.1 published", "Public testnet with faucet open"],
+          items: [
+            "VaultEngine, CollateralManager, PriceOracle, USDAX Token deployed on Testnet (46630)",
+            "USDAxSavings yield module deployed on Testnet (46630)",
+            "APX Token deployed on Mainnet (4663)",
+            "APXStaking deployed and active on Mainnet (4663), ~7.7% APY",
+            "Public testnet with faucet, liquidation engine, and protocol activity feed live",
+          ],
         },
         {
-          q: "H2 2026: Mainnet Alpha",
+          q: "Next: Audit & Security",
           done: false,
-          items: ["Mainnet launch on Robinhood Chain with WETH + stETH collateral", "Audit 2 (OpenZeppelin), in progress", "APX token generation event (TGE)", "USDAX Savings Rate fully on-chain (testnet: live)"],
+          items: [
+            "Engage independent audit firm (not yet started)",
+            "Publish full audit reports publicly before any mainnet deployment",
+            "Bug bounty program launch",
+            "Live oracle integration (replacing MockPriceOracle)",
+          ],
         },
         {
-          q: "2027: Expansion",
+          q: "Future: Mainnet (No Timeline Set)",
           done: false,
-          items: ["WBTC and RWA collateral onboarding", "Cross-chain USDAX bridges (Ethereum, Arbitrum)", "APX staking and governance module activated", "Formal verification (Certora) complete"],
-        },
-        {
-          q: "2027–2028: Ecosystem",
-          done: false,
-          items: ["Real-world asset (RWA) collateral expansion", "USDAX lending markets integration", "Decentralised oracle network transition", "v2 governance with quadratic voting"],
+          items: [
+            "Mainnet VaultEngine deployment, contingent on audit completion",
+            "On-chain governance contract deployment (APX voting + 48-hr timelock)",
+            "Expanded collateral types (WBTC, RWA)",
+            "Cross-chain USDAX bridges",
+          ],
         },
       ].map((phase) => (
         <div key={phase.q} className="relative pl-6 mb-8"
@@ -749,7 +793,7 @@ await stakeTx.wait();`} />
         },
         {
           q: "How is APX APY calculated?",
-          a: "APY = (Annual Protocol Revenue in USDAX) / (Total APX Staked × APX Price). As protocol revenue grows and APX staked stays constant, APY rises.",
+          a: "APY = (Annual APX Emissions) / (Total APX Staked). The pool emits 1,000,000 APX per year. At current stake levels APY is approximately 13.9% (7.2M APX staked). Rewards are paid in APX. This is an emission-based model, not a share of protocol revenue.",
         },
         {
           q: "Is there a lock period for staking APX?",
@@ -757,7 +801,7 @@ await stakeTx.wait();`} />
         },
         {
           q: "Who controls the protocol?",
-          a: "APX token holders govern the protocol via on-chain voting. The development team holds no admin keys. All upgrades go through a 48-hour timelock.",
+          a: "The on-chain governance contract is not yet deployed. Testnet contracts are currently owned by the deployer wallet. Governance via APX voting is the intended end state. No admin key removal will occur until the governance contract is deployed and audited.",
         },
       ].map((item) => (
         <div key={item.q} className="mb-5 rounded-xl p-5" style={{ background: CARD_BG, border: `1px solid ${BORDER}` }}>
@@ -768,16 +812,121 @@ await stakeTx.wait();`} />
 
       {/* ── CHANGELOG ── */}
       <SectionHeading id="changelog">Changelog</SectionHeading>
-      {[
-        { v: "v1.0.0", date: "Jul 2026", notes: ["Initial documentation release.", "Testnet contracts documented.", "SDK v0.1 reference added."] },
-        { v: "v0.9.0", date: "Jun 2026", notes: ["Architecture overview added.", "Fee schedule finalised.", "Responsible disclosure policy published."] },
-      ].map((entry) => (
-        <div key={entry.v} className="mb-5">
-          <div className="flex items-center gap-3 mb-2">
-            <span className="font-black font-mono text-[13px]" style={{ color: LIME }}>{entry.v}</span>
-            <span className="text-[11px]" style={{ color: "hsl(0 0% 32%)" }}>{entry.date}</span>
+      <Prose>
+        All significant protocol deployments, contract updates, and app changes are recorded here.
+        Dates are UTC. Chain IDs: Testnet = 46630, Mainnet = 4663.
+      </Prose>
+      {([
+        {
+          v: "v1.1.0",
+          date: "Jul 2026",
+          tag: "latest",
+          sections: [
+            {
+              label: "Contracts",
+              items: [
+                "VaultEngine, USDAX, CollateralManager, PriceOracle, and LiquidationEngine redeployed on Testnet (46630) — v1.1.0 release with updated addresses.",
+                "USDAxSavings yield module deployed on Testnet (46630) at 0x24121228c54916CCa8651D6B4770e7A23030c476. USDAX holders can now deposit and earn savings yield.",
+                "APX Token (ERC-20, 100M fixed supply) confirmed live on Robinhood Chain Mainnet (4663).",
+                "APXStaking contract confirmed live on Mainnet (4663) at 0x00b6792ac02caf607d0b6ea4a6f572a83472412f. Synthetix reward model: 1M APX/yr pool, rewards paid in APX.",
+                "Governance contract remains undeployed. All parameter changes made directly by deployer wallet (current admin).",
+              ],
+            },
+            {
+              label: "Protocol Mechanics",
+              items: [
+                "APX staking rewards clarified as APX token emissions (Synthetix model), not protocol fee revenue. Staking fee revenue capture is a planned future feature.",
+                "Staking APY (~7.7%) is derived from 1,000,000 APX/yr emission rate relative to staked pool size — not from USDAX mint/stability fees.",
+                "Staking rewards pool funded and live. APY is dynamic — currently ~13.9% based on 7.2M APX staked against 1M APX/yr emission.",
+                "Collateral seed at startup: stETH, RWA-TB, RWA-RE, RWA-CB seeded in CollateralManager for testnet.",
+              ],
+            },
+            {
+              label: "App & UI",
+              items: [
+                "Protocol Activity feed now covers both Testnet (MINT, BURN, DEPOSIT, REDEEM, LIQUIDATE) and Mainnet (STAKE, UNSTAKE, CLAIM) in one unified view.",
+                "Each activity event now shows a chain indicator badge (Testnet 46630 in green, Mainnet 4663 in violet). Tx explorer links route to the correct chain per event type.",
+                "Staking activity page separated — uses Robinhood Chain Blockscout (robinhoodchain.blockscout.com) for mainnet staking tx links.",
+                "Yield page added (USDAX Savings). Shows current deposit, accrued yield, and APY. Backed by USDAxSavings contract.",
+                "Vault (Positions) page: real tx hashes (depositTxHash, mintTxHash, burnTxHash, redeemTxHash) shown when available; null otherwise — no fake hashes.",
+                "Faucet page: balance display uses live API; loading state shows '...' not em dash.",
+                "All em dash placeholders removed across every page and replaced with contextually correct values (0%, N/A, explicit labels).",
+              ],
+            },
+            {
+              label: "Documentation & Content",
+              items: [
+                "Contract table in docs split into three sections: Testnet (46630), Mainnet (4663), and Pending (not yet deployed).",
+                "Governance page fully rewritten: clearly states governance contract is not deployed, team admin key is active, vote system is a planned design.",
+                "Staking rewards section corrected: APX emissions, not fee revenue. Emission rate and APY formula documented.",
+                "Audit page updated: no unverified audit firm names. Status is 'pending external review'.",
+                "Roadmap section rewritten: no unconfirmed H2 2026 mainnet timeline. Phases described without fabricated dates.",
+                "Explorer links: testnet uses explorer.testnet.chain.robinhood.com; mainnet uses robinhoodchain.blockscout.com.",
+                "API reference corrected: internal endpoint, no public access.",
+                "Brand name standardised to 'USDAX Finance' everywhere (previous references to 'APEX Protocol' removed).",
+              ],
+            },
+          ],
+        },
+        {
+          v: "v1.0.0",
+          date: "Jun 2026",
+          tag: "initial",
+          sections: [
+            {
+              label: "Contracts",
+              items: [
+                "VaultEngine deployed on Robinhood Chain Testnet (46630) — core CDP logic for opening vaults, minting USDAX, and managing collateral.",
+                "USDAX ERC-20 stablecoin deployed on Testnet (46630). Pegged to $1.00 USD. Min collateral ratio 150%, liquidation threshold 130%.",
+                "CollateralManager deployed on Testnet (46630). Supports WETH as initial collateral type.",
+                "ChainlinkPriceOracle deployed on Testnet (46630). Implements AggregatorV3 interface — testnet uses admin-set fallback prices; mainnet registers live Chainlink feeds (ETH/USD, WBTC/USD, WSTETH/USD on chain 4663).",
+                "LiquidationEngine deployed on Testnet (46630). 10% liquidation bonus for liquidators; 50% partial liquidation cap.",
+              ],
+            },
+            {
+              label: "App & API",
+              items: [
+                "Initial app launch: Vault Manager (open, close, manage CDPs), Protocol Monitor (TVL, USDAX supply, live events), Liquidations dashboard.",
+                "REST API server launched. Endpoints: /positions, /protocol/stats, /protocol/activity, /liquidations, /yield.",
+                "Wallet connection via Privy (embedded + external wallets). Robinhood Chain Testnet network switcher.",
+                "Activity feed: live MINT, BURN, DEPOSIT, REDEEM, LIQUIDATE events from Testnet (46630).",
+                "Collateral seeded at startup: stETH, RWA-TB (Treasury Bond), RWA-RE (Real Estate), RWA-CB (Corporate Bond).",
+              ],
+            },
+            {
+              label: "Documentation",
+              items: [
+                "Initial documentation release covering Introduction, How It Works, Architecture, Getting Started, and all protocol mechanics.",
+                "Testnet contract addresses documented.",
+                "API reference and SDK sections included.",
+              ],
+            },
+          ],
+        },
+      ] as const).map((entry) => (
+        <div key={entry.v} className="mb-10 rounded-xl overflow-hidden" style={{ border: `1px solid ${BORDER}` }}>
+          {/* header */}
+          <div className="flex items-center gap-3 px-5 py-4" style={{ background: "hsl(0 0% 5%)", borderBottom: `1px solid ${BORDER}` }}>
+            <span className="font-black font-mono text-[15px]" style={{ color: LIME }}>{entry.v}</span>
+            <span className="text-[12px]" style={{ color: "hsl(0 0% 40%)" }}>{entry.date}</span>
+            {entry.tag === "latest" && (
+              <span className="ml-auto text-[10px] font-black tracking-widest px-2 py-0.5 rounded-full"
+                style={{ background: LIME_DIM, color: LIME, border: `1px solid ${LIME_BORDER}` }}>
+                LATEST
+              </span>
+            )}
           </div>
-          <ul>{entry.notes.map((n) => <Li key={n}>{n}</Li>)}</ul>
+          {/* body */}
+          <div className="px-5 py-5 space-y-5">
+            {entry.sections.map((sec) => (
+              <div key={sec.label}>
+                <div className="text-[10px] font-black tracking-[0.18em] uppercase mb-2" style={{ color: "hsl(0 0% 30%)" }}>
+                  {sec.label}
+                </div>
+                <ul>{sec.items.map((n) => <Li key={n}>{n}</Li>)}</ul>
+              </div>
+            ))}
+          </div>
         </div>
       ))}
 

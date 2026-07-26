@@ -363,7 +363,6 @@ components:
         - amount
         - token
         - timestamp
-        - txHash
       properties:
         id:
           type: integer
@@ -380,6 +379,7 @@ components:
           type: string
         txHash:
           type: string
+          nullable: true
 
     CollateralBreakdown:
       type: object
@@ -470,11 +470,15 @@ components:
           type: string
         collateralToken:
           type: string
-          enum: [WETH, WBTC]
+          enum: [WETH, WBTC, stETH]
         collateralAmount:
           type: number
         usdaxToMint:
           type: number
+        depositTxHash:
+          type: string
+        mintTxHash:
+          type: string
 
     PositionUpdate:
       type: object

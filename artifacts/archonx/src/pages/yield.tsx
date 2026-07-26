@@ -632,9 +632,11 @@ export default function YieldPage() {
   const { address, authenticated, login } = useAuth();
   const { wallets }  = useWallets();
 
-  const { data: stats,     isLoading: statsLoading }  = useGetYieldStats(address ?? undefined);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: stats,     isLoading: statsLoading }  = (useGetYieldStats as any)(address ?? undefined) as ReturnType<typeof useGetYieldStats>;
   const { data: pools,     isLoading: poolsLoading }  = useListYieldPools();
-  const { data: positions, isLoading: posLoading }    = useListYieldPositions(address ?? undefined);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: positions, isLoading: posLoading }    = (useListYieldPositions as any)(address ?? undefined) as ReturnType<typeof useListYieldPositions>;
 
   const [depositPool,   setDepositPool]   = useState<YieldPool | null>(null);
   const [claimingId,    setClaimingId]    = useState<number | null>(null);
@@ -950,24 +952,37 @@ export default function YieldPage() {
         </div>
       )}
 
-      {/* ── Coming Soon Pools ── */}
-      {pendingPools.length > 0 && (
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <SectionLabel color={AMBER}>Coming Soon</SectionLabel>
-              <span className="font-mono text-[11px]" style={{ color: DIM }}>
-                Pending external protocol deployment on Robinhood Chain
-              </span>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-            {pendingPools.map((pool) => (
-              <ComingSoonCard key={pool.id} pool={pool} />
-            ))}
-          </div>
+      {/* ── Roadmap ── */}
+      <div className="rounded-2xl p-5" style={{ background: CARD, border: `1px solid ${BORDER}` }}>
+        <div className="flex items-center gap-3 mb-4">
+          <SectionLabel color={AMBER}>Roadmap</SectionLabel>
+          <span className="font-mono text-[11px]" style={{ color: DIM }}>
+            Additional yield strategies planned for mainnet
+          </span>
         </div>
-      )}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {[
+            { name: "Stable LP",   desc: "USDAX/USDC liquidity pool",         req: "Uniswap V3 on Robinhood Chain", apy: "8–12%" },
+            { name: "Volatile LP", desc: "USDAX/ETH concentrated liquidity",   req: "Uniswap V3 on Robinhood Chain", apy: "15–25%" },
+            { name: "Auto-Vault",  desc: "Auto-compounding collateral yield",   req: "Mainnet vault deployment",      apy: "Variable" },
+          ].map((item) => (
+            <div key={item.name} className="rounded-xl p-4" style={{ background: CARD2, border: `1px solid ${BORDER}` }}>
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-black text-[13px]" style={{ color: "hsl(0 0% 65%)" }}>{item.name}</span>
+                <span className="font-mono text-[10px] font-black px-2 py-0.5 rounded-full"
+                  style={{ background: `${AMBER}10`, color: AMBER, border: `1px solid ${AMBER}25` }}>
+                  {item.apy} APY
+                </span>
+              </div>
+              <p className="text-[12px] mb-2" style={{ color: DIM }}>{item.desc}</p>
+              <div className="flex items-center gap-1.5">
+                <Clock className="w-3 h-3 flex-shrink-0" style={{ color: "hsl(0 0% 28%)" }} />
+                <span className="font-mono text-[10px]" style={{ color: "hsl(0 0% 28%)" }}>Requires: {item.req}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
 
       {/* ── Your Positions ── */}
       <div>

@@ -20,11 +20,11 @@ const DIM     = "hsl(0 0% 55%)";
 /* ─── Robinhood Chain testnet params ─── */
 const NETWORK = {
   name:     "Robinhood Chain Testnet",
-  rpc:      "https://testnet-rpc.robinhoodchain.io",
+  rpc:      "https://rpc.testnet.chain.robinhood.com/rpc",
   chainId:  "46630",
-  chainHex: "0xB666",
+  chainHex: "0xB626",
   symbol:   "ETH",
-  explorer: "https://testnet-explorer.robinhoodchain.io",
+  explorer: "https://explorer.testnet.chain.robinhood.com",
 };
 
 /* ─── Copy button ─── */
@@ -162,7 +162,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10 xl:gap-16">
 
           {/* ══════════════════════════════════
-              COL 1 — Brand + live stats
+              COL 1, Brand + live stats
           ══════════════════════════════════ */}
           <div className="space-y-5">
             {/* Logo */}
@@ -197,7 +197,7 @@ export function Footer() {
                 {[
                   { l: "TVL",       v: formatCompact(stats.tvlUsd)           },
                   { l: "USDAX",     v: formatCompactNum(stats.usdaxSupply)   },
-                  { l: "Vol 24h",   v: formatCompact(stats.volume24hUsd)     },
+                  { l: stats.volume24hUsd > 0 ? "Vol 24h" : "Vol Total", v: formatCompact(stats.volume24hUsd > 0 ? stats.volume24hUsd : stats.totalVolumeUsd) },
                   { l: "Txs",       v: formatCompactNum(stats.totalTransactions) },
                 ].map(({ l, v }) => (
                   <div key={l} className="rounded-xl px-3 py-2.5"
@@ -221,7 +221,7 @@ export function Footer() {
           </div>
 
           {/* ══════════════════════════════════
-              COL 2 — Navigation
+              COL 2, Navigation
           ══════════════════════════════════ */}
           <div className="grid grid-cols-2 gap-8">
             {/* App links */}
@@ -254,7 +254,7 @@ export function Footer() {
                     external: true,
                   },
                   {
-                    href:     "https://github.com/usdaxfinance",
+                    href:     "https://github.com/USDAX-Finance",
                     label:    "GitHub",
                     icon:     Github,
                     external: true,
@@ -265,10 +265,10 @@ export function Footer() {
           </div>
 
           {/* ══════════════════════════════════
-              COL 3 — Testnet / Network
+              COL 3, Testnet / Network
           ══════════════════════════════════ */}
           <div className="space-y-4">
-            <SectionLabel>Testnet Setup</SectionLabel>
+            <SectionLabel>Network Setup</SectionLabel>
 
             {/* Network card */}
             <div className="rounded-2xl overflow-hidden"
@@ -333,13 +333,13 @@ export function Footer() {
                   style={{ color: "hsl(0 0% 20%)" }}>
                   Faucet
                 </div>
-                <a href="https://faucet.robinhoodchain.io" target="_blank"
+                <a href="https://thirdweb.com/robinhood-chain-testnet" target="_blank"
                   rel="noopener noreferrer"
                   className="font-mono text-[11px] flex items-center gap-1 transition-colors"
                   style={{ color: SOFT }}
                   onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = LIME; }}
                   onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = SOFT; }}>
-                  faucet.robinhoodchain.io
+                  thirdweb.com/robinhood-chain-testnet
                   <ExternalLink className="w-2.5 h-2.5 opacity-40" />
                 </a>
               </div>
@@ -357,7 +357,7 @@ export function Footer() {
       <div style={{ borderTop: `1px solid ${BORDER}` }}>
         <div className="max-w-screen-xl mx-auto px-6 py-3 flex items-center justify-between gap-4">
           <p className="font-mono text-[10px]" style={{ color: "hsl(0 0% 16%)" }}>
-            ⚠ Testnet environment · All assets are simulated · No real monetary value
+            ⚠ Testnet environment · Robinhood Chain Testnet (EVM 46630) · Not for production use
           </p>
           <div className="flex items-center gap-1.5">
             <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: EMERALD }} />

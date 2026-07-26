@@ -1,69 +1,73 @@
-# 🏛️ ArchonX Protocol — Official Documentation
+# USDAX Finance — Protocol Documentation
 
-**Version:** 1.0.0  
-**Blockchain:** Robinhood Chain (EVM-Compatible, Arbitrum Orbit)  
-**Chain ID:** `4663` (Mainnet) / `46630` (Testnet)  
+**Version:** 1.1.0 (Security Release)
+**Blockchain:** Robinhood Chain (EVM-Compatible, Arbitrum Orbit)
+**Chain ID:** `46630` (Testnet) · `4663` (Mainnet, coming soon)
 **Last Updated:** July 2026
 
 ---
 
-## 📑 Table of Contents
+## Table of Contents
 
 1. [Introduction](#1-introduction)
 2. [Protocol Overview](#2-protocol-overview)
 3. [Tokenomics](#3-tokenomics)
    - [3.1 USDAX (Stablecoin)](#31-usdax-stablecoin)
-   - [3.2 AKX (Governance Token)](#32-akx-governance-token)
+   - [3.2 APX (Governance Token)](#32-apx-governance-token)
 4. [System Architecture](#4-system-architecture)
    - [4.1 Smart Contract Interaction Flow](#41-smart-contract-interaction-flow)
    - [4.2 Oracle & Price Feeds](#42-oracle--price-feeds)
 5. [Core Mechanics](#5-core-mechanics)
    - [5.1 Overcollateralization & Minting](#51-overcollateralization--minting)
-   - [5.2 Health Factor](#52-health-factor)
-   - [5.3 Liquidation Mechanism](#53-liquidation-mechanism)
-   - [5.4 Staking & APY](#54-staking--apy)
+   - [5.2 Minting Fee](#52-minting-fee)
+   - [5.3 Health Factor](#53-health-factor)
+   - [5.4 Withdrawal Safety Buffer](#54-withdrawal-safety-buffer)
+   - [5.5 Liquidation Mechanism](#55-liquidation-mechanism)
+   - [5.6 Staking & APY](#56-staking--apy)
 6. [User Guides](#6-user-guides)
    - [6.1 How to Mint USDAX](#61-how-to-mint-usdax)
-   - [6.2 How to Redeem Collateral](#62-how-to-redeem-collateral)
-   - [6.3 How to Stake AKX](#63-how-to-stake-akx)
+   - [6.2 How to Repay Debt & Close a Vault](#62-how-to-repay-debt--close-a-vault)
+   - [6.3 How to Stake APX](#63-how-to-stake-apx)
    - [6.4 How to Claim Staking Rewards](#64-how-to-claim-staking-rewards)
-   - [6.5 How to Liquidate an Underwater Position](#65-how-to-liquidate-an-underwater-position)
-7. [Developer API Reference](#7-developer-api-reference)
-   - [7.1 DSCEngine.sol](#71-dscenginesol)
-   - [7.2 Staking.sol](#72-stakingsol)
-   - [7.3 OracleLib.sol](#73-oraclelibsol)
-   - [7.4 USDAX.sol & AKX.sol](#74-usdaxsol--akxsol)
+   - [6.5 How to Liquidate an Underwater Vault](#65-how-to-liquidate-an-underwater-vault)
+7. [Smart Contract Reference](#7-smart-contract-reference)
+   - [7.1 VaultEngine.sol](#71-vaultenginesol)
+   - [7.2 USDAxToken.sol](#72-usdaxtokensol)
+   - [7.3 CollateralManager.sol](#73-collateralmanagersol)
+   - [7.4 MockPriceOracle.sol](#74-mockpriceoraclesol)
 8. [Deployment Addresses](#8-deployment-addresses)
 9. [Security & Audits](#9-security--audits)
-10. [Glossary](#10-glossary)
+10. [Risk Parameters](#10-risk-parameters)
+11. [Glossary](#11-glossary)
 
 ---
 
 ## 1. Introduction
 
-**ArchonX** is a decentralized dual-token protocol built on the Robinhood Chain. It provides a stable, overcollateralized digital dollar (`USDAX`) backed by crypto assets (WETH / WBTC), while rewarding long-term participants through a governance token (`AKX`) with a variable staking APY.
+**USDAX Finance** is a decentralized, overcollateralized stablecoin protocol built on Robinhood Chain. Users deposit crypto assets as collateral to mint **USDAX** — a USD-pegged stablecoin — at a safe loan-to-value ratio. The protocol enforces solvency through on-chain health factor monitoring and permissionless liquidations.
 
-ArchonX is designed around three core principles:
+Core design principles:
 
 | Principle | Description |
 | :--- | :--- |
-| **Stability** | USDAX maintains a 1:1 peg with USD through robust 150% overcollateralization. |
-| **Efficiency** | Low gas fees and fast finality via the Arbitrum Orbit stack of Robinhood Chain. |
-| **Governance** | AKX holders vote on protocol parameters — APY, collateral types, fees, and more. |
+| **Capital Efficiency** | Per-asset LTV and liquidation thresholds tuned to each collateral's risk profile. |
+| **User Protection** | Withdrawal safety buffer (HF ≥ 1.05) prevents users from unknowingly approaching the liquidation boundary. |
+| **Fairness to Liquidators** | Proportional scaling ensures liquidators always receive the full liquidation bonus relative to the debt they cover, even on near-empty vaults. |
+| **Immutability** | Critical references (VaultEngine address in USDAxToken) are set once and cannot be changed after deployment. |
 
 ---
 
 ## 2. Protocol Overview
 
-The protocol consists of five primary smart contracts working in harmony:
+Five primary smart contracts work together:
 
 | Contract | Purpose |
 | :--- | :--- |
-| `USDAX.sol` | ERC-20 stablecoin pegged to $1. Minted and burned exclusively by `DSCEngine`. |
-| `AKX.sol` | ERC-20 governance token with voting (ERC20Votes). Hard-capped at 100 M supply. |
-| `DSCEngine.sol` | Core engine. Handles collateral deposits, debt tracking, health factors, and liquidations. |
-| `OracleLib.sol` | Wraps Chainlink price feeds with a 3-hour stale-price timeout and decimal normalization. |
-| `Staking.sol` | Manages AKX staking, variable APY calculation, and the 7-day cooldown enforcement. |
+| `VaultEngine.sol` | Core CDP engine. Handles collateral deposits, debt tracking, minting, repayment, withdrawal, and liquidations. |
+| `USDAxToken.sol` | ERC-20 stablecoin. Mint and burn are restricted exclusively to `VaultEngine`. |
+| `CollateralManager.sol` | Stores per-asset risk parameters: maxLTV, liquidationThreshold, liquidationBonus, and token decimals. |
+| `MockPriceOracle.sol` | On-chain price feed. Prices are admin-set. Reverts if any price is older than 24 hours (stale price protection). |
+| `MockERC20.sol` | Faucet-mintable test tokens (WETH, WBTC, stETH) used for testnet experimentation. |
 
 ---
 
@@ -74,26 +78,27 @@ The protocol consists of five primary smart contracts working in harmony:
 | Property | Value |
 | :--- | :--- |
 | **Ticker** | USDAX |
-| **Full Name** | USDArch |
 | **Type** | Overcollateralized Stablecoin |
 | **Peg** | 1 USDAX = $1.00 USD |
-| **Max Supply** | Algorithmically capped by available collateral — no hard cap. |
-| **Usage** | Medium of exchange, collateral for external DeFi protocols, stable store of value. |
+| **Max Supply** | Algorithmically limited by available collateral — no hard cap. |
+| **Minting Fee** | 0.5% of the requested mint amount (deducted at mint time, sent to protocol fee recipient). |
+| **Usage** | Stable medium of exchange, collateral for external DeFi protocols, stable store of value. |
 
-### 3.2 AKX (Governance Token)
+> **Minting fee note:** When a user requests to mint `N` USDAX, they receive `N × 0.995` in their wallet. Their on-chain debt is recorded as `N` (full amount). The remaining `N × 0.005` is minted to the protocol fee recipient. This origination fee is intentional and visible in the UI.
+
+### 3.2 APX (Governance Token)
 
 | Property | Value |
 | :--- | :--- |
-| **Ticker** | AKX |
-| **Full Name** | Archon Key |
-| **Type** | ERC-20 + ERC20Votes |
-| **Max Supply** | 100,000,000 AKX (immutable hard cap) |
-| **Initial Supply** | 10,000,000 AKX (liquidity, team vesting, ecosystem fund) |
+| **Ticker** | APX |
+| **Type** | ERC-20 governance token |
+| **Max Supply** | 100,000,000 APX (immutable hard cap) |
+| **Status** | Not yet deployed — activates H2 2026 |
 
-**Utility:**
-- Stake to earn variable APY (rewards paid in AKX).
-- On-chain voting power for protocol proposals (e.g., changing `baseAPY`, adding collateral types).
-- Revenue sharing (planned for future implementation).
+**Planned utility:**
+- Stake to earn variable APY (rewards paid in APX).
+- On-chain voting power for protocol parameter changes.
+- Revenue sharing and protocol fee distribution.
 
 ---
 
@@ -102,55 +107,41 @@ The protocol consists of five primary smart contracts working in harmony:
 ### 4.1 Smart Contract Interaction Flow
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                         END USER (EOA)                          │
-└──────────────────────────────┬──────────────────────────────────┘
-                               │
-                               ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                          DApp / UI                              │
-└──────────────────────────────┬──────────────────────────────────┘
-                               │
-                               ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    DSCEngine.sol  (Core)                        │
-│  ┌──────────────────────────────────────────────────────────┐   │
-│  │  depositCollateralAndMintUSDX()  →  USDAX Minted         │   │
-│  │  redeemCollateralAndBurnUSDX()   →  USDAX Burned         │   │
-│  │  liquidate()                     →  Liquidator Rewarded  │   │
-│  │  getHealthFactor()               →  View (read-only)     │   │
-│  └────────────────────┬─────────────────────────────────────┘   │
-└───────────────────────┼─────────────────────────────────────────┘
-                        │
-          ┌─────────────┴──────────────┐
-          ▼                            ▼
-┌───────────────────┐      ┌────────────────────────┐
-│    USDAX.sol      │      │     OracleLib.sol       │
-│   (Mint / Burn)   │      │  (Chainlink Aggregator) │
-└───────────────────┘      └────────────┬────────────┘
-                                        │
-                                        ▼
-                           ┌────────────────────────┐
-                           │       CHAINLINK         │
-                           │    (Off-chain Oracles)  │
-                           └────────────────────────┘
+┌───────────────────────────────────────────────────────────────────┐
+│                          END USER (EOA)                           │
+└───────────────────────────────┬───────────────────────────────────┘
+                                │
+                                ▼
+┌───────────────────────────────────────────────────────────────────┐
+│                     USDAX Finance DApp                            │
+└───────────────────────────────┬───────────────────────────────────┘
+                                │
+                                ▼
+┌───────────────────────────────────────────────────────────────────┐
+│                     VaultEngine.sol  (Core CDP)                   │
+│                                                                   │
+│  depositCollateral()   → Records collateral, registers owner      │
+│  mintUsdax()           → Checks LTV, mints USDAX (minus 0.5%)    │
+│  repayUsdax()          → Burns debt, reduces balance              │
+│  withdrawCollateral()  → Enforces HF ≥ 1.05 after withdrawal     │
+│  liquidate()           → Burns liquidator's USDAX, seizes coll.  │
+└───────────┬───────────────────┬───────────────────────────────────┘
+            │                   │
+            ▼                   ▼
+┌─────────────────┐   ┌──────────────────────────────────────────┐
+│  USDAxToken.sol │   │  CollateralManager.sol + PriceOracle.sol │
+│  (Mint / Burn)  │   │  (Risk params + USD prices)              │
+└─────────────────┘   └──────────────────────────────────────────┘
 ```
-
-> **Staking** is a separate flow: users interact with `Staking.sol` directly, which reads AKX balances and mints reward tokens independently of `DSCEngine`.
 
 ### 4.2 Oracle & Price Feeds
 
-ArchonX uses **Chainlink Price Feeds** to determine the real-time USD value of collateral assets.
+USDAX Finance uses a **MockPriceOracle** on testnet. Prices are set by the protocol deployer via `setPrices()`.
 
-- **Stale Price Protection:** Any price data older than **3 hours** is rejected, reverting the transaction.
-- **Decimal Normalization:** Chainlink returns 8-decimal prices (e.g., `200000000000` for $2,000). `OracleLib` normalizes these to 18 decimals for internal math consistency.
+- **Stale Price Protection:** Any price older than **24 hours** causes `getPrice()` to revert, blocking all vault operations until prices are refreshed.
+- **Decimal Format:** All prices are stored and returned in **18 decimal** USD notation (e.g., `2000e18` = $2,000).
 
-| Asset | Chainlink Feed (Reference) |
-| :--- | :--- |
-| WETH / USD | `0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419` |
-| WBTC / USD | `0xF4030086522a5bEEa4988f8cA5B36dbC97BeE88c` |
-
-> ⚠️ Replace feed addresses above with the actual Robinhood Chain Chainlink deployments once available.
+> On mainnet, the oracle will be replaced by a decentralized feed (e.g., Chainlink or a TWAP-based system).
 
 ---
 
@@ -158,70 +149,101 @@ ArchonX uses **Chainlink Price Feeds** to determine the real-time USD value of c
 
 ### 5.1 Overcollateralization & Minting
 
-To mint USDAX, a user must deposit a supported collateral asset. The protocol enforces a **150% collateralization ratio** (equivalent to ~66.7% LTV).
-
-**Formula:**
+Each collateral asset has its own **maxLTV** and **liquidationThreshold** (stored in `CollateralManager`). The LTV cap determines the maximum USDAX mintable:
 
 ```
-Max Mintable USDAX = Collateral Value (USD) / 1.5
+Max Mintable USDAX = Σ (collateral_amount_i × price_i × maxLTV_i)
 ```
 
-**Example:**
+**Example with WETH (maxLTV = 80%):**
 
 | Step | Value |
 | :--- | :--- |
 | User deposits | 1 WETH |
-| Current WETH price | $3,000 |
-| Collateral Value | $3,000 |
-| Max USDAX mintable | $3,000 / 1.5 = **$2,000 USDAX** |
+| WETH price | $2,000 |
+| Collateral value | $2,000 |
+| Max USDAX mintable | $2,000 × 80% = **$1,600 USDAX** |
+| User receives (after 0.5% fee) | **$1,592 USDAX** |
+| On-chain debt recorded | **$1,600 USDAX** |
 
-### 5.2 Health Factor
+### 5.2 Minting Fee
 
-The **Health Factor (HF)** determines whether a position is at risk of liquidation. It is calculated as:
+A **0.5% origination fee** is deducted at mint time:
 
 ```
-Health Factor = (Total Collateral Value USD × 1e18) / (Total USDAX Minted USD × 1e18)
+Fee = amount × 0.005
+User receives = amount − fee
+Debt recorded = amount (full)
+```
+
+This fee is sent to the protocol fee recipient address. It is non-refundable and displayed in the UI before confirmation.
+
+### 5.3 Health Factor
+
+The **Health Factor (HF)** determines whether a vault is safe or eligible for liquidation:
+
+```
+Health Factor = (Σ collateral_value_i × liquidationThreshold_i) / total_debt
 ```
 
 | Health Factor | Status |
 | :--- | :--- |
-| `∞` (infinite) | No debt — fully safe. |
-| `> 1.0` | ✅ Safe. Position is overcollateralized. |
-| `= 1.0` | ⚠️ At threshold. Minimum safe collateralization. |
-| `< 1.0` | 🔴 Undercollateralized. Eligible for immediate liquidation. |
+| `> 1.05` | ✅ Safe — comfortably above both the liquidation boundary and the withdrawal buffer. |
+| `1.0 < HF < 1.05` | ⚠️ Near liquidation — withdrawal blocked, repay debt to restore safety margin. |
+| `= 1.0` | 🔴 At liquidation boundary — eligible for liquidation at next price tick. |
+| `< 1.0` | 🔴 Undercollateralized — eligible for immediate liquidation. |
 
-### 5.3 Liquidation Mechanism
+### 5.4 Withdrawal Safety Buffer
 
-When a user's Health Factor drops below `1.0`, any external account can call `liquidate()` to repay that user's debt in exchange for their collateral **plus a 10% bonus**.
+When withdrawing collateral, the protocol enforces a **5% safety buffer**:
 
-**Liquidation Example:**
+```
+Post-withdrawal Health Factor must be ≥ 1.05
+```
+
+**Why this matters:** Without the buffer, a user could withdraw collateral until HF = 1.0 exactly. A single oracle price tick would then immediately make their vault eligible for liquidation — leaving no time to react. The 1.05 buffer provides a grace window between the withdrawal limit and the liquidation trigger.
+
+### 5.5 Liquidation Mechanism
+
+When a vault's Health Factor drops below `1.0`, any external account can call `liquidate()` to repay part of that vault's debt in exchange for collateral plus a liquidation bonus.
+
+**Liquidation parameters (per asset):**
+
+| Asset | Liquidation Threshold | Liquidation Bonus |
+| :--- | :--- | :--- |
+| WETH | 85% | 5% |
+| WBTC | 80% | 5% |
+| stETH | 80% | 5% |
+
+**How it works:**
+
+1. Liquidator calls `liquidate(vaultOwner, debtToRepay, collateralToken)`.
+2. Protocol calculates collateral equivalent to `debtToRepay` at current price, plus a 5% bonus.
+3. If the vault does not have enough collateral to cover the full bonus:
+   - `debtToRepay` is **scaled down proportionally** so the liquidator always receives the full 5% bonus on the amount they cover.
+   - The liquidator is never shorted — they always get exactly the bonus they are entitled to.
+4. `debtToRepay` USDAX is burned from the liquidator's wallet.
+5. `collateralWithBonus` tokens are transferred to the liquidator.
+
+**Example:**
 
 | | Value |
 | :--- | :--- |
-| User A collateral | $90 (WETH) |
-| User A debt | $100 (USDAX) |
-| User A Health Factor | 0.9 — eligible |
-| Liquidator repays | $100 USDAX (burned) |
-| Liquidator receives | $100 collateral + 10% bonus = **$110 WETH** |
-| Liquidator net profit | **$10** |
+| Vault collateral | 0.5 WETH ($1,000) |
+| Vault debt | $1,100 USDAX |
+| Health Factor | 1,000 × 0.85 / 1,100 = **0.773** — liquidatable |
+| Liquidator sends | $952.38 USDAX |
+| Liquidator receives | 0.5 WETH ($1,000) — exactly 5% bonus on $952.38 covered |
 
-> **Cap:** A single liquidation call can cover at most **50%** of the outstanding debt per transaction, preventing over-liquidation.
+> **Single-call cap:** One `liquidate()` call can cover at most **100% of outstanding debt** (no cap below that) — liquidators choose how much to cover, up to the full debt amount.
 
-### 5.4 Staking & APY
+### 5.6 Staking & APY
 
-Users stake AKX to earn rewards denominated in AKX.
+Staking uses the **APX governance token**, which is not yet deployed. Once APX launches (H2 2026):
 
-**Base APY:** 15% annualized.
-
-**Variable APY Formula:**
-
-```
-User Effective APY = Base APY × (Total Staked AKX / User Staked AKX)
-```
-
-This rewards early or large stakers with proportionally higher yields, incentivizing long-term commitment.
-
-**Cooldown Period:** 7 days from the most recent stake deposit. Users cannot call `unstake()` until the cooldown has elapsed. This stabilizes governance voting power and prevents bank-run dynamics.
+- **Base APY:** 15% annualized.
+- **Cooldown Period:** 7 days from unstake initiation before tokens can be withdrawn.
+- **Reward accrual:** Continuous, second-by-second accumulation based on staked balance.
 
 ---
 
@@ -229,82 +251,92 @@ This rewards early or large stakers with proportionally higher yields, incentivi
 
 ### 6.1 How to Mint USDAX
 
-1. Open the ArchonX DApp and connect your wallet (MetaMask) to **Robinhood Chain** (Chain ID: `46630` for testnet).
-2. Navigate to **Vaults → Open New Vault**.
-3. Select your collateral asset (WETH or WBTC).
-4. Enter the amount of collateral to deposit. The UI shows your projected Health Factor and max mintable USDAX in real time.
-5. Enter the amount of USDAX to mint (must keep Health Factor ≥ 1.0).
-6. Click **Approve** to allow the protocol to spend your collateral, then **Confirm Deposit**.
-7. Wait for the transaction to finalize. USDAX appears in your wallet.
+1. Open the USDAX Finance app and connect your wallet to **Robinhood Chain Testnet** (Chain ID: `46630`).
+2. Claim testnet tokens from the **Faucet** page (WETH, WBTC, or stETH).
+3. Navigate to **Vaults → Open New Vault**.
+4. Select your collateral asset and enter the deposit amount.
+5. Enter the amount of USDAX to mint. The UI shows your projected Health Factor, minting fee, and actual amount received in real time.
+6. Approve the collateral token spend, then confirm the vault transaction.
+7. USDAX appears in your wallet. Your Health Factor must remain above 1.05 to withdraw collateral later.
 
-### 6.2 How to Redeem Collateral
+### 6.2 How to Repay Debt & Close a Vault
 
 1. Go to **Vaults** and locate your active position.
-2. Click **Redeem / Close**.
-3. Enter the amount of USDAX to burn and the amount of collateral to withdraw.
-4. The UI validates that your Health Factor remains ≥ 1.0 after the operation.
-5. Confirm the transaction. Collateral is returned to your wallet.
+2. Click **Close Vault**.
+3. Approve USDAX spend (equal to your full outstanding debt), then confirm.
+4. Your collateral is returned to your wallet and the vault is closed.
 
-### 6.3 How to Stake AKX
+> Partial repayment: use the **Repay** action to reduce debt without closing the vault.
+
+### 6.3 How to Stake APX
+
+> APX staking activates at APX token launch (H2 2026).
 
 1. Navigate to the **Staking** page.
-2. Enter the amount of AKX you wish to stake.
-3. Click **Approve** for the AKX token, then **Stake**.
-4. Staking rewards begin accumulating from the next block. Your cooldown timer starts now.
+2. Enter the amount of APX to stake and confirm.
+3. Rewards begin accruing immediately. Your 7-day cooldown timer starts on unstake initiation.
 
 ### 6.4 How to Claim Staking Rewards
 
-1. Visit the **Staking** page. Your pending rewards are displayed on your staking card.
-2. Click **Claim Rewards**.
-3. Confirm the transaction. Rewards are transferred directly to your wallet in AKX.
+1. Visit the **Staking** page.
+2. Click **Claim Rewards** on your position card.
+3. Rewards transfer directly to your wallet in APX. Claiming does not reset your cooldown.
 
-> Claiming rewards does **not** reset your cooldown timer.
+### 6.5 How to Liquidate an Underwater Vault
 
-### 6.5 How to Liquidate an Underwater Position
-
-1. Go to the **Liquidations** page. Positions with Health Factor `< 1.0` are highlighted in red.
-2. Select a position and click **Liquidate**.
-3. Enter the debt amount you wish to cover (up to 50% of outstanding debt per call).
-4. Review the projected collateral bonus you will receive (+10%).
-5. Confirm the transaction. Collateral plus bonus is sent to your wallet instantly.
+1. Go to the **Liquidations** page. Vaults with Health Factor `< 1.0` are shown.
+2. Select a vault and review the debt, collateral, and projected bonus.
+3. Enter the amount of USDAX debt to cover (any amount up to the vault's full debt).
+4. Confirm the transaction. No prior approval needed — VaultEngine burns USDAX directly from your wallet via its mint/burn authority.
+5. Collateral plus the 5% bonus transfers to your wallet on the same transaction.
 
 ---
 
-## 7. Developer API Reference
+## 7. Smart Contract Reference
 
-### 7.1 DSCEngine.sol
+### 7.1 VaultEngine.sol
 
-#### `depositCollateralAndMintUSDX`
+#### `depositCollateral`
 
 ```solidity
-function depositCollateralAndMintUSDX(
-    address tokenCollateralAddress,
-    uint256 amountCollateral,
-    uint256 amountUSDXToMint
-) external nonReentrant onlyCollateralToken
+function depositCollateral(address token, uint256 amount) external nonReentrant
 ```
 
-| Parameter | Type | Description |
-| :--- | :--- | :--- |
-| `tokenCollateralAddress` | `address` | Address of the ERC-20 collateral token (WETH or WBTC). |
-| `amountCollateral` | `uint256` | Amount of collateral to deposit (in token decimals). |
-| `amountUSDXToMint` | `uint256` | Amount of USDAX to mint (18 decimals). |
-
-**Reverts if:** Resulting Health Factor < 1.0 (`DSCEngine__BreaksHealthFactor`).
+Deposits `amount` of `token` into the caller's vault. Token must be whitelisted in `CollateralManager`.
 
 ---
 
-#### `redeemCollateralAndBurnUSDX`
+#### `mintUsdax`
 
 ```solidity
-function redeemCollateralAndBurnUSDX(
-    address tokenCollateralAddress,
-    uint256 amountCollateral,
-    uint256 amountUSDXToBurn
-) external nonReentrant onlyCollateralToken
+function mintUsdax(uint256 amount) external nonReentrant
 ```
 
-**Reverts if:** Burn amount is insufficient for the requested collateral, or resulting Health Factor < 1.0.
+Mints `amount` of USDAX against deposited collateral. A 0.5% fee is deducted — the user receives `amount × 0.995`, but debt is recorded as `amount`.
+
+**Reverts if:** `_maxMintable(msg.sender) < newDebt` (exceeds maxLTV).
+
+---
+
+#### `repayUsdax`
+
+```solidity
+function repayUsdax(uint256 amount) external nonReentrant
+```
+
+Burns `amount` USDAX from the caller and reduces their debt. Caps at full outstanding debt.
+
+---
+
+#### `withdrawCollateral`
+
+```solidity
+function withdrawCollateral(address token, uint256 amount) external nonReentrant
+```
+
+Withdraws collateral. If the caller has any debt, enforces that the post-withdrawal Health Factor is **≥ 1.05**.
+
+**Reverts if:** `_healthFactor(msg.sender) < WAD × 1.05` after withdrawal.
 
 ---
 
@@ -312,182 +344,191 @@ function redeemCollateralAndBurnUSDX(
 
 ```solidity
 function liquidate(
-    address user,
-    address tokenCollateralAddress,
-    uint256 debtToCover
-) external
+    address vaultOwner,
+    uint256 debtToRepay,
+    address collToken
+) external nonReentrant
 ```
 
 | Parameter | Type | Description |
 | :--- | :--- | :--- |
-| `user` | `address` | Address of the undercollateralized position owner. |
-| `tokenCollateralAddress` | `address` | Collateral token to seize. |
-| `debtToCover` | `uint256` | Amount of USDAX debt to repay (max 50% of outstanding). |
+| `vaultOwner` | `address` | Address of the undercollateralized vault. |
+| `debtToRepay` | `uint256` | USDAX debt amount the liquidator covers. Automatically scaled down if vault collateral is insufficient to pay the full bonus. |
+| `collToken` | `address` | Collateral token to seize. |
 
-**Requirements:** `getHealthFactor(user) < 1e18`.
+**Reverts if:** `_healthFactor(vaultOwner) >= WAD` (vault is healthy).
 
 ---
 
-#### `getHealthFactor`
+#### `healthFactor`
 
 ```solidity
-function getHealthFactor(address user) public view returns (uint256)
+function healthFactor(address user) external view returns (uint256)
 ```
 
-Returns the health factor scaled by `1e18`. A value of `1e18` equals a Health Factor of `1.0`.
+Returns the health factor scaled by `1e18`. Values below `1e18` (= 1.0) are eligible for liquidation.
 
 ---
 
-### 7.2 Staking.sol
+### 7.2 USDAxToken.sol
 
-#### `stake`
+#### `setVaultEngine`
 
 ```solidity
-function stake(uint256 amount) external nonReentrant
+function setVaultEngine(address engine) external onlyOwner
 ```
 
-Stakes `amount` of AKX tokens. Resets the cooldown timer to `block.timestamp`.
+Sets the VaultEngine address — **callable once only**. After the first call, `vaultEngine` is permanently set and cannot be changed. This prevents the owner from redirecting mint/burn authority to a malicious contract after deployment.
+
+**Reverts if:** `vaultEngine != address(0)` (already set).
 
 ---
 
-#### `unstake`
+#### `mint` / `burn`
 
 ```solidity
-function unstake(uint256 amount) external nonReentrant
+function mint(address to, uint256 amount) external onlyVaultEngine
+function burn(address from, uint256 amount) external onlyVaultEngine
 ```
 
-Withdraws `amount` of staked AKX.  
-**Requirements:** `block.timestamp >= stakeTimestamp + 7 days`.
+Both restricted to `VaultEngine` only via the `onlyVaultEngine` modifier.
 
 ---
 
-#### `claimRewards`
+### 7.3 CollateralManager.sol
+
+Stores per-asset risk parameters set at deployment:
+
+| Parameter | Description |
+| :--- | :--- |
+| `maxLTV` | Maximum loan-to-value ratio for minting (basis points, e.g., 8000 = 80%). |
+| `liquidationThreshold` | Threshold used in Health Factor calculation (basis points). |
+| `liquidationBonus` | Bonus paid to liquidators (basis points, e.g., 500 = 5%). |
+| `tokenDecimals` | ERC-20 decimals of the collateral token (used for price conversion). |
+
+---
+
+### 7.4 MockPriceOracle.sol
 
 ```solidity
-function claimRewards() external nonReentrant
+function getPrice(address token) external view returns (uint256 price, uint256 updatedAt)
 ```
 
-Transfers all accumulated AKX rewards to the caller's wallet.
-
----
-
-#### `getPendingRewards`
+Returns the USD price of `token` in 18-decimal format. Reverts if the price was last set more than 24 hours ago.
 
 ```solidity
-function getPendingRewards(address user) external view returns (uint256)
+function setPrices(address[] calldata tokens, uint256[] calldata prices) external onlyOwner
 ```
 
-Returns the total pending reward amount for `user`, including unclaimed compounded interest.
-
----
-
-### 7.3 OracleLib.sol
-
-#### `getPrice`
-
-```solidity
-function getPrice(address token) external view returns (uint256)
-```
-
-Returns the USD price of `token` normalized to **18 decimals**.  
-**Reverts if:** Feed is stale (> 3 hours old) or price ≤ 0.
-
----
-
-#### `setPriceFeed`
-
-```solidity
-function setPriceFeed(address token, address feed) external
-```
-
-Sets the Chainlink aggregator address for a given token.  
-**Permission:** Contract owner only.
-
----
-
-### 7.4 USDAX.sol & AKX.sol
-
-**USDAX.sol**
-- Standard ERC-20 with `mint()` and `burn()`.
-- Both functions are restricted to `DSCEngine` only via `onlyOwner` (DSCEngine is set as owner post-deploy).
-
-**AKX.sol**
-- Standard ERC-20 with `ERC20Votes` extension for on-chain snapshot voting.
-- `delegate()` must be called before voting power is active.
-- `MAX_SUPPLY = 100_000_000 * 1e18` — immutable hard cap enforced in the `mint()` override.
+Sets prices for multiple tokens in one call. Only the deployer can call this.
 
 ---
 
 ## 8. Deployment Addresses
 
-> **Note:** Addresses below are placeholders. Replace them with your actual deployed contract addresses after running the Forge deployment script.
-
 ### Robinhood Chain Testnet (Chain ID: `46630`)
+
+> Deployed July 24, 2026. All contracts verified on [explorer.testnet.chain.robinhood.com](https://explorer.testnet.chain.robinhood.com).
 
 | Contract | Address |
 | :--- | :--- |
-| USDAX (Stablecoin) | `0x...` |
-| AKX (Governance) | `0x...` |
-| DSCEngine (Core) | `0x...` |
-| OracleLib | `0x...` |
-| Staking | `0x...` |
+| USDAX Token | `0x89F2c042def8719930904A474FF999A0F8fddd64` |
+| VaultEngine | `0xB5d971d69728B0C31b19A8f184d31813F29EEA20` |
+| CollateralManager | `0x2472DCBA450e0AA2f81e69AaCD33f91528343854` |
+| Price Oracle | `0xe5211fF6a85F51b290600B4807d0ee5F978cEC2D` |
+| WETH (testnet) | `0x728a06069E7A7DBafe2a92bc1E3e4d48e8fC49Dc` |
+| WBTC (testnet) | `0xBA4120eA7aA703cA1BBCdD03a1B4Ff15e15F2e34` |
+| stETH (testnet) | `0xE571b0C36B3EF817950f7Fe3Aa296F2a1fB7479e` |
+
+**Deployer:** `0xD1f324DfFdf49d81eEd4419edF0515E5d99887B2`
+**Compiler:** `v0.8.24+commit.e11b9ed9` · Optimizer: 200 runs
 
 ### Robinhood Chain Mainnet (Chain ID: `4663`)
 
-_Coming soon after testnet validation and external audit completion._
+Pending testnet validation and external security audit completion.
 
 ---
 
 ## 9. Security & Audits
 
-### 9.1 Security Considerations
+### 9.1 Security Mechanisms
 
-| Mechanism | Description |
+| Mechanism | Implementation |
 | :--- | :--- |
-| **Reentrancy Guard** | All state-changing functions in `DSCEngine` and `Staking` use OpenZeppelin's `ReentrancyGuard`. |
-| **Stale Price Protection** | Oracle prices are rejected if older than 3 hours, preventing manipulation during feed outages. |
-| **Overcollateralization** | 150% collateral ratio provides a buffer against sharp market volatility. |
-| **Liquidation Cap** | Maximum 50% of debt per liquidation call prevents flash-loan-based over-liquidation. |
-| **Access Control** | `mint()` and `burn()` on USDAX are restricted to `DSCEngine`. Oracle feeds restricted to owner. |
+| **Reentrancy Guard** | All state-changing functions use OpenZeppelin `ReentrancyGuard`. |
+| **Stale Price Protection** | `getPrice()` reverts if the price is more than 24 hours old. |
+| **Withdrawal Safety Buffer** | `withdrawCollateral()` requires post-withdrawal HF ≥ 1.05 (not just ≥ 1.0). |
+| **Fair Liquidation Scaling** | When vault collateral is insufficient for the full bonus, `debtToRepay` is scaled down proportionally — liquidators are never shortchanged. |
+| **Immutable Engine Reference** | `USDAxToken.setVaultEngine()` is one-time-only; the address cannot be replaced after deployment. |
+| **Access Control** | `mint()` and `burn()` on USDAX restricted to `VaultEngine`. Oracle `setPrices()` restricted to owner. |
+| **Per-Asset Risk Params** | LTV and liquidation thresholds tuned per collateral rather than a single protocol-wide value. |
 
-### 9.2 Audit Status
+### 9.2 Security Changelog — v1.1.0 (July 2026)
+
+Three issues identified in the v1.0.0 deployment were fixed and redeployed:
+
+| Severity | Contract | Issue | Fix |
+| :--- | :--- | :--- | :--- |
+| Medium | `VaultEngine` | Partial liquidation shortchanged liquidators when vault collateral was insufficient to pay the full bonus. | `debtToRepay` is now scaled proportionally from available collateral — liquidators always receive the full 5% bonus on what they repay. |
+| Medium | `VaultEngine` | `withdrawCollateral` allowed HF to reach exactly 1.0 — the liquidation boundary — leaving no safety margin. | Now requires post-withdrawal HF ≥ 1.05 (5% buffer). |
+| Low | `USDAxToken` | `setVaultEngine()` could be called multiple times by the owner, allowing the mint/burn target to be redirected. | Added `require(vaultEngine == address(0))` — the engine address can only be set once. |
+
+### 9.3 Audit Status
 
 | Stage | Status |
 | :--- | :--- |
-| Internal Review | ✅ Completed by core development team. |
-| External Audit | 🔄 Scheduled with a third-party auditor before Mainnet launch. |
-| Bug Bounty | 📅 Public program planned on Immunefi post-mainnet. |
+| Internal Review | ✅ Completed — July 2026 |
+| External Audit | 🔄 Scheduled with third-party auditor prior to mainnet launch |
+| Bug Bounty | 📅 Public program planned on Immunefi post-mainnet |
 
 ---
 
-## 10. Glossary
+## 10. Risk Parameters
+
+### Collateral Risk Configuration (Testnet)
+
+| Asset | Max LTV | Liquidation Threshold | Liquidation Bonus | Token Decimals |
+| :--- | :--- | :--- | :--- | :--- |
+| WETH | 80% | 85% | 5% | 18 |
+| WBTC | 75% | 80% | 5% | 8 |
+| stETH | 75% | 80% | 5% | 18 |
+
+**How to read this table:**
+- **Max LTV:** The maximum ratio of debt to collateral value at which USDAX can be minted.
+- **Liquidation Threshold:** The collateral value ratio used to compute the Health Factor. A vault becomes liquidatable when HF = `(collateral × liqThreshold) / debt` drops below 1.0.
+- **Liquidation Bonus:** The extra collateral percentage paid to the liquidator as an incentive.
+
+---
+
+## 11. Glossary
 
 | Term | Definition |
 | :--- | :--- |
-| **USDAX** | The stablecoin native to ArchonX, pegged 1:1 to the US Dollar. |
-| **AKX** | The governance and staking token of ArchonX. |
-| **Overcollateralized** | A debt position where the collateral value exceeds the borrowed value (150% in ArchonX). |
-| **Health Factor (HF)** | A numeric metric representing the safety of a loan position. Must be ≥ 1.0 to avoid liquidation. |
-| **Liquidation** | The process of forcibly repaying a user's debt to claim their collateral when undercollateralized. |
-| **Cooldown Period** | A mandatory 7-day waiting period before staked AKX can be withdrawn. |
-| **Chainlink Oracle** | A decentralized network providing reliable real-time off-chain price data to smart contracts. |
-| **ERC20Votes** | An OpenZeppelin extension that adds on-chain snapshot-based voting power to an ERC-20 token. |
-| **LTV** | Loan-to-Value ratio. At 150% collateralization, the effective LTV cap is ~66.7%. |
-| **Arbitrum Orbit** | The L2/L3 stack Robinhood Chain is built on, providing Ethereum-compatible execution with low fees. |
+| **USDAX** | The overcollateralized stablecoin of USDAX Finance, pegged 1:1 to USD. |
+| **APX** | The governance and staking token of USDAX Finance (not yet deployed). |
+| **CDP** | Collateralized Debt Position — a vault where a user deposits collateral and borrows against it. |
+| **Health Factor (HF)** | A numeric ratio representing vault safety. Below 1.0 = liquidatable. Below 1.05 = withdrawal blocked. |
+| **MaxLTV** | Maximum loan-to-value ratio — caps how much USDAX can be minted per unit of collateral. |
+| **Liquidation Threshold** | The collateral adjustment factor used in HF calculation. Higher = stricter safety requirement. |
+| **Liquidation Bonus** | Extra collateral percentage awarded to the liquidator as compensation and protocol incentive. |
+| **Stale Price** | An oracle price older than 24 hours. All vault operations revert until prices are refreshed. |
+| **Origination Fee** | 0.5% fee charged at mint time. Deducted from received USDAX; full amount recorded as debt. |
+| **Cooldown Period** | 7-day waiting period after initiating an APX unstake before tokens can be withdrawn. |
+| **Arbitrum Orbit** | The L2/L3 stack Robinhood Chain is built on — Ethereum-compatible with low fees. |
 
 ---
 
-## 📥 Quick Reference by Role
+## Quick Reference
 
-| Role | Read These Sections |
+| Role | Sections to Read |
 | :--- | :--- |
-| **End User** | §1 Introduction, §3 Tokenomics, §6 User Guides |
-| **Developer / Integrator** | §4 Architecture, §5 Core Mechanics, §7 API Reference, §8 Deployment |
-| **Security Auditor** | §5 Core Mechanics, §7 API Reference, §9 Security & Audits |
-| **Governance Participant** | §3.2 AKX Tokenomics, §5.4 Staking & APY |
+| End User | §1, §3, §6 |
+| Developer / Integrator | §4, §5, §7, §8, §10 |
+| Security Auditor | §5, §7, §9 |
+| Governance Participant | §3.2, §5.6 |
 
 ---
 
 *This document is maintained alongside the codebase and updated after every significant protocol upgrade.*
 
-© 2026 ArchonX Protocol. All rights reserved.
+*© 2026 USDAX Finance. All rights reserved.*

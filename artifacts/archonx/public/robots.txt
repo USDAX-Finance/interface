@@ -1,2 +1,10 @@
 User-agent: *
 Allow: /
+
+# Do not index internal app routes or API
+Disallow: /api/
+Disallow: /app/
+Disallow: /archonx/app/
+
+# Canonical sitemap
+Sitemap: https://usdax.finance/sitemap.xml

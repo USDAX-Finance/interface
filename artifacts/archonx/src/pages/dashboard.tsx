@@ -22,41 +22,57 @@ const BORDER   = "hsl(0 0% 10%)";
 const CARD_BG  = "hsl(0 0% 6%)";
 const CARD_BG2 = "hsl(0 0% 8%)";
 
-// 13 distinct colors — one per collateral token (crypto → RWA → stocks)
+// 13 distinct colors, one per collateral token (crypto → RWA → stocks)
 const PIE_COLORS = [
-  "hsl(231 92% 72%)",  // WETH  — indigo
-  "hsl(35 92% 60%)",   // WBTC  — amber
-  "hsl(152 70% 48%)",  // stETH — emerald
-  "hsl(79 100% 57%)",  // RWA-TB — lime
-  "hsl(280 70% 65%)",  // RWA-RE — violet
-  "hsl(200 80% 55%)",  // RWA-CB — blue
-  "hsl(346 84% 61%)",  // TSLA  — rose
-  "hsl(15 85% 58%)",   // AMZN  — orange
-  "hsl(320 65% 60%)",  // PLTR  — pink
-  "hsl(0 84% 60%)",    // NFLX  — red
-  "hsl(260 65% 65%)",  // AMD   — purple
-  "hsl(120 55% 45%)",  // NVDA  — green
-  "hsl(210 70% 60%)",  // AAPL  — steel-blue
+  "hsl(231 92% 72%)",  // WETH , indigo
+  "hsl(35 92% 60%)",   // WBTC , amber
+  "hsl(152 70% 48%)",  // stETH, emerald
+  "hsl(79 100% 57%)",  // RWA-TB, lime
+  "hsl(280 70% 65%)",  // RWA-RE, violet
+  "hsl(200 80% 55%)",  // RWA-CB, blue
+  "hsl(346 84% 61%)",  // TSLA , rose
+  "hsl(15 85% 58%)",   // AMZN , orange
+  "hsl(320 65% 60%)",  // PLTR , pink
+  "hsl(0 84% 60%)",    // NFLX , red
+  "hsl(260 65% 65%)",  // AMD  , purple
+  "hsl(120 55% 45%)",  // NVDA , green
+  "hsl(210 70% 60%)",  // AAPL , steel-blue
 ];
+
+/* ── USDAX coin icon component (used as React.ElementType) ── */
+function USDAxCoin({ className, style }: { className?: string; style?: React.CSSProperties }) {
+  return <img src="/usdax-coin.png" alt="USDAX" className={className} style={{ ...style, borderRadius: "50%", objectFit: "cover" as const }} />;
+}
 
 const ACTIVITY_BADGE: Record<string, string> = {
   MINT:      LIME,
   BURN:      RED,
   DEPOSIT:   EMERALD,
   REDEEM:    AMBER,
-  STAKE:     EMERALD,
+  STAKE:     "hsl(262 83% 68%)",
   UNSTAKE:   AMBER,
-  CLAIM:     LIME,
+  CLAIM:     "hsl(262 83% 68%)",
   LIQUIDATE: RED,
 };
 
+const TESTNET_EXPLORER = "https://explorer.testnet.chain.robinhood.com";
+const MAINNET_EXPLORER = "https://robinhoodchain.blockscout.com";
+const MAINNET_TYPES    = new Set(["STAKE", "UNSTAKE", "CLAIM"]);
+const explorerFor      = (type: string) => MAINNET_TYPES.has(type) ? MAINNET_EXPLORER : TESTNET_EXPLORER;
+const chainLabelFor    = (type: string) => MAINNET_TYPES.has(type) ? "Mainnet 4663" : "Testnet 46630";
+const chainColorFor    = (type: string) => MAINNET_TYPES.has(type) ? "hsl(262 83% 68%)" : EMERALD;
+
 const TOOLTIP_STYLE = {
-  backgroundColor: CARD_BG2,
-  borderColor: BORDER,
+  backgroundColor: "hsl(0 0% 10%)",
+  borderColor: "hsl(0 0% 18%)",
   fontFamily: "var(--font-mono)",
   fontSize: "11px",
   borderRadius: "8px",
+  color: "hsl(0 0% 88%)",
 };
+
+const TOOLTIP_LABEL_STYLE = { color: "hsl(0 0% 55%)" };
+const TOOLTIP_ITEM_STYLE  = { color: "hsl(0 0% 88%)" };
 
 function LBracket({ size = 10, color = `${LIME}30` }: { size?: number; color?: string }) {
   const s = { position: "absolute" as const, width: size, height: size };
@@ -156,10 +172,10 @@ export default function Dashboard() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-1">
         <div>
           <div className="font-mono text-[10px] tracking-[0.2em] uppercase mb-2" style={{ color: "hsl(0 0% 30%)" }}>
-            ◈ USDAX Finance · Protocol Layer
+            ◈ USDAX Finance · Monitor
           </div>
           <h1 className="font-black text-2xl md:text-3xl uppercase tracking-tight">
-            Protocol <span style={{ color: LIME }}>Dashboard</span>
+            Protocol <span style={{ color: LIME }}>Monitor</span>
           </h1>
           <p className="text-sm mt-1" style={{ color: "hsl(0 0% 38%)" }}>
             Real-time state overview & risk monitoring
@@ -187,12 +203,12 @@ export default function Dashboard() {
           title="USDAX Supply"
           value={formatNumber(stats.usdaxSupply, 0)}
           sub={`${stats.totalPositions} active positions`}
-          icon={Activity}
+          icon={USDAxCoin}
           accent={EMERALD}
         />
         <StatCard
-          title="Vol 24h"
-          value={netStats ? formatCurrency(netStats.volume24hUsd) : "—"}
+          title={netStats && netStats.volume24hUsd > 0 ? "Vol 24h" : "Vol Total"}
+          value={netStats ? formatCurrency(netStats.volume24hUsd > 0 ? netStats.volume24hUsd : netStats.totalVolumeUsd) : "-"}
           sub={netStats ? `${netStats.transactions24h} txns · ${netStats.uniqueUsers} users` : "Loading…"}
           icon={TrendingUp}
           accent={LIME}
@@ -217,7 +233,7 @@ export default function Dashboard() {
           <Panel className="flex flex-col p-5">
             <div className="font-mono text-[10px] tracking-widest uppercase mb-0.5" style={{ color: "hsl(0 0% 28%)" }}>Collateral Breakdown</div>
             <div className="font-bold text-sm mb-3" style={{ color: "hsl(0 0% 78%)" }}>By asset type</div>
-            {/* Donut — cy slightly above center so it never clips */}
+            {/* Donut, cy slightly above center so it never clips */}
             <div style={{ height: 170 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -236,12 +252,13 @@ export default function Dashboard() {
                   <Tooltip
                     formatter={(v: number) => [formatCurrency(v), "Value"]}
                     contentStyle={TOOLTIP_STYLE}
-                    itemStyle={{ color: "hsl(0 0% 85%)" }}
+                    labelStyle={TOOLTIP_LABEL_STYLE}
+                    itemStyle={TOOLTIP_ITEM_STYLE}
                   />
                 </PieChart>
               </ResponsiveContainer>
             </div>
-            {/* 2-col grid legend — fits 13 tokens cleanly */}
+            {/* 2-col grid legend, fits 13 tokens cleanly */}
             <div className="grid grid-cols-2 gap-x-3 gap-y-1.5 mt-3 pt-3" style={{ borderTop: `1px solid ${BORDER}` }}>
               {collateral.map((c, i) => (
                 <div key={c.symbol} className="flex items-center gap-1.5 min-w-0">
@@ -262,11 +279,20 @@ export default function Dashboard() {
             <div className="flex-1" style={{ height: 170 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={health} barCategoryGap="28%" margin={{ top: 4, right: 4, left: -18, bottom: 0 }}>
-                  <XAxis dataKey="range" stroke="hsl(0 0% 22%)" fontSize={10} tickLine={false} axisLine={false} />
-                  <YAxis stroke="hsl(0 0% 22%)" fontSize={10} tickLine={false} axisLine={false} allowDecimals={false} />
+                  <XAxis
+                    dataKey="range"
+                    tick={{ fill: "hsl(0 0% 52%)", fontSize: 10 }}
+                    tickLine={false} axisLine={false}
+                  />
+                  <YAxis
+                    tick={{ fill: "hsl(0 0% 52%)", fontSize: 10 }}
+                    tickLine={false} axisLine={false} allowDecimals={false}
+                  />
                   <Tooltip
-                    cursor={{ fill: "hsl(0 0% 8%)" }}
+                    cursor={{ fill: "hsl(0 0% 11%)" }}
                     contentStyle={TOOLTIP_STYLE}
+                    labelStyle={TOOLTIP_LABEL_STYLE}
+                    itemStyle={TOOLTIP_ITEM_STYLE}
                     formatter={(v: number) => [v, "Positions"]}
                   />
                   <Bar dataKey="count" radius={[5, 5, 0, 0]}>
@@ -281,12 +307,12 @@ export default function Dashboard() {
                 </BarChart>
               </ResponsiveContainer>
             </div>
-            {/* Legend row — mirrors pie card footer */}
+            {/* Legend row, mirrors pie card footer */}
             <div className="grid grid-cols-1 gap-y-1.5 mt-3 pt-3" style={{ borderTop: `1px solid ${BORDER}` }}>
               {[
-                { label: "Critical — HF below 1.0", color: RED     },
-                { label: "Warning  — HF 1.0 – 1.5", color: AMBER   },
-                { label: "Safe     — HF above 1.5",  color: EMERALD },
+                { label: "Critical, HF below 1.0", color: RED     },
+                { label: "Warning , HF 1.0 – 1.5", color: AMBER   },
+                { label: "Safe    , HF above 1.5",  color: EMERALD },
               ].map((leg) => (
                 <div key={leg.label} className="flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: leg.color }} />
@@ -301,10 +327,11 @@ export default function Dashboard() {
         <Panel className="flex flex-col">
           <div className="flex items-center gap-2 px-5 pt-5 pb-3 flex-shrink-0" style={{ borderBottom: `1px solid ${BORDER}` }}>
             <div className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: EMERALD }} />
-            <span className="font-mono text-[10px] tracking-widest uppercase" style={{ color: "hsl(0 0% 30%)" }}>Live Activity</span>
+            <span className="font-mono text-[10px] tracking-widest uppercase" style={{ color: "hsl(0 0% 30%)" }}>Vault Activity</span>
+            <span className="font-mono text-[9px] px-1.5 py-0.5 rounded-full ml-1" style={{ background: `${EMERALD}10`, color: EMERALD, border: `1px solid ${EMERALD}25` }}>Testnet 46630</span>
           </div>
           <div className="overflow-y-auto px-5 py-3 space-y-3" style={{ maxHeight: 420 }}>
-            {activity.map((event) => {
+            {activity.filter((e) => !MAINNET_TYPES.has(e.type)).map((event) => {
               const color = ACTIVITY_BADGE[event.type] ?? LIME;
               return (
                 <div
@@ -332,15 +359,19 @@ export default function Dashboard() {
                     <div className="font-mono text-[10px]" style={{ color: "hsl(0 0% 28%)" }}>
                       {formatTimeAgoUTC(event.timestamp)}
                     </div>
-                    <a
-                      href={`https://explorer.robinhood.com/tx/${event.txHash}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="font-mono text-[10px] hover:underline"
-                      style={{ color: `${LIME}80` }}
-                    >
-                      {formatAddress(event.txHash)}
-                    </a>
+                    {event.txHash ? (
+                      <a
+                        href={`${TESTNET_EXPLORER}/tx/${event.txHash}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="font-mono text-[10px] hover:underline"
+                        style={{ color: `${LIME}80` }}
+                      >
+                        {formatAddress(event.txHash)}
+                      </a>
+                    ) : (
+                      <span className="font-mono text-[10px]" style={{ color: "hsl(0 0% 25%)" }}></span>
+                    )}
                   </div>
                 </div>
               );

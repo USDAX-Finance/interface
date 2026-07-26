@@ -1,0 +1,19 @@
+{
+  "name": "APX",
+  "symbol": "APX",
+  "decimals": 18,
+  "website": "https://usdax.finance",
+  "logo": {
+    "src": "https://usdax.finance/apx-logo.png",
+    "width": "1000",
+    "height": "1000",
+    "ipfs_hash": ""
+  },
+  "support": {
+    "url": "https://usdax.finance"
+  },
+  "social": {
+    "twitter": "https://x.com/Usdax_Finance",
+    "telegram": ""
+  }
+}

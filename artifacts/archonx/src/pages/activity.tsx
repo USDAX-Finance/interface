@@ -32,7 +32,14 @@ const CARD2   = "hsl(0 0% 8%)";
 const MUTED   = "hsl(0 0% 40%)";
 const DIM     = "hsl(0 0% 28%)";
 
-const EXPLORER = "https://explorer.testnet.chain.robinhood.com";
+const EXPLORER         = "https://explorer.testnet.chain.robinhood.com";
+const MAINNET_EXPLORER = "https://robinhoodchain.blockscout.com";
+
+/* Events that come from Mainnet (4663) APX staking contracts */
+const MAINNET_TYPES = new Set(["STAKE", "UNSTAKE", "CLAIM", "EMERGENCY", "COOLDOWN"]);
+const explorerFor   = (type: string) => MAINNET_TYPES.has(type) ? MAINNET_EXPLORER : EXPLORER;
+const chainLabelFor = (type: string) => MAINNET_TYPES.has(type) ? "Mainnet 4663" : "Testnet 46630";
+const chainColorFor = (type: string) => MAINNET_TYPES.has(type) ? VIOLET : EMERALD;
 
 /* ─── Tx-type config ─── */
 const TX_META: Record<string, {
@@ -44,8 +51,10 @@ const TX_META: Record<string, {
   REDEEM:    { label: "REDEEM",    color: AMBER,   bg: `${AMBER}10`,   icon: ArrowDownLeft,  dir: "out"     },
   STAKE:     { label: "STAKE",     color: VIOLET,  bg: `${VIOLET}10`,  icon: ArrowUpRight,   dir: "in"      },
   UNSTAKE:   { label: "UNSTAKE",   color: AMBER,   bg: `${AMBER}10`,   icon: ArrowDownLeft,  dir: "out"     },
-  CLAIM:     { label: "CLAIM",     color: LIME,    bg: `${LIME}10`,    icon: Zap,            dir: "neutral" },
+  CLAIM:     { label: "CLAIM",     color: VIOLET,  bg: `${VIOLET}10`,  icon: Zap,            dir: "neutral" },
   LIQUIDATE: { label: "LIQUIDATE", color: RED,     bg: `${RED}12`,     icon: Flame,          dir: "neutral" },
+  EMERGENCY: { label: "EMERGENCY", color: RED,     bg: `${RED}10`,     icon: Flame,          dir: "out"     },
+  COOLDOWN:  { label: "COOLDOWN",  color: AMBER,   bg: `${AMBER}10`,   icon: ArrowDownLeft,  dir: "neutral" },
 };
 
 /* ─── Helpers ─── */
@@ -148,21 +157,27 @@ function TxRow({ event, index }: { event: any; index: number }) {
             <span className="font-normal text-[10px] ml-1" style={{ color: MUTED }}>{event.token}</span>
           </div>
         </div>
-        {/* Row 2: time + hash */}
+        {/* Row 2: time + chain + hash */}
         <div className="flex items-center justify-between gap-2">
-          <span className="font-mono text-[10px]" style={{ color: DIM }}>
-            {formatTimeAgoUTC(event.timestamp)}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-[10px]" style={{ color: DIM }}>
+              {formatTimeAgoUTC(event.timestamp)}
+            </span>
+            <span className="font-mono text-[9px] px-1.5 py-0.5 rounded-full"
+              style={{ background: `${chainColorFor(event.type)}10`, color: chainColorFor(event.type), border: `1px solid ${chainColorFor(event.type)}25` }}>
+              {chainLabelFor(event.type)}
+            </span>
+          </div>
           {hash ? (
             <div className="flex items-center gap-1 font-mono text-[10px]" style={{ color: DIM }}>
               <span>{`${hash.slice(0, 6)}…${hash.slice(-4)}`}</span>
-              <a href={`${EXPLORER}/tx/${hash}`} target="_blank" rel="noopener noreferrer"
+              <a href={`${explorerFor(event.type)}/tx/${hash}`} target="_blank" rel="noopener noreferrer"
                 className="hover:opacity-70" style={{ color: DIM }}>
                 <ExternalLink className="w-2.5 h-2.5" />
               </a>
             </div>
           ) : (
-            <span className="font-mono text-[10px]" style={{ color: "hsl(0 0% 20%)" }}>—</span>
+            <span className="font-mono text-[10px]" style={{ color: "hsl(0 0% 20%)" }}></span>
           )}
         </div>
       </div>
@@ -199,24 +214,30 @@ function TxRow({ event, index }: { event: any; index: number }) {
           {event.token}
         </div>
 
-        {/* Time */}
-        <div className="font-mono text-[11px]" style={{ color: DIM }}>
-          {formatTimeAgoUTC(event.timestamp)}
+        {/* Time + chain */}
+        <div className="space-y-0.5">
+          <div className="font-mono text-[11px]" style={{ color: DIM }}>
+            {formatTimeAgoUTC(event.timestamp)}
+          </div>
+          <div className="font-mono text-[9px] px-1.5 py-0.5 rounded-full inline-block"
+            style={{ background: `${chainColorFor(event.type)}10`, color: chainColorFor(event.type), border: `1px solid ${chainColorFor(event.type)}25` }}>
+            {chainLabelFor(event.type)}
+          </div>
         </div>
 
         {/* Tx hash */}
         <div className="flex items-center gap-1 font-mono text-[11px]" style={{ color: DIM }}>
-          <span>{hash ? `${hash.slice(0, 8)}…${hash.slice(-4)}` : "—"}</span>
+          <span>{hash ? `${hash.slice(0, 8)}…${hash.slice(-4)}` : ""}</span>
           {hash && (
             <>
               <CopyBtn text={hash} />
               <a
-                href={`${EXPLORER}/tx/${hash}`}
+                href={`${explorerFor(event.type)}/tx/${hash}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="transition-colors hover:opacity-80 flex-shrink-0"
                 style={{ color: DIM }}
-                title="View on explorer"
+                title={`View on ${MAINNET_TYPES.has(event.type) ? "Blockscout (Mainnet)" : "Explorer (Testnet)"}`}
                 onClick={(e) => e.stopPropagation()}
               >
                 <ExternalLink className="w-3 h-3" />
@@ -358,7 +379,7 @@ export default function ActivityPage() {
               style={{ background: `${EMERALD}08`, border: `1px solid ${EMERALD}25`, color: EMERALD }}
             >
               <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: EMERALD }} />
-              Robinhood Chain Testnet · Live Feed
+              Testnet 46630 + Mainnet 4663 · Live Feed
             </div>
             <h1
               className="font-black uppercase leading-none tracking-tight mb-2"
@@ -367,7 +388,7 @@ export default function ActivityPage() {
               PROTOCOL <span style={{ color: LIME }}>ACTIVITY</span>
             </h1>
             <p className="text-[14px]" style={{ color: MUTED }}>
-              All on-chain interactions (mints, deposits, burns, liquidations) in real time.
+              Vault activity (MINT, BURN, DEPOSIT, REDEEM, LIQUIDATE) on Testnet 46630 — APX staking (STAKE, UNSTAKE, CLAIM) on Mainnet 4663. Each tx links to the correct chain explorer.
             </p>
           </div>
 
@@ -383,42 +404,42 @@ export default function ActivityPage() {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-8">
           <StatPill
             label="TVL"
-            value={stats ? formatCompact(stats.tvlUsd) : "—"}
+            value={stats ? formatCompact(stats.tvlUsd) : ""}
             sub="Total collateral locked"
             color={LIME}
             icon={Coins}
           />
           <StatPill
             label="USDAX Supply"
-            value={stats ? formatCompactNum(stats.usdaxSupply) : "—"}
+            value={stats ? formatCompactNum(stats.usdaxSupply) : ""}
             sub="Stablecoin in circulation"
             color={EMERALD}
             icon={Activity}
           />
           <StatPill
-            label="Vol 24h"
-            value={net ? formatCompact(net.volume24hUsd) : "—"}
-            sub="Mint + burn volume"
+            label={net && net.volume24hUsd > 0 ? "Vol 24h" : "Vol Total"}
+            value={net ? formatCompact(net.volume24hUsd > 0 ? net.volume24hUsd : net.totalVolumeUsd) : ""}
+            sub={net && net.volume24hUsd > 0 ? "Mint + burn · last 24h" : "Mint + burn · all-time"}
             color={LIME}
             icon={TrendingUp}
           />
           <StatPill
             label="Txns 24h"
-            value={net ? String(net.transactions24h) : "—"}
+            value={net ? String(net.transactions24h) : ""}
             sub="Protocol interactions"
             color={AMBER}
             icon={Zap}
           />
           <StatPill
             label="Unique Wallets"
-            value={net ? String(net.uniqueUsers) : "—"}
+            value={net ? String(net.uniqueUsers) : ""}
             sub="Distinct addresses"
             color={VIOLET}
             icon={Users}
           />
           <StatPill
             label="Total Txns"
-            value={net ? formatCompactNum(net.totalTransactions) : "—"}
+            value={net ? formatCompactNum(net.totalTransactions) : ""}
             sub="Lifetime interactions"
             color={EMERALD}
             icon={Activity}
@@ -532,16 +553,22 @@ export default function ActivityPage() {
           className="mt-6 rounded-xl px-6 py-4 flex flex-wrap gap-6 items-center"
           style={{ background: CARD2, border: `1px solid ${BORDER}` }}
         >
-          <div className="flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full" style={{ background: EMERALD }} />
-            <span className="font-mono text-[11px] font-bold" style={{ color: EMERALD }}>
-              Robinhood Chain Testnet
-            </span>
-            <span className="font-mono text-[11px]" style={{ color: DIM }}>Chain ID 46630</span>
+          <div className="flex items-center gap-4 flex-wrap">
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full" style={{ background: EMERALD }} />
+              <span className="font-mono text-[11px] font-bold" style={{ color: EMERALD }}>Testnet</span>
+              <span className="font-mono text-[11px]" style={{ color: DIM }}>Chain 46630 · Vault / USDAX</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full" style={{ background: VIOLET }} />
+              <span className="font-mono text-[11px] font-bold" style={{ color: VIOLET }}>Mainnet</span>
+              <span className="font-mono text-[11px]" style={{ color: DIM }}>Chain 4663 · APX Staking</span>
+            </div>
           </div>
           {[
-            { label: "Explorer", href: EXPLORER, val: "explorer.testnet.chain.robinhood.com" },
-            { label: "RPC",      href: "https://rpc.testnet.chain.robinhood.com/rpc", val: "rpc.testnet.chain.robinhood.com/rpc" },
+            { label: "Testnet Explorer", href: EXPLORER,         val: "explorer.testnet.chain.robinhood.com" },
+            { label: "Mainnet Explorer", href: MAINNET_EXPLORER, val: "robinhoodchain.blockscout.com" },
+            { label: "RPC",              href: "https://rpc.testnet.chain.robinhood.com/rpc", val: "rpc.testnet.chain.robinhood.com/rpc" },
           ].map((r) => (
             <a
               key={r.label}

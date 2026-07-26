@@ -1,4 +1,4 @@
-import { ArrowLeft, Shield, Users, Zap, Globe, Lock, Mail, Twitter } from "lucide-react";
+import { Shield, Users, Zap, Globe, Lock, Mail, Twitter } from "lucide-react";
 
 const LIME    = "hsl(79 100% 57%)";
 const EMERALD = "hsl(152 70% 48%)";
@@ -12,15 +12,18 @@ export default function About() {
     <div style={{ background: BG, minHeight: "100vh", color: "hsl(0 0% 90%)" }}>
       {/* Nav */}
       <header style={{ borderBottom: `1px solid ${BORDER}`, background: "hsl(0 0% 3% / 0.95)", backdropFilter: "blur(16px)", position: "sticky", top: 0, zIndex: 40 }}>
-        <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
-          <a href="/" style={{ display: "flex", alignItems: "center", gap: 8, color: MUTED, textDecoration: "none", fontSize: 13 }}>
-            <ArrowLeft style={{ width: 14, height: 14 }} /> Home
+        <div className="max-w-7xl mx-auto px-6 h-14 flex items-center gap-4">
+          <a href="/" style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
+            <img src="/favicon.png" alt="USDAX" style={{ width: 26, height: 26, borderRadius: 4 }} />
+            <span style={{ fontWeight: 700, fontSize: 14, color: "hsl(0 0% 80%)" }}>USDAX <span style={{ color: "hsl(0 0% 35%)" }}>finance</span></span>
           </a>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <img src="/favicon.png" alt="USDAX" style={{ width: 24, height: 24, borderRadius: 4 }} />
-            <span style={{ fontWeight: 700, fontSize: 14 }}>USDAX Finance</span>
-          </div>
-          <a href="/app" style={{ fontSize: 13, color: LIME, textDecoration: "none", fontWeight: 700 }}>Launch App →</a>
+          <div style={{ flex: 1 }} />
+          {[{ label: "Staking", href: "/staking" }, { label: "Docs", href: "/docs" }, { label: "Audit", href: "/audit" }].map(({ label, href }) => (
+            <a key={label} href={href} style={{ fontSize: 12, color: "hsl(0 0% 38%)", textDecoration: "none", padding: "6px 14px", border: `1px solid ${BORDER}`, borderRadius: 6 }}
+              onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "hsl(0 0% 75%)")}
+              onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "hsl(0 0% 38%)")}>{label}</a>
+          ))}
+          <a href="/app" style={{ fontSize: 12, fontWeight: 700, color: "hsl(0 0% 4%)", background: LIME, padding: "6px 16px", borderRadius: 6, textDecoration: "none" }}>Launch App</a>
         </div>
       </header>
 
@@ -139,8 +142,8 @@ export default function About() {
           </h2>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 14 }}>
             {[
-              { icon: Mail,    label: "General",  value: "team@usdax.finance",       href: "mailto:team@usdax.finance" },
-              { icon: Shield,  label: "Security", value: "security@usdax.finance",   href: "mailto:security@usdax.finance" },
+              { icon: Mail,    label: "General",  value: "support@usdax.finance",       href: "mailto:support@usdax.finance" },
+              { icon: Shield,  label: "Security", value: "support@usdax.finance",   href: "mailto:support@usdax.finance" },
               { icon: Twitter, label: "Twitter",  value: "@Usdax_Finance",            href: "https://x.com/Usdax_Finance" },
               { icon: Globe,   label: "Website",  value: "usdax.finance",             href: "https://usdax.finance" },
             ].map(({ icon: Icon, label, value, href }) => (

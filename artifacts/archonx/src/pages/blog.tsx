@@ -1,4 +1,4 @@
-import { ArrowLeft, BookOpen } from "lucide-react";
+import { BookOpen } from "lucide-react";
 
 const LIME    = "hsl(79 100% 57%)";
 const EMERALD = "hsl(152 70% 48%)";
@@ -15,7 +15,7 @@ const posts = [
     category: "Product Update",
     color: EMERALD,
     title: "USDAX Savings Rate Now Live on Robinhood Chain",
-    excerpt: "The USDAxSavings contract is now deployed on Robinhood Chain Testnet at 0x1f355B42D2844ffEE5a76E6989E2942b04DffFD3. USDAX holders can deposit and earn 4.20% APY with no lock-up period and no minimum deposit. The savings pool is seeded with 900 USDAX in reward reserves. Direct contract interaction is available on the block explorer while the app UI completes wallet integration.",
+    excerpt: "The USDAxSavings contract is now deployed on Robinhood Chain Testnet at 0x1Ce84b4Fb6E6b44C767d4575bE56890DbC8EFA00. USDAX holders can deposit and earn 4.20% APY with no lock-up period and no minimum deposit. The savings pool is seeded with 900 USDAX in reward reserves. The yield interface is live in the app under the Yield tab.",
     readTime: "3 min",
   },
   {
@@ -24,7 +24,7 @@ const posts = [
     category: "Protocol Update",
     color: LIME,
     title: "Q3 2026 Update: Vaults, Liquidations, and the Road to Mainnet",
-    excerpt: "Three months into public testnet. Vault creation, collateral management, and the liquidation engine are all functioning as designed. This post covers what we've learned from testnet, the upcoming savings rate deployment, and our updated mainnet timeline for H2 2026.",
+    excerpt: "Three months into public testnet. Vault creation, collateral management, and the liquidation engine are all functioning as designed. This post covers what we've learned from testnet, the savings rate deployment, and what remains before mainnet is considered, including audit, live oracle, and peg mechanism.",
     readTime: "6 min",
   },
   {
@@ -61,15 +61,18 @@ export default function Blog() {
     <div style={{ background: BG, minHeight: "100vh", color: "hsl(0 0% 90%)" }}>
       {/* Nav */}
       <header style={{ borderBottom: `1px solid ${BORDER}`, background: "hsl(0 0% 3% / 0.95)", backdropFilter: "blur(16px)", position: "sticky", top: 0, zIndex: 40 }}>
-        <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
-          <a href="/" style={{ display: "flex", alignItems: "center", gap: 8, color: MUTED, textDecoration: "none", fontSize: 13 }}>
-            <ArrowLeft style={{ width: 14, height: 14 }} /> Home
+        <div className="max-w-7xl mx-auto px-6 h-14 flex items-center gap-4">
+          <a href="/" style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
+            <img src="/favicon.png" alt="USDAX" style={{ width: 26, height: 26, borderRadius: 4 }} />
+            <span style={{ fontWeight: 700, fontSize: 14, color: "hsl(0 0% 80%)" }}>USDAX <span style={{ color: "hsl(0 0% 35%)" }}>finance</span></span>
           </a>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <img src="/favicon.png" alt="USDAX" style={{ width: 24, height: 24, borderRadius: 4 }} />
-            <span style={{ fontWeight: 700, fontSize: 14 }}>USDAX Finance</span>
-          </div>
-          <a href="/app" style={{ fontSize: 13, color: LIME, textDecoration: "none", fontWeight: 700 }}>Launch App →</a>
+          <div style={{ flex: 1 }} />
+          {[{ label: "Staking", href: "/staking" }, { label: "Docs", href: "/docs" }, { label: "Audit", href: "/audit" }].map(({ label, href }) => (
+            <a key={label} href={href} style={{ fontSize: 12, color: "hsl(0 0% 38%)", textDecoration: "none", padding: "6px 14px", border: `1px solid ${BORDER}`, borderRadius: 6 }}
+              onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "hsl(0 0% 75%)")}
+              onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "hsl(0 0% 38%)")}>{label}</a>
+          ))}
+          <a href="/app" style={{ fontSize: 12, fontWeight: 700, color: "hsl(0 0% 4%)", background: LIME, padding: "6px 16px", borderRadius: 6, textDecoration: "none" }}>Launch App</a>
         </div>
       </header>
 

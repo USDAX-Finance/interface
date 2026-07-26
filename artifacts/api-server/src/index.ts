@@ -1,6 +1,6 @@
 import app from "./app";
 import { logger } from "./lib/logger";
-import { seedProtocolData, seedStockTokens } from "./lib/seed";
+import { startReconciler } from "./lib/reconcile.js";
 
 const rawPort = process.env["PORT"];
 
@@ -23,8 +23,5 @@ app.listen(port, (err) => {
   }
 
   logger.info({ port }, "Server listening");
-
-  // Seed diverse collateral types on startup (idempotent)
-  seedProtocolData();
-  seedStockTokens();
+  startReconciler();
 });

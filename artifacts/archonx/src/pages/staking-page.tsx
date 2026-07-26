@@ -79,10 +79,10 @@ function TopBar() {
 /* ─── HERO ─── */
 function Hero() {
   const stats = [
-    { label: "Projected APY",    val: "~15%",  sub: "Est. at APX launch · protocol revenue" },
-    { label: "Total APX Staked", val: "-",     sub: "Live once staking launches" },
-    { label: "Rewards Paid",     val: "-",     sub: "USDAX distributed" },
-    { label: "Stakers",          val: "-",     sub: "Active wallets" },
+    { label: "Reward Rate",      val: "2,740", sub: "APX per day · 1M APX/year emission" },
+    { label: "Total APX Staked", val: "N/A",   sub: "Live on Robinhood Mainnet" },
+    { label: "Rewards Pool",     val: "10M",   sub: "APX funded · ~10 years runway" },
+    { label: "Stakers",          val: "N/A",   sub: "Active wallets on mainnet" },
   ];
 
   return (
@@ -111,19 +111,19 @@ function Hero() {
           <span style={{ color: LIME }}>EARN REAL YIELD.</span>
         </h1>
         <p className="text-[15px] leading-relaxed mb-8 max-w-xl" style={{ color: "hsl(0 0% 44%)" }}>
-          Every stability fee and mint fee collected by USDAX Finance flows directly to APX stakers.
-          No emissions, no inflation. Pure revenue-share from real protocol activity.
+          Stake APX and earn APX rewards from a 10,000,000 APX reward pool.
+          Powered by the Synthetix rewardPerToken model. Rewards accrue every block, claim anytime.
         </p>
 
-        {/* APX Disclaimer */}
+        {/* Live badge */}
         <div className="mb-10 rounded-xl px-5 py-4 flex items-start gap-3 max-w-xl"
-          style={{ background: "hsl(35 92% 60% / 0.06)", border: "1px solid hsl(35 92% 60% / 0.25)" }}>
-          <Shield className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: "hsl(35 92% 60%)" }} />
+          style={{ background: "hsl(79 100% 57% / 0.05)", border: "1px solid hsl(79 100% 57% / 0.2)" }}>
+          <Shield className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: LIME }} />
           <div>
-            <p className="font-black text-[13px] mb-1" style={{ color: "hsl(35 92% 60%)" }}>APX Token Not Yet Deployed</p>
+            <p className="font-black text-[13px] mb-1" style={{ color: LIME }}>Live on Robinhood Chain Mainnet</p>
             <p className="text-[12px] leading-relaxed" style={{ color: "hsl(0 0% 48%)" }}>
-              APX staking requires the APX governance token, which has not yet launched on Robinhood Chain.
-              VaultEngine and USDAX are live on testnet. Staking activates at APX token launch.
+              APXStaking contract is deployed and funded with 10M APX rewards on Robinhood Chain Mainnet (Chain ID 4663).
+              Connect your wallet and start earning today.
             </p>
           </div>
         </div>
@@ -185,7 +185,7 @@ function HowItWorks() {
     {
       n: "04", icon: RefreshCw,
       title: "Claim Anytime",
-      body: "Claim your accrued USDAX rewards at any time, no vesting, no waiting. Unstaking initiates a 7-day unbonding period, after which your APX is fully returned.",
+      body: "Claim your accrued APX rewards at any time, no vesting, no waiting. Unstaking initiates a 7-day cooldown period, after which your APX is fully returned to your wallet.",
     },
   ];
 
@@ -360,13 +360,13 @@ function Parameters() {
 
           <div className="space-y-3">
             {[
-              { icon: Coins,    label: "Minimum Stake",      val: "No minimum",    note: "Any amount of APX qualifies" },
-              { icon: Lock,     label: "Lock Period",         val: "None",          note: "Stake and unstake freely" },
-              { icon: Clock,    label: "Unbonding Period",    val: "7 days",        note: "After initiating unstake" },
+              { icon: Coins,    label: "Minimum Stake",      val: "1 APX",         note: "Min. 1 APX per transaction" },
+              { icon: Lock,     label: "Lock Period",         val: "None",          note: "Stake anytime, no lockup" },
+              { icon: Clock,    label: "Cooldown Period",     val: "7 days",        note: "After initiating unstake" },
               { icon: RefreshCw,label: "Reward Frequency",   val: "Every block",   note: "Accrues in real time" },
               { icon: Zap,      label: "Claim Cooldown",     val: "None",          note: "Claim whenever you want" },
-              { icon: Shield,   label: "Reward Token",       val: "USDAX",         note: "Stable, dollar-denominated" },
-              { icon: TrendingUp,label: "Reward Source",     val: "Protocol fees", note: "0% from token inflation" },
+              { icon: Shield,   label: "Reward Token",       val: "APX",           note: "Governance token rewards" },
+              { icon: TrendingUp,label: "Reward Source",     val: "10M APX pool",  note: "1M APX/year emission rate" },
               { icon: Users,    label: "Governance Access",  val: "1 APX = 1 vote",note: "Stake does not affect votes" },
             ].map((p) => {
               const Icon = p.icon;

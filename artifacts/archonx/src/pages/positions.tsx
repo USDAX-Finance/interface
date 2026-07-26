@@ -256,6 +256,100 @@ function FieldGroup({ label, children }: { label: string; children: React.ReactN
   );
 }
 
+/* ─── Liquidation Price Simulator ─── */
+const ORACLE_PRICES: Record<string, number> = { WETH: 3247.50, WBTC: 67823.00, stETH: 3190.00 };
+
+function LiquidationSimulator() {
+  const [token,    setToken]    = useState("WETH");
+  const [amount,   setAmount]   = useState("");
+  const [debt,     setDebt]     = useState("");
+  const [curPrice, setCurPrice] = useState(String(ORACLE_PRICES["WETH"]));
+
+  // auto-fill price when token changes
+  const handleTokenChange = (t: string) => {
+    setToken(t);
+    setCurPrice(String(ORACLE_PRICES[t] ?? ""));
+  };
+
+  const amt   = parseFloat(amount)   || 0;
+  const dbt   = parseFloat(debt)     || 0;
+  const price = parseFloat(curPrice) || 0;
+  const MIN_CR = 1.5;
+
+  const liqPrice  = amt > 0 && dbt > 0 ? (dbt * MIN_CR) / amt : null;
+  const currentCR = amt > 0 && dbt > 0 && price > 0 ? (amt * price) / dbt : null;
+  const safetyBuf = liqPrice && price > 0 ? ((price - liqPrice) / price) * 100 : null;
+  const crColor   = currentCR ? (currentCR < 1.5 ? RED : currentCR < 2.0 ? AMBER : EMERALD) : LIME;
+  const inputSt   = { background: "hsl(0 0% 7%)", border: `1px solid ${BORDER}`, borderRadius: 8, fontFamily: "var(--font-mono)", color: "hsl(0 0% 82%)", height: 40, fontSize: 13 };
+
+  return (
+    <div className="rounded-2xl p-5" style={{ background: CARD_BG, border: `1px solid ${BORDER}` }}>
+      <div className="font-mono text-[10px] tracking-[0.2em] uppercase mb-4" style={{ color: "hsl(0 0% 30%)" }}>
+        ◈ Liquidation Price Simulator
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+        <div>
+          <label className="block font-mono text-[10px] tracking-widest uppercase mb-1.5" style={{ color: "hsl(0 0% 30%)" }}>Token</label>
+          <Select value={token} onValueChange={handleTokenChange}>
+            <SelectTrigger style={inputSt}><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="WETH">WETH</SelectItem>
+              <SelectItem value="WBTC">WBTC</SelectItem>
+              <SelectItem value="stETH">stETH</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <label className="block font-mono text-[10px] tracking-widest uppercase mb-1.5" style={{ color: "hsl(0 0% 30%)" }}>Collateral Amt</label>
+          <Input type="number" step="0.0001" placeholder="e.g. 1.5" value={amount} onChange={(e) => setAmount(e.target.value)} style={inputSt} />
+        </div>
+        <div>
+          <label className="block font-mono text-[10px] tracking-widest uppercase mb-1.5" style={{ color: "hsl(0 0% 30%)" }}>USDAX Debt</label>
+          <Input type="number" step="0.01" placeholder="e.g. 2000" value={debt} onChange={(e) => setDebt(e.target.value)} style={inputSt} />
+        </div>
+        <div>
+          <label className="block font-mono text-[10px] tracking-widest uppercase mb-1.5" style={{ color: "hsl(0 0% 30%)" }}>Current Price ($)</label>
+          <Input type="number" step="1" placeholder="e.g. 3500" value={curPrice} onChange={(e) => setCurPrice(e.target.value)} style={inputSt} />
+        </div>
+      </div>
+
+      {liqPrice !== null ? (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="rounded-xl p-3" style={{ background: `${RED}08`, border: `1px solid ${RED}20` }}>
+            <p className="font-mono text-[10px] tracking-widest uppercase mb-1" style={{ color: "hsl(0 0% 35%)" }}>Liquidation Price</p>
+            <p className="font-black text-xl font-mono" style={{ color: RED }}>
+              ${liqPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </p>
+            <p className="text-[11px] mt-0.5" style={{ color: "hsl(0 0% 35%)" }}>per {token} · liquidated below this</p>
+          </div>
+          {currentCR !== null && (
+            <div className="rounded-xl p-3" style={{ background: `${crColor}08`, border: `1px solid ${crColor}20` }}>
+              <p className="font-mono text-[10px] tracking-widest uppercase mb-1" style={{ color: "hsl(0 0% 35%)" }}>Current C-Ratio</p>
+              <p className="font-black text-xl font-mono" style={{ color: crColor }}>{(currentCR * 100).toFixed(1)}%</p>
+              <p className="text-[11px] mt-0.5" style={{ color: "hsl(0 0% 35%)" }}>Minimum required: 150%</p>
+            </div>
+          )}
+          {safetyBuf !== null && (
+            <div className="rounded-xl p-3" style={{ background: safetyBuf > 0 ? `${EMERALD}08` : `${RED}08`, border: `1px solid ${safetyBuf > 0 ? EMERALD : RED}20` }}>
+              <p className="font-mono text-[10px] tracking-widest uppercase mb-1" style={{ color: "hsl(0 0% 35%)" }}>Safety Buffer</p>
+              <p className="font-black text-xl font-mono" style={{ color: safetyBuf > 0 ? EMERALD : RED }}>
+                {safetyBuf > 0 ? `${safetyBuf.toFixed(1)}%` : "AT RISK"}
+              </p>
+              <p className="text-[11px] mt-0.5" style={{ color: "hsl(0 0% 35%)" }}>
+                {safetyBuf > 0 ? "Price can drop before liquidation" : "Price below liquidation level"}
+              </p>
+            </div>
+          )}
+        </div>
+      ) : (
+        <p className="text-[12px] font-mono" style={{ color: "hsl(0 0% 30%)" }}>
+          Enter collateral amount + USDAX debt to calculate your liquidation price.
+        </p>
+      )}
+    </div>
+  );
+}
+
 export default function Positions() {
   const queryClient      = useQueryClient();
   const { toast }        = useToast();
@@ -719,6 +813,9 @@ export default function Positions() {
         </div>
       </div>
 
+      {/* Liquidation Price Simulator */}
+      <LiquidationSimulator />
+
       {/* Table */}
       <div className="overflow-x-auto rounded-xl" style={{ border: `1px solid ${BORDER}` }}>
       <div className="relative rounded-xl overflow-hidden" style={{ background: CARD_BG, minWidth: 560 }}>
@@ -822,9 +919,9 @@ export default function Positions() {
                 My Transactions
               </span>
             </div>
-            {myActivity && myActivity.length > 0 && (
+            {myActivity && myActivity.filter((ev) => !["STAKE","UNSTAKE","CLAIM"].includes(ev.type)).length > 0 && (
               <span className="font-mono text-[10px]" style={{ color: "hsl(0 0% 30%)" }}>
-                {myActivity.length} events
+                {myActivity.filter((ev) => !["STAKE","UNSTAKE","CLAIM"].includes(ev.type)).length} events
               </span>
             )}
           </div>
@@ -839,7 +936,7 @@ export default function Positions() {
             </div>
           ) : (
             <div className="divide-y" style={{ borderColor: BORDER }}>
-              {myActivity.map((ev) => {
+              {myActivity.filter((ev) => !["STAKE","UNSTAKE","CLAIM"].includes(ev.type)).map((ev) => {
                 const typeColors: Record<string, string> = {
                   MINT:      LIME,
                   DEPOSIT:   EMERALD,
@@ -882,7 +979,7 @@ export default function Positions() {
                           <ExternalLink className="w-2.5 h-2.5" />
                         </a>
                       ) : (
-                        <span className="font-mono text-[11px]" style={{ color: "hsl(0 0% 25%)" }}>—</span>
+                        <span className="font-mono text-[11px]" style={{ color: "hsl(0 0% 25%)" }}></span>
                       )}
                       <span className="font-mono text-[10px]" style={{ color: "hsl(0 0% 28%)" }}>
                         {formatTimeAgoUTC(ev.timestamp)}

@@ -5,7 +5,7 @@ import { z } from "zod/v4";
 export const positionsTable = pgTable("positions", {
   id: serial("id").primaryKey(),
   owner: text("owner").notNull(),
-  collateralToken: text("collateral_token").notNull(), // WETH or WBTC
+  collateralToken: text("collateral_token").notNull(), // WETH, WBTC, or stETH
   collateralAmount: numeric("collateral_amount", { precision: 30, scale: 18 }).notNull(),
   collateralValueUsd: numeric("collateral_value_usd", { precision: 30, scale: 6 }).notNull(),
   usdaxMinted: numeric("usdax_minted", { precision: 30, scale: 6 }).notNull(),

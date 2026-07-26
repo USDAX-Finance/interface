@@ -165,7 +165,7 @@ export default function TermsOfService() {
               "Violate any applicable law, regulation, or sanction.",
               "Engage in market manipulation, wash trading, or any form of fraudulent activity.",
               "Launder money or finance terrorism or other criminal activity.",
-              "Exploit bugs or vulnerabilities in the smart contracts (please disclose responsibly via security@usdax.finance instead).",
+              "Exploit bugs or vulnerabilities in the smart contracts (please disclose responsibly via support@usdax.finance instead).",
               "Use automated systems to scrape, attack, or overwhelm the web interface.",
               "Impersonate USDAX Finance or its contributors.",
             ]} />
@@ -247,7 +247,7 @@ export default function TermsOfService() {
           <Section title="14. Contact">
             <P>
               Questions about these Terms? Contact us at{" "}
-              <a href="mailto:legal@usdax.finance" style={{ color: LIME, textDecoration: "none" }}>legal@usdax.finance</a>.
+              <a href="mailto:support@usdax.finance" style={{ color: LIME, textDecoration: "none" }}>support@usdax.finance</a>.
             </P>
           </Section>
 

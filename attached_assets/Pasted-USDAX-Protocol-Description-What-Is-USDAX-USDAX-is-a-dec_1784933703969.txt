@@ -1,0 +1,44 @@
+USDAX — Protocol Description
+What Is USDAX?
+USDAX is a decentralized stablecoin pegged to the US Dollar. Unlike USDT or USDC — which are backed by a company holding real dollars in a bank — USDAX is backed entirely by crypto collateral locked in a smart contract. No company controls it. No bank holds the reserves. The math does.
+
+Architecture
+USDAX runs on Robinhood Chain, a Layer 2 rollup that settles to Ethereum. It is built around three smart contracts that work together:
+
+VaultEngine is the core. It accepts collateral (WETH, WBTC, stETH), calculates how much USDAX you can safely mint against it, and enforces all the rules — minimum debt, collateral ratios, and liquidation thresholds. Nothing moves without VaultEngine approving it.
+
+CollateralManager handles the supported asset list and their parameters: which tokens are accepted, what the loan-to-value ratio is, and at what point a vault becomes unsafe.
+
+MockPriceOracle feeds live asset prices into the system. The protocol continuously monitors each vault's health using these prices. If a vault drops below the safe threshold, it becomes eligible for liquidation.
+
+USDAxSavings lets holders deposit their USDAX and earn a fixed 4.20% APY, funded by mint fees collected from vault activity.
+
+How It Works
+The mechanism is straightforward and follows the same model as MakerDAO (DAI):
+
+You lock collateral. Deposit WETH, WBTC, or stETH into your vault. The collateral is held by the smart contract — not by any person or company.
+
+You mint USDAX. The protocol creates new USDAX tokens and sends them to your wallet. No one transfers tokens to you — the contract prints them fresh, backed by your locked collateral. You can mint up to 75–80% of your collateral's value, depending on the asset.
+
+A 0.5% mint fee is deducted automatically. Of the USDAX created, 0.5% goes to the protocol fee wallet — this is what funds the savings reward pool over time.
+
+Your vault stays healthy as long as your collateral value stays above the liquidation threshold. The protocol monitors this continuously using oracle prices.
+
+To get your collateral back, you repay the full USDAX debt. The protocol burns those tokens — permanently removing them from supply — and releases your collateral back to your wallet.
+
+What Keeps USDAX at $1?
+The peg is maintained by economic incentives, not by a central authority:
+
+If USDAX trades below $1, vault owners are incentivized to buy cheap USDAX on the market and repay their debt, shrinking supply and pushing the price back up.
+If USDAX trades above $1, new users are incentivized to open vaults and mint USDAX to sell, increasing supply and pulling the price back down.
+Liquidations enforce the floor: any vault that goes undercollateralized is liquidated by external actors who receive a 5% bonus on the collateral they buy, making the protocol whole again.
+Key Advantages
+Non-custodial. Your collateral is locked in a smart contract, not held by a company. No one can freeze, seize, or move it — including the team that deployed the protocol.
+
+No credit check. You do not need a bank account, credit score, or identity verification. Anyone with a wallet and crypto can open a vault.
+
+Capital-efficient. Your locked collateral does not sit idle. You unlock liquidity from assets you already hold without selling them — useful when you want to use USDAX for spending or DeFi while maintaining long exposure to your collateral.
+
+Transparent. Every vault, every mint, every liquidation is visible on-chain. The total USDAX supply, every holder, and every transaction is publicly verifiable — as seen on the token holders page, where all 27,610 USDAX in existence are accounted for across exactly 4 addresses.
+
+Yield-bearing. USDAX holders can deposit into USDAxSavings and earn 4.20% APY, making idle stablecoins productive without leaving the protocol.

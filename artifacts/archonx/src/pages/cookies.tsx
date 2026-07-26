@@ -249,7 +249,7 @@ export default function CookiePolicy() {
           <Section title="8. Contact">
             <P>
               Questions about our use of cookies? Contact us at{" "}
-              <a href="mailto:privacy@usdax.finance" style={{ color: LIME, textDecoration: "none" }}>privacy@usdax.finance</a>.
+              <a href="mailto:support@usdax.finance" style={{ color: LIME, textDecoration: "none" }}>support@usdax.finance</a>.
             </P>
           </Section>
 

@@ -18,4 +18,6 @@ export const ActivityEventType = {
   UNSTAKE: 'UNSTAKE',
   CLAIM: 'CLAIM',
   LIQUIDATE: 'LIQUIDATE',
+  EMERGENCY: 'EMERGENCY',
+  COOLDOWN: 'COOLDOWN',
 } as const;

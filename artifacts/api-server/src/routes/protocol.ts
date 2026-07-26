@@ -45,11 +45,16 @@ router.get("/protocol/stats", async (req, res): Promise<void> => {
 });
 
 router.get("/protocol/activity", async (req, res): Promise<void> => {
-  const events = await db
-    .select()
-    .from(activityEventsTable)
-    .orderBy(desc(activityEventsTable.timestamp))
-    .limit(50);
+  const userParam = typeof req.query.user === "string" ? req.query.user.toLowerCase() : undefined;
+
+  const events = await (userParam
+    ? db.select().from(activityEventsTable)
+        .where(sql`lower(${activityEventsTable.user}) = ${userParam}`)
+        .orderBy(desc(activityEventsTable.timestamp))
+        .limit(50)
+    : db.select().from(activityEventsTable)
+        .orderBy(desc(activityEventsTable.timestamp))
+        .limit(50));
 
   const mapped = events.map((e) => ({
     id: e.id,
@@ -149,8 +154,8 @@ router.get("/protocol/network-stats", async (_req, res): Promise<void> => {
   res.json(NetworkStatsSchema.parse({
     chainId: 46630,
     networkName: "Robinhood Chain Testnet",
-    rpcUrl: "https://testnet-rpc.robinhoodchain.io",
-    explorerUrl: "https://testnet-explorer.robinhoodchain.io",
+    rpcUrl: process.env.RPC_URL ?? "https://rpc.testnet.chain.robinhood.com/rpc",
+    explorerUrl: "https://explorer.testnet.chain.robinhood.com",
     totalTransactions: events.length,
     transactions24h:   events24h.length,
     volume24hUsd,

@@ -8,7 +8,7 @@ export const activityEventsTable = pgTable("activity_events", {
   user: text("user").notNull(),
   amount: numeric("amount", { precision: 30, scale: 8 }).notNull(),
   token: text("token").notNull(),
-  txHash: text("tx_hash").notNull(),
+  txHash: text("tx_hash"),
   timestamp: timestamp("timestamp", { withTimezone: true }).notNull().defaultNow(),
 });
 
