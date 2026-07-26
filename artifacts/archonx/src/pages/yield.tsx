@@ -38,8 +38,8 @@ const robinhoodTestnet = defineChain({
   blockExplorers: { default: { name: "Robinhood Explorer", url: EXPLORER } },
 });
 
-const SAVINGS_CONTRACT = "0x1Ce84b4Fb6E6b44C767d4575bE56890DbC8EFA00" as `0x${string}`;
-const USDAX_CONTRACT   = "0x89F2c042def8719930904A474FF999A0F8fddd64" as `0x${string}`;
+const SAVINGS_CONTRACT = "0xeBcbB803FC90A89ed1edb659528d771cA3B19958" as `0x${string}`;
+const USDAX_CONTRACT   = "0x913bb47EEcd43657c10558dF10250d2cfbF6a2e6" as `0x${string}`;
 
 const ERC20_ABI = [
   { name: "approve", type: "function", inputs: [{ name: "spender", type: "address" }, { name: "amount", type: "uint256" }], outputs: [{ type: "bool" }], stateMutability: "nonpayable" },
@@ -1098,8 +1098,8 @@ Withdraw before repaying your vault if needed.`}</Formula>
         </HSection>
 
         <HSection title="Contract Addresses">
-          <Formula>{`USDAX Token  : 0x89F2c042def8719930904A474FF999A0F8fddd64
-USDAxSavings : 0x1Ce84b4Fb6E6b44C767d4575bE56890DbC8EFA00`}</Formula>
+          <Formula>{`USDAX Token  : 0x913bb47EEcd43657c10558dF10250d2cfbF6a2e6
+USDAxSavings : 0xeBcbB803FC90A89ed1edb659528d771cA3B19958`}</Formula>
         </HSection>
       </HelpModal>
 

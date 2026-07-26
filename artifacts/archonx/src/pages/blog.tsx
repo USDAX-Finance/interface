@@ -15,7 +15,7 @@ const posts = [
     category: "Product Update",
     color: EMERALD,
     title: "USDAX Savings Rate Now Live on Robinhood Chain",
-    excerpt: "The USDAxSavings contract is now deployed on Robinhood Chain Testnet at 0x1Ce84b4Fb6E6b44C767d4575bE56890DbC8EFA00. USDAX holders can deposit and earn 4.20% APY with no lock-up period and no minimum deposit. The savings pool is seeded with 900 USDAX in reward reserves. The yield interface is live in the app under the Yield tab.",
+    excerpt: "The USDAxSavings contract is now deployed on Robinhood Chain Testnet at 0xeBcbB803FC90A89ed1edb659528d771cA3B19958. USDAX holders can deposit and earn 4.20% APY with no lock-up period and no minimum deposit. The savings pool is seeded with 900 USDAX in reward reserves. The yield interface is live in the app under the Yield tab.",
     readTime: "3 min",
   },
   {
