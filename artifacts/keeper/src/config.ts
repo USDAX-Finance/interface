@@ -46,6 +46,19 @@ export const SCAN_INTERVAL_MS   = Number(process.env.SCAN_INTERVAL_MS   ?? 300_0
 export const MIN_PROFIT_USD     = Number(process.env.MIN_PROFIT_USD     ?? 5);        // USD
 export const MAX_GAS_PRICE_GWEI = Number(process.env.MAX_GAS_PRICE_GWEI ?? 50);
 
+// Oracle refresher — only needed on testnet (no live Chainlink feeds)
+export const ORACLE_REFRESH_MS = Number(process.env.ORACLE_REFRESH_MS ?? 1_800_000); // 30 min
+
+// Key used to call setFallbackPrices() — must be oracle contract owner (deployer)
+const rawOracleKey =
+  process.env.ORACLE_UPDATER_KEY ??
+  process.env.DEPLOYER_PRIVATE_KEY ??
+  "";
+if (!rawOracleKey) throw new Error("ORACLE_UPDATER_KEY (or DEPLOYER_PRIVATE_KEY) must be set");
+export const ORACLE_UPDATER_KEY: `0x${string}` = rawOracleKey.startsWith("0x")
+  ? (rawOracleKey as `0x${string}`)
+  : (`0x${rawOracleKey}` as `0x${string}`);
+
 export const CONTRACTS = {
   vaultEngine: addr("CONTRACT_VAULT_ENGINE"),
   usdax:       addr("CONTRACT_USDAX"),

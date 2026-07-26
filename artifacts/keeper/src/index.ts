@@ -20,6 +20,7 @@
 import { SCAN_INTERVAL_MS, DRY_RUN, CONTRACTS } from "./config.js";
 import { scanVaults } from "./scanner.js";
 import { executeLiquidations } from "./executor.js";
+import { startOracleRefresher } from "./oracle-refresher.js";
 import { privateKeyToAccount } from "viem/accounts";
 import { KEEPER_PRIVATE_KEY } from "./config.js";
 
@@ -160,7 +161,10 @@ async function main(): Promise<void> {
     log("keeper: DRY RUN MODE — scans active vaults, prints what would be liquidated, sends no txs");
   }
 
-  // Run immediately, then on interval
+  // Start oracle price refresher (testnet: keeps fallback prices current, <24h staleness)
+  startOracleRefresher(log);
+
+  // Run liquidation scan immediately, then on interval
   await runCycle();
 
   setInterval(async () => {

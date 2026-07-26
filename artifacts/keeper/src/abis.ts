@@ -99,5 +99,15 @@ export const ORACLE_ABI = [
       { "name": "updatedAt", "type": "uint256", "internalType": "uint256" }
     ],
     "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "setFallbackPrices",
+    "inputs": [
+      { "name": "tokens", "type": "address[]", "internalType": "address[]" },
+      { "name": "prices", "type": "uint256[]", "internalType": "uint256[]" }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
   }
 ] as const;
