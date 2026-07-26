@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>USDAX Finance — v1.3 Technical Release</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --lime:    hsl(79  100% 57%);
+    --emerald: hsl(152  70% 48%);
+    --amber:   hsl(35   92% 60%);
+    --red:     hsl(0    84% 60%);
+    --bg:      hsl(0    0%   4%);
+    --surface: hsl(0    0%   8%);
+    --card:    hsl(0    0%  10%);
+    --border:  hsl(0    0%  15%);
+    --text:    hsl(0    0%  94%);
+    --muted:   hsl(0    0%  55%);
+  }
+
+  body {
+    background: var(--bg);
+    font-family: 'Inter', system-ui, sans-serif;
+    color: var(--text);
+    width: 1200px;
+    padding: 56px;
+    line-height: 1.5;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 48px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--border);
+  }
+  .logo-block { display: flex; align-items: center; gap: 14px; }
+  .logo-dot {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: linear-gradient(135deg, var(--lime) 0%, var(--emerald) 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 900; color: #000; letter-spacing: -1px;
+  }
+  .brand { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+  .brand span { color: var(--lime); }
+  .tagline { font-size: 12px; color: var(--muted); margin-top: 2px; font-weight: 400; }
+
+  .release-badge {
+    text-align: right;
+  }
+  .release-tag {
+    display: inline-block;
+    background: color-mix(in srgb, var(--lime) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--lime) 30%, transparent);
+    color: var(--lime);
+    font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+    padding: 4px 12px; border-radius: 100px; text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .release-title {
+    font-size: 36px; font-weight: 900; letter-spacing: -1.5px;
+    line-height: 1;
+  }
+  .release-sub { font-size: 13px; color: var(--muted); margin-top: 6px; }
+
+  /* ── GRID ── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+  }
+  .card-header {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 18px;
+  }
+  .card-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; flex-shrink: 0;
+  }
+  .card-title { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+  .card-subtitle { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* ── COLOR ACCENTS ── */
+  .accent-lime   { background: color-mix(in srgb, var(--lime)    12%, transparent); color: var(--lime); }
+  .accent-emerald{ background: color-mix(in srgb, var(--emerald) 12%, transparent); color: var(--emerald); }
+  .accent-amber  { background: color-mix(in srgb, var(--amber)   12%, transparent); color: var(--amber); }
+  .accent-red    { background: color-mix(in srgb, var(--red)     12%, transparent); color: var(--red); }
+
+  /* ── CONTRACT ROW ── */
+  .contract-row {
+    display: flex; align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    gap: 12px;
+  }
+  .contract-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .contract-row:first-child { padding-top: 0; }
+
+  .contract-name {
+    font-size: 12px; font-weight: 600; color: var(--text);
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .contract-tag {
+    font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 4px;
+    text-transform: uppercase; letter-spacing: 0.5px; flex-shrink: 0;
+  }
+  .contract-addr {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; color: var(--muted);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    flex: 1; text-align: right;
+  }
+
+  /* ── ABI PILL ── */
+  .abi-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+  .abi-pill {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; font-weight: 500;
+    padding: 5px 10px; border-radius: 6px;
+  }
+  .abi-new { background: color-mix(in srgb, var(--lime) 10%, transparent); color: var(--lime); border: 1px solid color-mix(in srgb, var(--lime) 25%, transparent); }
+  .abi-existing { background: color-mix(in srgb, var(--muted) 8%, transparent); color: var(--muted); border: 1px solid var(--border); }
+
+  /* ── TEST BADGE ── */
+  .test-score {
+    font-size: 64px; font-weight: 900; letter-spacing: -3px; line-height: 1;
+    color: var(--lime);
+  }
+  .test-label { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .test-bar {
+    height: 4px; background: var(--border); border-radius: 2px;
+    margin: 16px 0 12px;
+    overflow: hidden;
+  }
+  .test-bar-fill {
+    height: 100%; border-radius: 2px;
+    background: linear-gradient(90deg, var(--lime), var(--emerald));
+    width: 100%;
+  }
+
+  .test-category { margin-bottom: 6px; }
+  .test-cat-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .test-cat-name { font-size: 11px; font-weight: 600; color: var(--text); flex: 1; }
+  .test-count {
+    font-size: 10px; font-weight: 700;
+    padding: 1px 7px; border-radius: 100px;
+  }
+  .pass { background: color-mix(in srgb, var(--lime) 12%, transparent); color: var(--lime); }
+
+  /* ── KEEPER ROW ── */
+  .keeper-feature { padding: 14px 0; border-bottom: 1px solid var(--border); }
+  .keeper-feature:last-child { border-bottom: none; padding-bottom: 0; }
+  .keeper-feature:first-child { padding-top: 0; }
+
+  .keeper-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+    text-transform: uppercase; padding: 2px 8px; border-radius: 100px;
+    margin-bottom: 6px;
+  }
+  .keeper-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  .keeper-desc { font-size: 11px; color: var(--muted); line-height: 1.6; }
+
+  .code-inline {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    background: var(--surface);
+    padding: 1px 5px; border-radius: 3px;
+    color: var(--text);
+  }
+
+  /* ── FEATURE ROW (pause) ── */
+  .feature-row {
+    display: flex; gap: 12px; padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+    align-items: flex-start;
+  }
+  .feature-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .feature-row:first-child { padding-top: 0; }
+  .feature-icon {
+    width: 28px; height: 28px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; flex-shrink: 0;
+  }
+  .feature-text { flex: 1; }
+  .feature-title { font-size: 12px; font-weight: 600; margin-bottom: 3px; }
+  .feature-desc { font-size: 11px; color: var(--muted); line-height: 1.6; }
+
+  /* ── FOOTER ── */
+  .footer {
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .footer-meta { font-size: 11px; color: var(--muted); }
+  .footer-meta strong { color: var(--text); }
+  .chain-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 5px 14px;
+    font-size: 11px; font-weight: 500;
+  }
+  .chain-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--lime); }
+
+  .section-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  .full-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<div class="header">
+  <div class="logo-block">
+    <div class="logo-dot">U$</div>
+    <div>
+      <div class="brand">USDAX <span>Finance</span></div>
+      <div class="tagline">CDP Stablecoin · Robinhood Chain Testnet (46630)</div>
+    </div>
+  </div>
+  <div class="release-badge">
+    <div class="release-tag">Technical Release</div>
+    <div class="release-title">VaultEngine v1.3</div>
+    <div class="release-sub">Debt Ceiling · Emergency Pause · Keeper Hardening · 32-Test Suite</div>
+  </div>
+</div>
+
+<!-- ── ROW 1: CONTRACTS + NEW FEATURES ── -->
+<div class="grid-2">
+
+  <!-- Contract Addresses -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon accent-emerald">📋</div>
+      <div>
+        <div class="card-title" style="color: var(--emerald)">Contract Addresses</div>
+        <div class="card-subtitle">Testnet · Chain 46630 · Redeployed Jul 2026</div>
+      </div>
+    </div>
+
+    <div class="contract-row">
+      <span class="contract-name">VaultEngine</span>
+      <span class="contract-tag accent-lime">v1.3 NEW</span>
+      <span class="contract-addr">0xb381081264Bc5ec02DEF80888faA03d8D5715Ae4</span>
+    </div>
+    <div class="contract-row">
+      <span class="contract-name">USDAxSavings</span>
+      <span class="contract-tag accent-lime">v3 NEW</span>
+      <span class="contract-addr">0xE0381B92571A784Ff632aDc288e6821349F28B0a</span>
+    </div>
+    <div class="contract-row">
+      <span class="contract-name">USDAxToken</span>
+      <span class="contract-tag" style="background:var(--border);color:var(--muted)">stable</span>
+      <span class="contract-addr">0x1988D89F5E7339394C20f93e982188c70eC4e5D3</span>
+    </div>
+    <div class="contract-row">
+      <span class="contract-name">CollateralManager</span>
+      <span class="contract-tag" style="background:var(--border);color:var(--muted)">stable</span>
+      <span class="contract-addr">0x2472DCBA450e0AA2f81e69AaCD33f91528343854</span>
+    </div>
+    <div class="contract-row">
+      <span class="contract-name">ChainlinkPriceOracle</span>
+      <span class="contract-tag" style="background:var(--border);color:var(--muted)">stable</span>
+      <span class="contract-addr">0xfE07515418B6f7239e9b4ecE21f49a75656Ba1a3</span>
+    </div>
+
+    <div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border);">
+      <div style="font-size: 11px; color: var(--muted);">
+        Deployer &nbsp;<span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text);">0xD1f324…87B2</span>
+        &nbsp;·&nbsp;
+        Keeper &nbsp;<span style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text);">0xfBA117…8dce</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- New ABI Surface -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon accent-lime">⚙️</div>
+      <div>
+        <div class="card-title" style="color: var(--lime)">VaultEngine v1.3 — ABI Changes</div>
+        <div class="card-subtitle">New functions added to VaultEngine interface</div>
+      </div>
+    </div>
+
+    <div class="feature-row">
+      <div class="feature-icon accent-amber">🔒</div>
+      <div class="feature-text">
+        <div class="feature-title">pause() / unpause()</div>
+        <div class="feature-desc">
+          Owner-only. Halts <span class="code-inline">depositCollateral</span>,
+          <span class="code-inline">mintUsdax</span>, <span class="code-inline">liquidate</span>.
+          Repay &amp; withdraw <strong style="color: var(--text);">always remain open</strong> — users can always exit.
+          Emits standard OZ <span class="code-inline">Paused</span> / <span class="code-inline">Unpaused</span> events.
+        </div>
+      </div>
+    </div>
+
+    <div class="feature-row">
+      <div class="feature-icon accent-emerald">📊</div>
+      <div class="feature-text">
+        <div class="feature-title">setDebtCeiling(uint256) / debtCeiling()</div>
+        <div class="feature-desc">
+          Owner-only setter. <span class="code-inline">0</span> = uncapped (default).
+          Checked in <span class="code-inline">mintUsdax</span> against <span class="code-inline">usdax.totalSupply()</span>.
+          Emits <span class="code-inline">DebtCeilingUpdated(uint256 oldCap, uint256 newCap)</span>.
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border);">
+      <div class="section-label">Full function surface</div>
+      <div class="abi-grid">
+        <span class="abi-pill abi-new">pause()</span>
+        <span class="abi-pill abi-new">unpause()</span>
+        <span class="abi-pill abi-new">setDebtCeiling()</span>
+        <span class="abi-pill abi-new">debtCeiling()</span>
+        <span class="abi-pill abi-existing">depositCollateral()</span>
+        <span class="abi-pill abi-existing">mintUsdax()</span>
+        <span class="abi-pill abi-existing">repayUsdax()</span>
+        <span class="abi-pill abi-existing">withdrawCollateral()</span>
+        <span class="abi-pill abi-existing">liquidate()</span>
+        <span class="abi-pill abi-existing">drip()</span>
+        <span class="abi-pill abi-existing">currentDebt()</span>
+        <span class="abi-pill abi-existing">pendingFee()</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── ROW 2: TESTS + KEEPER ── -->
+<div class="grid-2">
+
+  <!-- Foundry Tests -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon accent-lime">🧪</div>
+      <div>
+        <div class="card-title" style="color: var(--lime)">Foundry Test Suite</div>
+        <div class="card-subtitle">contracts/test/VaultEngine.t.sol</div>
+      </div>
+    </div>
+
+    <div style="display:flex; align-items: baseline; gap: 10px;">
+      <div class="test-score">32</div>
+      <div>
+        <div style="font-size: 18px; font-weight: 700; color: var(--lime);">/ 32</div>
+        <div class="test-label">tests passing · 0 failed · 0 skipped</div>
+      </div>
+    </div>
+    <div class="test-bar"><div class="test-bar-fill"></div></div>
+
+    <div class="test-cat-row">
+      <span class="test-cat-name">Happy path (deposit → mint → repay → withdraw)</span>
+      <span class="test-count pass">5</span>
+    </div>
+    <div class="test-cat-row">
+      <span class="test-cat-name">Mint fee &amp; stability fee accrual</span>
+      <span class="test-count pass">4</span>
+    </div>
+    <div class="test-cat-row">
+      <span class="test-cat-name">Debt ceiling enforcement</span>
+      <span class="test-count pass">4</span>
+    </div>
+    <div class="test-cat-row">
+      <span class="test-cat-name">Emergency pause (deposit/mint/liq blocked, repay/withdraw open)</span>
+      <span class="test-count pass">5</span>
+    </div>
+    <div class="test-cat-row">
+      <span class="test-cat-name">Liquidation (bonus, event, self-liquidate guard)</span>
+      <span class="test-count pass">5</span>
+    </div>
+    <div class="test-cat-row">
+      <span class="test-cat-name">Guards (min debt, max LTV, non-whitelisted token)</span>
+      <span class="test-count pass">5</span>
+    </div>
+    <div class="test-cat-row">
+      <span class="test-cat-name">Owner-only access control</span>
+      <span class="test-count pass">4</span>
+    </div>
+  </div>
+
+  <!-- Keeper Hardening -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon accent-amber">🤖</div>
+      <div>
+        <div class="card-title" style="color: var(--amber)">Keeper Bot — Hardening</div>
+        <div class="card-subtitle">artifacts/keeper/src/executor.ts</div>
+      </div>
+    </div>
+
+    <div class="keeper-feature">
+      <div class="keeper-badge accent-lime">
+        ✓ Improvement
+      </div>
+      <div class="keeper-title">Actual Collateral Seized (on-chain)</div>
+      <div class="keeper-desc">
+        Previously logged estimated collateral using hardcoded 5% liquidation bonus.
+        Now uses <span class="code-inline">parseEventLogs()</span> (viem) to read
+        the actual <span class="code-inline">collateralSeized</span> field from the
+        on-chain <span class="code-inline">Liquidated</span> event in the tx receipt.
+        Falls back to estimate with explicit WARNING if parsing fails.
+      </div>
+    </div>
+
+    <div class="keeper-feature">
+      <div class="keeper-badge accent-red">
+        ⚠ Operational Safety
+      </div>
+      <div class="keeper-title">USDAX Balance Warning</div>
+      <div class="keeper-desc">
+        Keeper now checks its own USDAX balance before each liquidation cycle.<br />
+        <span style="color: var(--red); font-weight: 600;">CRITICAL</span> — balance = 0, all liquidations will be skipped<br />
+        <span style="color: var(--amber); font-weight: 600;">WARNING</span> — balance &lt; 50 USDAX, missed liquidations possible<br />
+        Gives operator advance warning before the bot silently misses vaults.
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── FOOTER ── -->
+<div class="footer">
+  <div>
+    <div class="footer-meta" style="margin-bottom: 6px;">
+      <strong>Explorer</strong> &nbsp;explorer.testnet.chain.robinhood.com
+      &nbsp;·&nbsp;
+      <strong>RPC</strong> &nbsp;rpc.testnet.chain.robinhood.com/rpc
+    </div>
+    <div class="footer-meta">
+      All contracts verified · Deployer wallet is protocol admin · Multi-sig planned pre-mainnet
+    </div>
+  </div>
+
+  <div style="text-align: right;">
+    <div class="chain-badge" style="margin-bottom: 8px; margin-left: auto; width: fit-content;">
+      <div class="chain-dot"></div>
+      Robinhood Chain Testnet · Chain 46630
+    </div>
+    <div class="footer-meta">Released July 26, 2026 · usdax.finance</div>
+  </div>
+</div>
+
+</body>
+</html>
