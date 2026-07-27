@@ -44,6 +44,12 @@ Thumbs.db
 .cursor/rules/nx-rules.mdc
 .github/instructions/nx.instructions.md
 
-# Replit
+# Local dev environment — never push to GitHub
+.replit
+.replitignore
+replit.md
+replit.nix
+.replit-artifact/
+.agents/
 .cache/
 .local/
