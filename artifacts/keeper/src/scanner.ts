@@ -2,34 +2,39 @@
  * scanner.ts — reads on-chain vault state and returns liquidation candidates.
  *
  * Flow:
- *  1. getVaultOwners() → all addresses that have ever deposited
- *  2. For each owner: read debt + healthFactor in parallel
- *  3. Filter: debt > 0 AND healthFactor < WAD (1e18)
- *  4. For each undercollateralized owner: read collateralDeposits for each token
- *  5. Return LiquidationCandidate[] sorted by healthFactor ascending (worst first)
+ *  1. vaultOwnerCount() → total registered owners
+ *  2. getVaultOwnersPaginated(offset, PAGE_SIZE) → paginated owner addresses
+ *     Pagination prevents the scan from approaching the block gas limit at scale.
+ *  3. For each owner: read debt + healthFactor in parallel
+ *  4. Filter: debt > 0 AND healthFactor < WAD (1e18)
+ *  5. For each undercollateralised owner: read collateralDeposits for each token
+ *  6. Return LiquidationCandidate[] sorted by healthFactor ascending (worst first)
  */
 
 import { createPublicClient, http, formatUnits } from "viem";
 import { CONTRACTS, COLLATERAL_TOKENS, RPC_URL, CHAIN_ID } from "./config.js";
 import { VAULT_ENGINE_ABI, ORACLE_ABI } from "./abis.js";
 
-const WAD = BigInt("1000000000000000000"); // 1e18
+const WAD      = BigInt("1000000000000000000"); // 1e18
 const MAX_UINT = BigInt("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+
+/** Maximum vault owners fetched per RPC call. Keeps response size bounded. */
+const PAGE_SIZE = 200;
 
 export interface CollateralInfo {
   token:    `0x${string}`;
   symbol:   string;
   decimals: number;
-  amount:   bigint;     // raw token units
-  priceUsd: number;     // per token, from oracle
-  valueUsd: number;     // amount × price (normalized)
+  amount:   bigint;    // raw token units
+  priceUsd: number;    // per whole token, from oracle
+  valueUsd: number;    // amount × price (normalised to USD)
 }
 
 export interface LiquidationCandidate {
   owner:        string;
-  debtRaw:      bigint;        // USDAX wei (18 dec)
+  debtRaw:      bigint;   // USDAX wei (18 dec)
   debtUsd:      number;
-  healthFactor: number;        // < 1.0 means liquidatable
+  healthFactor: number;   // < 1.0 means liquidatable
   collaterals:  CollateralInfo[];
 }
 
@@ -45,7 +50,7 @@ export const publicClient = createPublicClient({
   transport: http(RPC_URL, { timeout: 20_000 }),
 });
 
-/** Fetch on-chain price (USD, 18-dec) from ChainlinkPriceOracle */
+/** Fetch on-chain USD price (18-dec) from ChainlinkPriceOracle. Returns 0n on failure. */
 async function getPrice(token: `0x${string}`): Promise<bigint> {
   try {
     const [price] = await publicClient.readContract({
@@ -60,15 +65,51 @@ async function getPrice(token: `0x${string}`): Promise<bigint> {
   }
 }
 
+/**
+ * Fetch all vault owner addresses using paginated RPC calls.
+ * Falls back to the legacy getVaultOwners() if vaultOwnerCount returns 0
+ * (e.g. running against an older contract that lacks pagination).
+ */
+async function fetchAllOwners(): Promise<readonly `0x${string}`[]> {
+  // Try paginated path first (v1.5+)
+  let total: bigint;
+  try {
+    total = await publicClient.readContract({
+      address:      CONTRACTS.vaultEngine,
+      abi:          VAULT_ENGINE_ABI,
+      functionName: "vaultOwnerCount",
+    }) as bigint;
+  } catch {
+    // Contract predates pagination — use legacy call
+    return publicClient.readContract({
+      address:      CONTRACTS.vaultEngine,
+      abi:          VAULT_ENGINE_ABI,
+      functionName: "getVaultOwners",
+    }) as Promise<readonly `0x${string}`[]>;
+  }
+
+  if (total === 0n) return [];
+
+  // Fetch pages in parallel
+  const pageCount = Math.ceil(Number(total) / PAGE_SIZE);
+  const pages = await Promise.all(
+    Array.from({ length: pageCount }, (_, i) =>
+      publicClient.readContract({
+        address:      CONTRACTS.vaultEngine,
+        abi:          VAULT_ENGINE_ABI,
+        functionName: "getVaultOwnersPaginated",
+        args:         [BigInt(i * PAGE_SIZE), BigInt(PAGE_SIZE)],
+      }) as Promise<readonly `0x${string}`[]>
+    )
+  );
+
+  return pages.flat() as `0x${string}`[];
+}
+
 /** Return all vault owners with active debt and HF < 1.0 */
 export async function scanVaults(): Promise<LiquidationCandidate[]> {
-  // 1. Get all owners
-  const owners = await publicClient.readContract({
-    address:      CONTRACTS.vaultEngine,
-    abi:          VAULT_ENGINE_ABI,
-    functionName: "getVaultOwners",
-  }) as readonly `0x${string}`[];
-
+  // 1. Get all owners (paginated)
+  const owners = await fetchAllOwners();
   if (owners.length === 0) return [];
 
   // 2. Read debt + HF for all owners in parallel
@@ -91,7 +132,7 @@ export async function scanVaults(): Promise<LiquidationCandidate[]> {
     Promise.all(hfCalls),
   ]);
 
-  // 3. Filter undercollateralized vaults
+  // 3. Filter undercollateralised vaults
   const candidates: Array<{ owner: `0x${string}`; debt: bigint; hf: bigint }> = [];
   for (let i = 0; i < owners.length; i++) {
     const d  = debts[i] as bigint;
@@ -124,7 +165,6 @@ export async function scanVaults(): Promise<LiquidationCandidate[]> {
         .map((ct, idx) => {
           const amount   = deposits[idx];
           const price18  = prices[idx];
-          // normalize to USD: amount (tokenDecimals) * price (18 dec) / 10^tokenDecimals
           const valueRaw = (amount * price18) / BigInt(10 ** ct.decimals);
           const priceUsd = Number(formatUnits(price18, 18));
           const valueUsd = Number(formatUnits(valueRaw, 18));

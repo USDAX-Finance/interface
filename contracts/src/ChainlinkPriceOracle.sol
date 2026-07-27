@@ -45,6 +45,13 @@ contract ChainlinkPriceOracle is IUSDAxOracle, Ownable {
     ///         Can be raised for less-liquid assets with slower feed update cadences.
     uint256 public maxStaleness = 3_600;
 
+    /// @notice Address authorised to push fallback prices (setFallbackPrice / setFallbackPrices).
+    ///         Separate from the contract owner so the keeper bot can update prices frequently
+    ///         without having governance-level admin rights. address(0) = only owner may push prices.
+    ///         Set via setUpdater(). On mainnet, set this to a dedicated keeper EOA or multisig;
+    ///         on testnet, the deployer serves as both owner and updater.
+    address public updater;
+
     // ─── Storage ──────────────────────────────────────────────────────────────
 
     /// @notice Chainlink AggregatorV3 feed registered for each collateral token.
@@ -83,14 +90,48 @@ contract ChainlinkPriceOracle is IUSDAxOracle, Ownable {
     /// @param newMaxStaleness New threshold in seconds.
     event MaxStalenessUpdated(uint256 newMaxStaleness);
 
+    /// @notice Emitted when the updater address is changed.
+    /// @param oldUpdater Previous updater address (address(0) if none was set).
+    /// @param newUpdater New updater address (address(0) to clear the role).
+    event UpdaterSet(address indexed oldUpdater, address indexed newUpdater);
+
     // ─── Constructor ──────────────────────────────────────────────────────────
 
-    /// @notice Deploy the oracle with no registered feeds.
-    ///         Seed fallback prices and/or register Chainlink feeds after deployment.
+    /// @notice Deploy the oracle with no registered feeds and no updater set.
+    ///         Call setUpdater() after deployment to authorise the keeper bot address.
+    ///         Seed fallback prices via setFallbackPrices() and register Chainlink feeds
+    ///         via registerFeed() as needed.
     /// @param owner_ Initial contract owner (Ownable). Typically the deployer or a timelock.
     constructor(address owner_) Ownable(owner_) {}
 
+    // ─── Modifiers ────────────────────────────────────────────────────────────
+
+    /// @dev Allows the call from either the contract owner or the designated updater.
+    ///      Used to restrict fallback-price setters so only the keeper (updater role) or
+    ///      the governance owner can push prices, while registerFeed / removeFeed /
+    ///      setMaxStaleness remain exclusively owner-controlled.
+    modifier onlyUpdaterOrOwner() {
+        require(
+            msg.sender == owner() || (updater != address(0) && msg.sender == updater),
+            "Oracle: not owner or updater"
+        );
+        _;
+    }
+
     // ─── Admin ────────────────────────────────────────────────────────────────
+
+    /// @notice Assign or replace the updater address — the account authorised to push
+    ///         fallback prices without full owner privileges.
+    ///         Set to the keeper bot EOA on testnet; on mainnet use a dedicated hot wallet
+    ///         or a separate Gnosis Safe with a lower signing threshold.
+    ///         Set to address(0) to revoke the role (only owner may push prices).
+    ///         Only callable by the contract owner (or timelock on production).
+    /// @param newUpdater Address to grant the updater role. May be address(0) to clear it.
+    function setUpdater(address newUpdater) external onlyOwner {
+        address old = updater;
+        updater = newUpdater;
+        emit UpdaterSet(old, newUpdater);
+    }
 
     /// @notice Register a Chainlink AggregatorV3 feed for a collateral token.
     ///         After registration, getPrice() will prefer the Chainlink feed over the fallback.
@@ -118,10 +159,10 @@ contract ChainlinkPriceOracle is IUSDAxOracle, Ownable {
     ///         The fallback is used when no Chainlink feed is registered or the feed is stale.
     ///         On testnet this is the primary (only) price source; the keeper refreshes it
     ///         every 30 minutes from a CoinGecko feed to keep it within the 24-hour validity window.
-    ///         Only callable by the contract owner.
+    ///         Callable by the contract owner OR the designated updater (keeper bot).
     /// @param token       Collateral token address.
     /// @param usdPrice18  USD price with 18 decimal places (e.g. $3 247.50 = 3247.5e18). Must be > 0.
-    function setFallbackPrice(address token, uint256 usdPrice18) external onlyOwner {
+    function setFallbackPrice(address token, uint256 usdPrice18) external onlyUpdaterOrOwner {
         require(usdPrice18 > 0, "price zero");
         _fallback[token] = FallbackData({price: usdPrice18, updatedAt: block.timestamp});
         emit FallbackPriceSet(token, usdPrice18);
@@ -129,13 +170,13 @@ contract ChainlinkPriceOracle is IUSDAxOracle, Ownable {
 
     /// @notice Batch-set admin fallback prices for multiple tokens in one transaction.
     ///         Useful for the keeper's periodic refresh to minimise gas and round-trip latency.
-    ///         Only callable by the contract owner.
+    ///         Callable by the contract owner OR the designated updater (keeper bot).
     /// @param tokens  Array of collateral token addresses. Must be the same length as `prices`.
     /// @param prices  Corresponding USD prices with 18 decimals. Each must be > 0.
     function setFallbackPrices(
         address[] calldata tokens,
         uint256[] calldata prices
-    ) external onlyOwner {
+    ) external onlyUpdaterOrOwner {
         require(tokens.length == prices.length, "length mismatch");
         for (uint256 i = 0; i < tokens.length; i++) {
             require(prices[i] > 0, "price zero");

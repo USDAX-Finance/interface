@@ -1,8 +1,28 @@
 /**
  * Minimal ABIs — only the functions the keeper bot calls.
+ * Includes paginated vault-owner enumeration (v1.5) to prevent gas DoS at scale.
  */
 
 export const VAULT_ENGINE_ABI = [
+  // ── Paginated enumeration (preferred) ──────────────────────────────────────
+  {
+    "type": "function",
+    "name": "vaultOwnerCount",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getVaultOwnersPaginated",
+    "inputs": [
+      { "name": "offset", "type": "uint256", "internalType": "uint256" },
+      { "name": "limit",  "type": "uint256", "internalType": "uint256" }
+    ],
+    "outputs": [{ "name": "page", "type": "address[]", "internalType": "address[]" }],
+    "stateMutability": "view"
+  },
+  // ── Legacy full-array (fallback for small sets) ───────────────────────────
   {
     "type": "function",
     "name": "getVaultOwners",
@@ -10,6 +30,7 @@ export const VAULT_ENGINE_ABI = [
     "outputs": [{ "name": "", "type": "address[]", "internalType": "address[]" }],
     "stateMutability": "view"
   },
+  // ── Per-vault reads ────────────────────────────────────────────────────────
   {
     "type": "function",
     "name": "debt",
@@ -34,6 +55,7 @@ export const VAULT_ENGINE_ABI = [
     "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
     "stateMutability": "view"
   },
+  // ── Write: liquidate ──────────────────────────────────────────────────────
   {
     "type": "function",
     "name": "liquidate",
@@ -45,47 +67,18 @@ export const VAULT_ENGINE_ABI = [
     "outputs": [],
     "stateMutability": "nonpayable"
   },
+  // ── Event ─────────────────────────────────────────────────────────────────
   {
     "type": "event",
     "name": "Liquidated",
     "inputs": [
-      { "name": "liquidator",     "type": "address", "indexed": true,  "internalType": "address" },
-      { "name": "vaultOwner",     "type": "address", "indexed": true,  "internalType": "address" },
-      { "name": "collateralToken","type": "address", "indexed": true,  "internalType": "address" },
-      { "name": "debtRepaid",     "type": "uint256", "indexed": false, "internalType": "uint256" },
-      { "name": "collateralSeized","type": "uint256","indexed": false, "internalType": "uint256" }
+      { "name": "liquidator",      "type": "address", "indexed": true,  "internalType": "address" },
+      { "name": "vaultOwner",      "type": "address", "indexed": true,  "internalType": "address" },
+      { "name": "collateralToken", "type": "address", "indexed": true,  "internalType": "address" },
+      { "name": "debtRepaid",      "type": "uint256", "indexed": false, "internalType": "uint256" },
+      { "name": "collateralSeized","type": "uint256", "indexed": false, "internalType": "uint256" }
     ],
     "anonymous": false
-  }
-] as const;
-
-export const USDAX_ABI = [
-  {
-    "type": "function",
-    "name": "balanceOf",
-    "inputs": [{ "name": "account", "type": "address", "internalType": "address" }],
-    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "allowance",
-    "inputs": [
-      { "name": "owner",   "type": "address", "internalType": "address" },
-      { "name": "spender", "type": "address", "internalType": "address" }
-    ],
-    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "approve",
-    "inputs": [
-      { "name": "spender", "type": "address", "internalType": "address" },
-      { "name": "amount",  "type": "uint256", "internalType": "uint256" }
-    ],
-    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
-    "stateMutability": "nonpayable"
   }
 ] as const;
 
@@ -107,6 +100,21 @@ export const ORACLE_ABI = [
       { "name": "tokens", "type": "address[]", "internalType": "address[]" },
       { "name": "prices", "type": "uint256[]", "internalType": "uint256[]" }
     ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  // ── Updater role (v1.5) ───────────────────────────────────────────────────
+  {
+    "type": "function",
+    "name": "updater",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "address", "internalType": "address" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "setUpdater",
+    "inputs": [{ "name": "newUpdater", "type": "address", "internalType": "address" }],
     "outputs": [],
     "stateMutability": "nonpayable"
   }

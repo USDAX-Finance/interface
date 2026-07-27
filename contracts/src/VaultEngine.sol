@@ -480,9 +480,41 @@ contract VaultEngine is ReentrancyGuard, Pausable, Ownable {
         return _maxMintable(user);
     }
 
-    /// @notice Enumeration of all vault owner addresses (including those with zero current debt).
-    ///         Used by the keeper to scan all positions for liquidation eligibility.
-    /// @return Array of every address that has ever deposited collateral.
+    /// @notice Total number of unique vault owners ever registered.
+    ///         Use with getVaultOwnersPaginated() for safe enumeration at scale.
+    /// @return Count of addresses that have ever deposited collateral.
+    function vaultOwnerCount() external view returns (uint256) {
+        return _vaultOwners.length;
+    }
+
+    /// @notice Paginated enumeration of vault owner addresses.
+    ///         Preferred over getVaultOwners() when the owner count is large — a bounded
+    ///         slice prevents the call from approaching the block gas limit.
+    ///         Returns a shorter array (or empty) when offset + limit exceeds the total count.
+    /// @param  offset Zero-based index of the first owner to return.
+    /// @param  limit  Maximum number of owners to return per page (e.g. 200).
+    /// @return page   Slice of _vaultOwners[offset .. offset+limit], capped at the array length.
+    function getVaultOwnersPaginated(uint256 offset, uint256 limit)
+        external
+        view
+        returns (address[] memory page)
+    {
+        uint256 total = _vaultOwners.length;
+        if (offset >= total || limit == 0) return new address[](0);
+        uint256 end = offset + limit;
+        if (end > total) end = total;
+        page = new address[](end - offset);
+        for (uint256 i = 0; i < page.length; i++) {
+            page[i] = _vaultOwners[offset + i];
+        }
+    }
+
+    /// @notice Full enumeration of all vault owner addresses (including zero-debt vaults).
+    /// @dev    ⚠ Gas warning: this returns the entire _vaultOwners array in one call.
+    ///         At thousands of unique depositors this call will approach the block gas limit.
+    ///         Use getVaultOwnersPaginated(offset, limit) for production-scale enumeration.
+    ///         Retained for backward compatibility with existing integrations.
+    /// @return Array of every address that has ever deposited collateral, in registration order.
     function getVaultOwners() external view returns (address[] memory) {
         return _vaultOwners;
     }
