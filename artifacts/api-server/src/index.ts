@@ -4,13 +4,9 @@ import { startReconciler } from "./lib/reconcile.js";
 
 const rawPort = process.env["PORT"];
 
-if (!rawPort) {
-  throw new Error(
-    "PORT environment variable is required but was not provided.",
-  );
-}
-
-const port = Number(rawPort);
+// Default to 8080 — Replit autoscale / Cloud Run injects PORT=8080;
+// this fallback prevents a crash when PORT is absent in local testing.
+const port = Number(rawPort ?? "8080");
 
 if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
