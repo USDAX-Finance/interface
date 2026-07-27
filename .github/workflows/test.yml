@@ -1,18 +1,21 @@
-name: Forge Tests
+name: CI
 
 on:
   push:
     branches: ["main", "dev"]
     paths:
       - "contracts/**"
+      - "artifacts/keeper/**"
       - ".github/workflows/test.yml"
   pull_request:
     branches: ["main"]
     paths:
       - "contracts/**"
+      - "artifacts/keeper/**"
       - ".github/workflows/test.yml"
 
 jobs:
+  # ── Solidity / Foundry ────────────────────────────────────────────────────
   forge-test:
     name: Foundry Test Suite
     runs-on: ubuntu-latest
@@ -54,3 +57,29 @@ jobs:
       - name: Check gas snapshots
         run: forge snapshot --check
         continue-on-error: true   # warn only — do not block CI on snapshot drift
+
+  # ── Keeper — TypeScript typecheck ────────────────────────────────────────
+  keeper-typecheck:
+    name: Keeper TypeScript Typecheck
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck keeper
+        run: pnpm --filter @workspace/keeper run typecheck

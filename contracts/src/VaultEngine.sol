@@ -320,6 +320,12 @@ contract VaultEngine is ReentrancyGuard, Pausable, Ownable {
         }
 
         // Settle any accrued interest first so the LTV check uses true debt.
+        // slither-disable-next-line reentrancy-no-eth
+        // Safety: `nonReentrant` on this function prevents any reentrant call.
+        // drip() calls usdax.mint(feeRecipient) — a trusted contract with no external
+        // callbacks. All critical state (`debt[msg.sender]`) is written before the
+        // user-facing mint calls below, preserving the Checks-Effects-Interactions order
+        // for the caller's own state.
         drip(msg.sender);
 
         uint256 fee     = (amount * MINT_FEE_BPS) / BASIS_POINTS;
@@ -341,6 +347,10 @@ contract VaultEngine is ReentrancyGuard, Pausable, Ownable {
     /// @param amount USDAX to burn (18 decimals). Capped at currentDebt(caller). Must be > 0.
     function repayUsdax(uint256 amount) external nonReentrant {
         require(amount > 0, "amount zero");
+        // slither-disable-next-line reentrancy-no-eth
+        // Safety: same rationale as mintUsdax — nonReentrant guard is active and drip()
+        // only calls usdax.mint() on the trusted fee recipient with no callbacks.
+        // The caller's debt state is written on the line below before usdax.burn().
         drip(msg.sender);
 
         uint256 owed = debt[msg.sender];

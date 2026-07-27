@@ -81,8 +81,8 @@ contract APXStaking is ReentrancyGuard, Ownable, Pausable {
 
     /// @param _apx           APX token address (mainnet).
     /// @param _apxPerYear    Initial emission: APX tokens per year (in WAD, 1e18 = 1 APX).
-    /// @param _owner         Contract owner (can add rewards, adjust rate, pause).
-    constructor(address _apx, uint256 _apxPerYear, address _owner) Ownable(_owner) {
+    /// @param initialOwner_  Contract owner (can add rewards, adjust rate, pause).
+    constructor(address _apx, uint256 _apxPerYear, address initialOwner_) Ownable(initialOwner_) {
         require(_apx != address(0), "APXStaking: zero apx address");
         apx             = IERC20(_apx);
         rewardRate      = _apxPerYear / YEAR;   // APX wei per second

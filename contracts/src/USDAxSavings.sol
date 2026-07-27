@@ -120,10 +120,10 @@ contract USDAxSavings is ReentrancyGuard, Ownable {
     // ─── Constructor ──────────────────────────────────────────────────────────
 
     /// @notice Deploy the savings module.
-    /// @param _usdax  Address of the USDAX ERC-20 token. Must be non-zero.
-    /// @param _apyBps Initial savings APY in basis points. Must be ≤ 5 000 (50%).
-    /// @param _owner  Initial contract owner (Ownable). Typically the deployer or a timelock.
-    constructor(address _usdax, uint256 _apyBps, address _owner) Ownable(_owner) {
+    /// @param _usdax        Address of the USDAX ERC-20 token. Must be non-zero.
+    /// @param _apyBps       Initial savings APY in basis points. Must be ≤ 5 000 (50%).
+    /// @param initialOwner_ Initial contract owner (Ownable). Typically the deployer or a timelock.
+    constructor(address _usdax, uint256 _apyBps, address initialOwner_) Ownable(initialOwner_) {
         require(_usdax  != address(0), "zero usdax");
         require(_apyBps <= 5_000,      "APY > 50%");
         usdax  = IERC20(_usdax);

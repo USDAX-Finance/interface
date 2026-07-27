@@ -127,6 +127,9 @@ contract ChainlinkPriceOracle is IUSDAxOracle, Ownable {
     ///         Set to address(0) to revoke the role (only owner may push prices).
     ///         Only callable by the contract owner (or timelock on production).
     /// @param newUpdater Address to grant the updater role. May be address(0) to clear it.
+    /// @dev   address(0) is intentionally allowed — it revokes the updater role so that only
+    ///        the owner can push fallback prices. Slither L-08 (missing-zero-check) is a
+    ///        false positive here: zero is a valid, meaningful input by design.
     function setUpdater(address newUpdater) external onlyOwner {
         address old = updater;
         updater = newUpdater;
