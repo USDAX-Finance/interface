@@ -5,8 +5,8 @@ import * as schema from "./schema";
 const { Pool } = pg;
 
 // DATABASE_URL is required for DB-backed routes.
-// If it is not set (e.g. during production cold-start before Replit injects
-// it, or in environments without a provisioned database) we warn instead of
+// If it is not set (e.g. in environments without a provisioned database)
+// we warn instead of
 // throwing so the server can still start, pass the health-check probe, and
 // serve static files.  Any route that calls into `db` will surface a 500 at
 // request time — acceptable and easily diagnosed from logs.

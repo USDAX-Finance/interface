@@ -6,7 +6,7 @@ import { defineConfig } from 'vite';
 import runtimeErrorOverlay from '@replit/vite-plugin-runtime-error-modal';
 
 // PORT and BASE_PATH are required for the dev/preview server but not during
-// `vite build` — the build step runs in Replit's CI environment where these
+// `vite build` — the build step runs in CI where these
 // vars are not injected.  Default to safe values so the build succeeds.
 const isBuildCommand = process.argv.some((a) => a === 'build');
 

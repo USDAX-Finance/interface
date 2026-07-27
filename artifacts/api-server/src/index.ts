@@ -4,7 +4,7 @@ import { startReconciler } from "./lib/reconcile.js";
 
 const rawPort = process.env["PORT"];
 
-// Default to 8080 — Replit autoscale / Cloud Run injects PORT=8080;
+// Default to 8080 — Cloud Run injects PORT=8080 in production;
 // this fallback prevents a crash when PORT is absent in local testing.
 const port = Number(rawPort ?? "8080");
 
