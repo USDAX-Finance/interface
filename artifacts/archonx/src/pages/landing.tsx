@@ -1048,7 +1048,7 @@ function UseCases() {
       label: "02",
       title: "Developers",
       headline: "Build on open contracts.",
-      desc: "Mint, redeem, and stake via clean ERC-20 interfaces and a typed TypeScript SDK. All contracts are open-source and audited. Deploy integrations on Robinhood Chain in hours, not weeks.",
+      desc: "Mint, redeem, and stake via clean ERC-20 interfaces and a typed TypeScript SDK. All contracts are open-source. Security audit with Trail of Bits is currently in progress. Deploy integrations on Robinhood Chain in hours, not weeks.",
       color: "hsl(0 0% 68%)",
       stat: { val: "SDK", sub: "TypeScript · v0.1" },
     },

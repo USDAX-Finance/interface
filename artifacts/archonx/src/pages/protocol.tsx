@@ -594,7 +594,7 @@ const ROADMAP = [
       "Public testnet with faucet, WETH, USDC, RHOOD test tokens",
       "Vault creation, USDAX minting, and repayment flows live",
       "Liquidation engine deployed and stress-tested",
-      "Security Audit #1 (Trail of Bits), complete",
+      "Security Audit #1 (Trail of Bits), in progress",
       "SDK v0.1 published, REST API live",
       "Community testnet campaign launched",
     ],
@@ -606,7 +606,7 @@ const ROADMAP = [
     color: LIME,
     items: [
       "Mainnet deployment with WETH + USDC collateral",
-      "Security Audit #2 (OpenZeppelin), complete",
+      "Security Audit #2 (OpenZeppelin)",
       "Formal verification (Certora Prover), complete",
       "APX Token Generation Event (TGE)",
       "APX staking module live, real yield distribution begins",
