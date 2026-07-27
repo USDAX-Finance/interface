@@ -1,3 +1,5 @@
+import path from "path";
+import { fileURLToPath } from "url";
 import express, { type Express } from "express";
 import cors from "cors";
 import pinoHttp from "pino-http";
@@ -56,5 +58,17 @@ app.use("/api", readLimiter);
 app.use("/api/positions", writeLimiter);
 
 app.use("/api", router);
+
+// Production: serve the built frontend static files and handle SPA routing.
+// The frontend is built to artifacts/archonx/dist/public; relative to this
+// compiled file (artifacts/api-server/dist/index.mjs) that is two levels up.
+if (process.env.NODE_ENV === "production") {
+  const __dirname = path.dirname(fileURLToPath(import.meta.url));
+  const frontendDist = path.resolve(__dirname, "../../archonx/dist/public");
+  app.use(express.static(frontendDist));
+  app.get("/{*path}", (_req, res) => {
+    res.sendFile(path.join(frontendDist, "index.html"));
+  });
+}
 
 export default app;
