@@ -148,7 +148,6 @@ function Nav() {
           <Link href="/staking" className="hover:text-foreground transition-colors">Staking</Link>
           <Link href="/governance" className="hover:text-foreground transition-colors">Governance</Link>
           <Link href="/docs" className="hover:text-foreground transition-colors">Docs</Link>
-          <Link href="/activity" className="hover:text-foreground transition-colors">Activity</Link>
           <Link href="/faucet">
             <span
               className="inline-flex items-center gap-1.5 text-[12px] font-semibold px-3 py-1 rounded-full transition-all"
