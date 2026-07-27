@@ -559,8 +559,8 @@ function TestnetStatus() {
           <div className="grid sm:grid-cols-4 gap-4 mt-10">
             {[
               { label: "Contracts Deployed",    val: "7 / 7",    done: true },
-              { label: "Audit 1 (Trail of Bits)", val: "Complete", done: true },
-              { label: "Audit 2 (OpenZeppelin)", val: "Complete", done: true },
+              { label: "Audit 1 (Trail of Bits)", val: "In Progress", done: false },
+              { label: "Audit 2 (OpenZeppelin)", val: "Pre-Mainnet",  done: false },
               { label: "Mainnet Launch",         val: "Q3 2026",  done: false },
             ].map((s) => (
               <div key={s.label} className="rounded-xl px-4 py-3.5"

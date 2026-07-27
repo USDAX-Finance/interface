@@ -87,34 +87,36 @@ export default function AuditReport() {
           </h2>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            {/* Audit 1 — Pending */}
-            <div style={{ background: CARD_BG, border: `1px solid ${BORDER}`, borderRadius: 16, padding: "32px" }}>
+            {/* Audit 1 — Trail of Bits, in progress */}
+            <div style={{ background: CARD_BG, border: `1px solid ${AMBER}30`, borderRadius: 16, padding: "32px" }}>
               <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 20 }}>
                 <div>
                   <div style={{ fontFamily: "monospace", fontSize: 10, color: MUTED, marginBottom: 5, textTransform: "uppercase", letterSpacing: "0.12em" }}>Audit 1 · Testnet Contracts</div>
-                  <div style={{ fontWeight: 900, fontSize: 22, color: "hsl(0 0% 55%)" }}>Audit Firm TBD</div>
+                  <div style={{ fontWeight: 900, fontSize: 22, color: "hsl(0 0% 82%)" }}>Trail of Bits</div>
                 </div>
-                <span style={{ fontSize: 12, fontWeight: 900, fontFamily: "monospace", background: "hsl(0 0% 8%)", color: MUTED, border: `1px solid ${BORDER}`, borderRadius: 8, padding: "6px 14px", textTransform: "uppercase", letterSpacing: "0.08em" }}>
-                  Not Yet Engaged
+                <span style={{ fontSize: 12, fontWeight: 900, fontFamily: "monospace", background: `${AMBER}10`, color: AMBER, border: `1px solid ${AMBER}30`, borderRadius: 8, padding: "6px 14px", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                  In Progress
                 </span>
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 20, marginBottom: 20, padding: "16px 0", borderTop: `1px solid ${BORDER}`, borderBottom: `1px solid ${BORDER}` }}>
                 {[
-                  { label: "Scope",    value: "All testnet contracts" },
-                  { label: "Timeline", value: "TBD" },
+                  { label: "Firm",     value: "Trail of Bits" },
+                  { label: "Engaged",  value: "July 2026" },
                   { label: "Focus",    value: "CDP, oracle, liquidation" },
                   { label: "Network",  value: "Robinhood Chain Testnet" },
                 ].map((s) => (
                   <div key={s.label}>
                     <div style={{ fontSize: 10, fontFamily: "monospace", color: MUTED, marginBottom: 3, textTransform: "uppercase", letterSpacing: "0.1em" }}>{s.label}</div>
-                    <div style={{ fontSize: 13, color: "hsl(0 0% 48%)", fontWeight: 600 }}>{s.value}</div>
+                    <div style={{ fontSize: 13, color: "hsl(0 0% 65%)", fontWeight: 600 }}>{s.value}</div>
                   </div>
                 ))}
               </div>
-              <p style={{ fontSize: 13, color: "hsl(0 0% 40%)", lineHeight: 1.7 }}>
-                An external security audit of VaultEngine, CollateralManager, USDAxToken, USDAxSavings, and the
-                price oracle is required before any mainnet deployment is considered. Audit firm selection is
-                pending. The full report will be published on this page upon completion.
+              <p style={{ fontSize: 13, color: "hsl(0 0% 42%)", lineHeight: 1.7 }}>
+                Trail of Bits has been engaged to perform a full code assessment, design review, and threat
+                modeling of VaultEngine, CollateralManager, USDAxToken, USDAxSavings, and the ChainlinkPriceOracle.
+                The audit covers the Robinhood Chain testnet deployment. The full public report will be
+                published on this page upon completion. No mainnet launch will proceed until all critical
+                findings are resolved.
               </p>
             </div>
 
