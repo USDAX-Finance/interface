@@ -13,7 +13,7 @@
  *   MIN_PROFIT_USD      — default: 5  (skip liquidation if estimated bonus < $5)
  *   MAX_GAS_PRICE_GWEI  — default: 50 (skip if network gas price exceeds this)
  *
- * Contract addresses (sourced from env vars set in Replit Secrets):
+ * Contract addresses (sourced from environment variables):
  *   CONTRACT_VAULT_ENGINE, CONTRACT_USDAX, CONTRACT_WETH, CONTRACT_WBTC,
  *   CONTRACT_STETH, CONTRACT_ORACLE
  */

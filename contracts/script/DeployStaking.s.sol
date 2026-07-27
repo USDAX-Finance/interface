@@ -49,7 +49,7 @@ contract DeployStaking is Script {
         console.log("Next steps:");
         console.log("  1. Approve APXStaking to spend 10M APX from your wallet");
         console.log("  2. Call addRewards(10_000_000 ether) to fund the pool");
-        console.log("  3. Set CONTRACT_APX_STAKING=<address> in Replit Secrets");
+        console.log("  3. Set CONTRACT_APX_STAKING=<address> in your environment secrets");
         console.log("  4. Verify: forge verify-contract ...");
     }
 }

@@ -89,7 +89,7 @@ contract DeployStabilityFee is Script {
         console.log("  WBTC    :", WBTC);
         console.log("  stETH   :", STETH);
         console.log("---------------------------------------------------");
-        console.log("Update Replit Secrets:");
+        console.log("Update your environment secrets:");
         console.log("  CONTRACT_VAULT_ENGINE =", address(newVault));
         console.log("  CONTRACT_SAVINGS      =", address(newSavings));
         console.log("===================================================");

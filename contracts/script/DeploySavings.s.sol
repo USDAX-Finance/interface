@@ -69,6 +69,6 @@ contract DeploySavings is Script {
         console.log("APY          : 4.20%  (420 bps)");
         console.log("Reward Pool  : 900 USDAX");
         console.log("=============================================");
-        console.log("Next: set CONTRACT_SAVINGS=<address> in Replit Secrets");
+        console.log("Next: set CONTRACT_SAVINGS=<address> in your environment secrets");
     }
 }

@@ -7,7 +7,7 @@ import { logger } from "./lib/logger";
 
 const app: Express = express();
 
-// Replit runs behind a reverse proxy — trust first hop so rate-limiter
+// Server runs behind a reverse proxy — trust first hop so rate-limiter
 // reads the real client IP from X-Forwarded-For rather than the proxy IP.
 app.set("trust proxy", 1);
 

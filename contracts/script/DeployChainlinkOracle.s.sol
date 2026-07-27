@@ -102,7 +102,7 @@ contract DeployChainlinkOracle is Script {
         console.log("  stETH   :", STETH_TOKEN);
         console.log("  CollMgr :", COLL_MGR);
         console.log("---------------------------------------------");
-        console.log("Update Replit Secrets:");
+        console.log("Update your environment secrets:");
         console.log("  CONTRACT_ORACLE       =", address(oracle));
         console.log("  CONTRACT_USDAX        =", address(usdax));
         console.log("  CONTRACT_VAULT_ENGINE =", address(vault));
