@@ -125,9 +125,12 @@ async function refreshOracle(log: (msg: string, data?: object) => void): Promise
 
 /**
  * Start the oracle refresher.
- * Runs once immediately, then every ORACLE_REFRESH_MS milliseconds.
+ * Awaits the first refresh before returning so the caller can safely
+ * proceed knowing the on-chain prices are fresh (no oracle-stale errors
+ * on the first keeper scan cycle).
+ * Subsequent refreshes run on the configured interval in the background.
  */
-export function startOracleRefresher(log: (msg: string, data?: object) => void): void {
+export async function startOracleRefresher(log: (msg: string, data?: object) => void): Promise<void> {
   const intervalSec = Math.round(ORACLE_REFRESH_MS / 1000);
 
   log("oracle: refresher starting", {
@@ -136,12 +139,12 @@ export function startOracleRefresher(log: (msg: string, data?: object) => void):
     updater: "(see ORACLE_UPDATER_KEY)",
   });
 
-  // Run immediately on startup
-  refreshOracle(log).catch(err => {
-    log("oracle: unexpected error in refresher", { error: String(err) });
+  // Await first refresh — ensures prices are on-chain before the first scan
+  await refreshOracle(log).catch(err => {
+    log("oracle: unexpected error on initial refresh", { error: String(err) });
   });
 
-  // Then on schedule
+  // Schedule subsequent refreshes in the background
   setInterval(() => {
     refreshOracle(log).catch(err => {
       log("oracle: unexpected error in refresher", { error: String(err) });

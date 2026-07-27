@@ -194,10 +194,11 @@ async function main(): Promise<void> {
     log("keeper: DRY RUN MODE — scans active vaults, prints what would be liquidated, sends no txs");
   }
 
-  // Start oracle price refresher (testnet: keeps fallback prices current, <24h staleness)
-  startOracleRefresher(log);
+  // Start oracle price refresher and await first push — ensures on-chain prices
+  // are fresh before the first scan so healthFactor() never hits "oracle stale"
+  await startOracleRefresher(log);
 
-  // Run liquidation scan immediately, then on interval
+  // Safe to scan now — oracle prices are confirmed on-chain
   await runCycle();
 
   setInterval(async () => {
