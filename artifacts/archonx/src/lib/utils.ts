@@ -57,6 +57,7 @@ export function formatPercentage(value: number) {
 }
 
 export function formatCompact(value: number): string {
+  if (value == null || isNaN(value)) return '$0';
   if (value >= 1_000_000_000) return `$${(value / 1_000_000_000).toFixed(2)}B`;
   if (value >= 1_000_000)     return `$${(value / 1_000_000).toFixed(2)}M`;
   if (value >= 1_000)         return `$${(value / 1_000).toFixed(1)}K`;
@@ -64,6 +65,7 @@ export function formatCompact(value: number): string {
 }
 
 export function formatCompactNum(value: number): string {
+  if (value == null || isNaN(value)) return '0';
   if (value >= 1_000_000_000) return `${(value / 1_000_000_000).toFixed(2)}B`;
   if (value >= 1_000_000)     return `${(value / 1_000_000).toFixed(2)}M`;
   if (value >= 1_000)         return `${(value / 1_000).toFixed(1)}K`;

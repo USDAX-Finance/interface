@@ -455,10 +455,10 @@ function MockDashboard() {
 
 function Ticker() {
   const { data: proto } = useGetProtocolStats();
-  const tvl       = proto ? `TVL: $${formatCompact(proto.tvlUsd)}` : "TVL: loading";
-  const minted    = proto ? `USDAX minted: ${formatCompact(proto.usdaxSupply)}` : "USDAX minted: loading";
-  const vaults    = proto ? `Active vaults: ${proto.totalPositions}` : "Active vaults: loading";
-  const cratio    = proto && proto.usdaxSupply > 0
+  const tvl       = proto?.tvlUsd      != null ? `TVL: ${formatCompact(proto.tvlUsd)}`           : "TVL: loading";
+  const minted    = proto?.usdaxSupply != null ? `USDAX minted: ${formatCompact(proto.usdaxSupply)}` : "USDAX minted: loading";
+  const vaults    = proto?.totalPositions != null ? `Active vaults: ${proto.totalPositions}`    : "Active vaults: loading";
+  const cratio    = proto?.usdaxSupply > 0 && proto?.tvlUsd != null
     ? `C-Ratio: ${(proto.tvlUsd / proto.usdaxSupply * 100).toFixed(0)}%`
     : "C-Ratio: loading";
 
