@@ -1,0 +1,56 @@
+name: Forge Tests
+
+on:
+  push:
+    branches: ["main", "dev"]
+    paths:
+      - "contracts/**"
+      - ".github/workflows/test.yml"
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "contracts/**"
+      - ".github/workflows/test.yml"
+
+jobs:
+  forge-test:
+    name: Foundry Test Suite
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: contracts
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Install dependencies
+        run: forge install
+
+      - name: Build
+        run: forge build --sizes
+
+      - name: Run unit tests
+        run: forge test --match-path "test/*.t.sol" -v
+
+      - name: Run fuzz tests (500 runs)
+        run: forge test --match-contract "Fuzz" --fuzz-runs 500 -v
+
+      - name: Run invariant tests (50 runs × 500 depth)
+        run: |
+          forge test \
+            --match-contract "Invariant" \
+            --invariant-runs 50 \
+            --invariant-depth 500 \
+            -v
+
+      - name: Check gas snapshots
+        run: forge snapshot --check
+        continue-on-error: true   # warn only — do not block CI on snapshot drift
